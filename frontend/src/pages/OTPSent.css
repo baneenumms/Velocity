@@ -1,0 +1,126 @@
+.page {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: linear-gradient(160deg, #f2efe9 0%, #ece7de 50%, #efe9e2 100%);
+  font-family: Poppins, sans-serif;
+  padding: 24px;
+}
+
+.velocity-title {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  margin-bottom: 35px;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -2px;
+}
+
+.velo {
+  background: linear-gradient(180deg, #3e6b96, #234a6b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wheel {
+  width: 34px;
+  height: 34px;
+  margin: 0 4px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(#111 0deg 10deg, #1c1c1c 10deg 20deg);
+  border: 3px solid #0a0a0a;
+  box-shadow: 0 0 0 2px #2c2c2c, inset 0 0 8px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: spin 2.4s linear infinite;
+}
+
+.hub {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d9d9d9, #8a8a8a 70%, #5a5a5a);
+}
+
+.city {
+  font-style: italic;
+  background: linear-gradient(180deg, #c2537d, #a13c62);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  width: 420px;
+
+  background: #f7f4ee;
+  border: 1px solid rgba(40, 30, 15, 0.06);
+
+  border-radius: 28px;
+  padding: 45px;
+  box-shadow: 0 20px 50px rgba(40, 30, 15, 0.08);
+}
+
+.status-card {
+  max-width: 460px;
+  text-align: center;
+}
+
+.status-circle {
+  width: 90px;
+  height: 90px;
+
+  margin: 0 auto 30px;
+
+  border-radius: 50%;
+
+  background: #3e6b96;
+  color: white;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 40px;
+
+  box-shadow: 0 10px 25px rgba(62, 107, 150, 0.28);
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 12px;
+  color: #12233a;
+}
+
+.subtitle {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 0;
+}
+
+.email {
+  margin-top: 20px;
+
+  color: #a13c62;
+
+  font-size: 22px;
+  font-weight: 700;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

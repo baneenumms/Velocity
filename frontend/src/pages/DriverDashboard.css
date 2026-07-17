@@ -1,0 +1,79 @@
+.page {
+
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    background: #F6F8FC;
+
+    font-family: "Poppins", sans-serif;
+
+    padding: 20px;
+
+}
+
+.velocity-title {
+
+    font-size: 46px;
+
+    font-weight: 800;
+
+    margin-bottom: 35px;
+
+}
+
+.velo {
+
+    color: #071827;
+
+}
+
+.city {
+
+    color: #FF7A9E;
+
+    font-style: italic;
+
+}
+
+.card {
+
+    width: 420px;
+
+    background: white;
+
+    border-radius: 28px;
+
+    padding: 50px;
+
+    text-align: center;
+
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+
+}
+
+.title {
+
+    color: #071827;
+
+    font-size: 32px;
+
+    font-weight: 700;
+
+    margin-bottom: 16px;
+
+}
+
+.subtitle {
+
+    color: #6B7280;
+
+    font-size: 18px;
+
+    line-height: 1.6;
+
+}

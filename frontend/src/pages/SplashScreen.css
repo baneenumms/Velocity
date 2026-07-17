@@ -1,0 +1,119 @@
+.page {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+
+  background: linear-gradient(160deg, #f2efe9 0%, #ece7de 50%, #efe9e2 100%);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  font-family: "Poppins", sans-serif;
+  animation: fadeIn 0.9s ease;
+}
+
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.glow-blue {
+  width: 380px;
+  height: 380px;
+  background: #bcd4e6;
+  top: 5%;
+  left: 6%;
+}
+.glow-pink {
+  width: 320px;
+  height: 320px;
+  background: #f0c4d6;
+  bottom: 5%;
+  right: 8%;
+}
+
+.velocity-title {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 72px;
+  letter-spacing: -3px;
+}
+
+.velo {
+  background: linear-gradient(180deg, #3e6b96, #234a6b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wheel {
+  width: 72px;
+  height: 72px;
+  margin: 0 8px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(#111 0deg 10deg, #1c1c1c 10deg 20deg);
+  border: 4px solid #0a0a0a;
+  box-shadow: 0 0 0 3px #2c2c2c, inset 0 0 12px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: spin 2.2s linear infinite;
+}
+
+.hub {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d9d9d9, #8a8a8a 70%, #5a5a5a);
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+.city-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.city {
+  font-style: italic;
+  background: linear-gradient(180deg, #c2537d, #a13c62);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.city-reflect {
+  transform: scaleY(-1);
+  opacity: 0.18;
+  mask-image: linear-gradient(to bottom, black, transparent 70%);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent 70%);
+  margin-top: -6px;
+}
+
+.tagline {
+  position: relative;
+  z-index: 1;
+  margin-top: 26px;
+  font-size: 18px;
+  color: #7c8ba0;
+  letter-spacing: 3px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
