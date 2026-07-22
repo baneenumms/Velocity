@@ -190,8 +190,19 @@ public class DriverAuthService {
             return response;
         }
 
+        Driver driver = driverRepository.findByUser(user);
+
+        if (driver == null) {
+            response.success = false;
+            response.message = "Driver record not found";
+            return response;
+        }
+
         response.success = true;
         response.message = "Login Successful";
+        response.driverId = driver.driverId;
+        response.userId = user.userId;
+        response.fullName = user.fullName;
 
         return response;
     }

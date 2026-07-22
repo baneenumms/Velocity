@@ -20,5 +20,6 @@ public class Driver {
     public String licenseNumber;
 
     @Column(name = "driver_status")
-    public String driverStatus;
+    @Enumerated(EnumType.STRING)
+    public DriverStatus driverStatus;
 }

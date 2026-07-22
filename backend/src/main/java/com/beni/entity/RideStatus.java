@@ -1,4 +1,11 @@
 package com.beni.entity;
 
-public class RideStatus {
+public enum RideStatus {
+
+    SEARCHING,
+    ACCEPTED,
+    IN_PROGRESS,
+    COMPLETED,
+    CANCELLED
+
 }

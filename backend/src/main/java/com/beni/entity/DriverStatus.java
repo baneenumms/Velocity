@@ -1,4 +1,8 @@
 package com.beni.entity;
 
-public class DriverStatus {
+public enum DriverStatus {
+    Offline,
+    Online,
+    OnTrip,
+    Suspended
 }
