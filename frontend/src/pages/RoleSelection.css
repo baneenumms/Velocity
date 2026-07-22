@@ -9,7 +9,13 @@
   justify-content: center;
   align-items: center;
 
-  background: linear-gradient(160deg, #f2efe9 0%, #ece7de 50%, #efe9e2 100%);
+  background: linear-gradient(
+    160deg,
+    #f2efe9 0%,
+    #ece7de 50%,
+    #efe9e2 100%
+  );
+
   font-family: Poppins, sans-serif;
   padding: 24px;
 }
@@ -21,6 +27,7 @@
   opacity: 0.35;
   pointer-events: none;
 }
+
 .glow-blue {
   width: 380px;
   height: 380px;
@@ -28,6 +35,7 @@
   top: 5%;
   left: 6%;
 }
+
 .glow-pink {
   width: 320px;
   height: 320px;
@@ -39,9 +47,12 @@
 .velocity-title {
   position: relative;
   z-index: 1;
+
   display: flex;
   align-items: center;
+
   margin-bottom: 35px;
+
   font-size: 42px;
   font-weight: 800;
   letter-spacing: -2px;
@@ -58,13 +69,24 @@
   width: 34px;
   height: 34px;
   margin: 0 4px;
+
   border-radius: 50%;
-  background: repeating-conic-gradient(#111 0deg 10deg, #1c1c1c 10deg 20deg);
+
+  background: repeating-conic-gradient(
+    #111 0deg 10deg,
+    #1c1c1c 10deg 20deg
+  );
+
   border: 3px solid #0a0a0a;
-  box-shadow: 0 0 0 2px #2c2c2c, inset 0 0 8px rgba(0, 0, 0, 0.6);
+
+  box-shadow:
+    0 0 0 2px #2c2c2c,
+    inset 0 0 8px rgba(0, 0, 0, 0.6);
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   animation: spin 2.4s linear infinite;
 }
 
@@ -72,11 +94,18 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #d9d9d9, #8a8a8a 70%, #5a5a5a);
+
+  background: radial-gradient(
+    circle at 35% 30%,
+    #d9d9d9,
+    #8a8a8a 70%,
+    #5a5a5a
+  );
 }
 
 .city {
   font-style: italic;
+
   background: linear-gradient(180deg, #c2537d, #a13c62);
   -webkit-background-clip: text;
   background-clip: text;
@@ -86,13 +115,16 @@
 .card {
   position: relative;
   z-index: 1;
+
   width: 420px;
+  max-width: 100%;
 
   background: #f7f4ee;
   border: 1px solid rgba(40, 30, 15, 0.06);
 
   border-radius: 28px;
   padding: 45px;
+
   box-shadow: 0 20px 50px rgba(40, 30, 15, 0.08);
 }
 
@@ -111,10 +143,10 @@
 .role-btn {
   width: 100%;
   height: 64px;
+
   border: none;
   border-radius: 18px;
 
-  background: #3e6b96;
   color: white;
   font-size: 18px;
   font-weight: 600;
@@ -127,36 +159,46 @@
   cursor: pointer;
   transition: 0.25s;
   margin-bottom: 20px;
-
-  box-shadow: 0 6px 18px rgba(62, 107, 150, 0.28);
 }
 
 .role-btn:hover {
-  background: #4c7eab;
   transform: translateY(-1px);
 }
 
-.disabled {
-  background: #e8e2d6;
-  color: #9aa7b5;
-  box-shadow: none;
-  cursor: not-allowed;
+.driver-btn {
+  background: #3e6b96;
+  box-shadow: 0 6px 18px rgba(62, 107, 150, 0.28);
 }
 
-.disabled:hover {
-  transform: none;
+.driver-btn:hover {
+  background: #4c7eab;
 }
 
-.coming-soon {
-  margin-left: auto;
-  font-size: 13px;
-  background: #fbe6ee;
-  color: #a13c62;
-  padding: 4px 10px;
-  border-radius: 20px;
+.passenger-btn {
+  background: #c2537d;
+  box-shadow: 0 6px 18px rgba(194, 83, 125, 0.28);
+}
+
+.passenger-btn:hover {
+  background: #d4668d;
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 520px) {
+  .velocity-title {
+    font-size: 34px;
+  }
+
+  .card {
+    padding: 32px 24px;
+  }
 }

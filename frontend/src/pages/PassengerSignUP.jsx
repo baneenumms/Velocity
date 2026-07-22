@@ -2,7 +2,7 @@ import { useLocation } from "react-router-dom";
 import { UserRoundPlus } from "lucide-react";
 import "./Signup.css";
 
-function DriverSignUP() {
+function PassengerSignUP() {
 
     const location = useLocation();
 
@@ -27,11 +27,11 @@ function DriverSignUP() {
                 </div>
 
                 <h1 className="title">
-                    Driver Registration
+                    Passenger Registration
                 </h1>
 
                 <p className="subtitle">
-                    No driver account was found for this phone number.
+                    No passenger account was found for this phone number.
                 </p>
 
                 <div className="signup-phone">
@@ -43,7 +43,7 @@ function DriverSignUP() {
                 </div>
 
                 <p className="coming-text">
-                    Driver registration will be available soon.
+                    Passenger registration will be available soon.
                 </p>
 
             </div>
@@ -54,4 +54,4 @@ function DriverSignUP() {
 
 }
 
-export default DriverSignUP;
+export default PassengerSignUP;

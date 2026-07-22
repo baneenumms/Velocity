@@ -1,0 +1,61 @@
+.passenger-menu {
+    position: relative;
+}
+
+.menu-button {
+    width: 48px;
+    height: 48px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: white;
+    color: #12233a;
+
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.menu-button:hover {
+    background: #f0f2f5;
+}
+
+.menu-dropdown {
+    position: absolute;
+    top: 55px;
+    right: 0;
+
+    width: 220px;
+
+    background: white;
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+
+    z-index: 1000;
+}
+
+.menu-dropdown button {
+    width: 100%;
+
+    padding: 14px 18px;
+
+    border: none;
+    background: white;
+
+    text-align: left;
+    font-size: 15px;
+
+    cursor: pointer;
+}
+
+.menu-dropdown button:hover {
+    background: #f5f5f5;
+}
+
+.logout-btn {
+    color: #d32f2f;
+    font-weight: 600;
+}

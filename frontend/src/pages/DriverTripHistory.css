@@ -1,0 +1,67 @@
+.trips-page {
+  justify-content: flex-start;
+  padding-top: 32px;
+}
+
+.trips-card {
+  text-align: center;
+}
+
+.trip-list {
+  text-align: left;
+  margin: 24px 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trip-item {
+  background: #eee8dd;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.trip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.trip-date {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.trip-fare {
+  font-weight: 700;
+  color: #3e6b96;
+}
+
+.trip-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #12233a;
+  font-weight: 600;
+}
+
+.trip-arrow {
+  color: #9aa7b5;
+}
+
+.trip-status {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #fbe6ee;
+  color: #a13c62;
+}
+
+.back-btn {
+  margin-top: 24px;
+}

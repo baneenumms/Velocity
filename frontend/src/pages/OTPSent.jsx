@@ -1,5 +1,8 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+    useLocation,
+    useNavigate
+} from "react-router-dom";
 import "./OTPSent.css";
 
 function OTPSent() {
@@ -7,24 +10,38 @@ function OTPSent() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const { phone, maskedEmail } = location.state || {};
+    const {
+        phone,
+        maskedEmail,
+        nextRoute = "/driver-otp"
+    } = location.state || {};
 
     useEffect(() => {
 
+        if (!phone) {
+            navigate("/");
+            return;
+        }
+
         const timer = setTimeout(() => {
 
-            navigate("/driver-otp", {
+            navigate(nextRoute, {
                 state: {
                     phone,
-                    maskedEmail
-                }
+                    maskedEmail,
+                },
             });
 
         }, 2000);
 
         return () => clearTimeout(timer);
 
-    }, [navigate, phone, maskedEmail]);
+    }, [
+        navigate,
+        phone,
+        maskedEmail,
+        nextRoute
+    ]);
 
     return (
 
@@ -32,9 +49,11 @@ function OTPSent() {
 
             <div className="velocity-title">
                 <span className="velo">VEL</span>
+
                 <span className="wheel">
                     <span className="hub"></span>
                 </span>
+
                 <span className="city">CITY</span>
             </div>
 
@@ -49,11 +68,13 @@ function OTPSent() {
                 </h1>
 
                 <p className="subtitle">
-                    We've sent a 6-digit verification code to
+                    We've sent a 6-digit verification
+                    code to
                 </p>
 
                 <h2 className="email">
-                    {maskedEmail}
+                    {maskedEmail ||
+                        "your registered email"}
                 </h2>
 
             </div>

@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Phone } from "lucide-react";
 import "./Phone.css";
 
-function DriverPhone() {
+function PassengerPhone() {
 
     const [phone, setPhone] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -21,11 +22,12 @@ function DriverPhone() {
 
         const formattedPhone = "0" + phone;
 
+        setLoading(true);
+
         try {
 
-            // Check if phone exists
-            const checkResponse = await fetch(
-                "http://localhost:8080/driver-auth/check-phone",
+            const response = await fetch(
+                "http://localhost:8080/passenger-auth/check-phone",
                 {
                     method: "POST",
                     headers: {
@@ -37,11 +39,18 @@ function DriverPhone() {
                 }
             );
 
-            const checkData = await checkResponse.json();
+            const data = await response.json();
 
-            if (!checkData.exists) {
+            if (!response.ok) {
+                setError(
+                    data.message || "Unable to check phone number."
+                );
+                return;
+            }
 
-                navigate("/driver-signup", {
+            if (!data.exists) {
+
+                navigate("/passenger-signup", {
                     state: {
                         phone: formattedPhone,
                     },
@@ -50,31 +59,18 @@ function DriverPhone() {
                 return;
             }
 
-            // Send OTP
-            const otpResponse = await fetch(
-                "http://localhost:8080/driver-auth/send-otp",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        phoneNumber: formattedPhone,
-                    }),
-                }
-            );
-
-            const otpData = await otpResponse.json();
-
-            if (!otpData.success) {
-                setError(otpData.message);
+            if (!data.success) {
+                setError(
+                    data.message || "Unable to send OTP."
+                );
                 return;
             }
 
             navigate("/otp-sent", {
                 state: {
                     phone: formattedPhone,
-                    maskedEmail: otpData.maskedEmail,
+                    maskedEmail: data.maskedEmail,
+                    nextRoute: "/passenger-otp",
                 },
             });
 
@@ -82,6 +78,10 @@ function DriverPhone() {
 
             console.error(err);
             setError("Unable to connect to server.");
+
+        } finally {
+
+            setLoading(false);
 
         }
     };
@@ -92,9 +92,11 @@ function DriverPhone() {
 
             <div className="velocity-title">
                 <span className="velo">VEL</span>
+
                 <span className="wheel">
                     <span className="hub"></span>
                 </span>
+
                 <span className="city">CITY</span>
             </div>
 
@@ -120,27 +122,46 @@ function DriverPhone() {
 
                     <input
                         type="text"
+                        inputMode="numeric"
                         placeholder="3001234567"
                         value={phone}
                         maxLength={10}
+                        disabled={loading}
                         onChange={(e) =>
                             setPhone(
-                                e.target.value.replace(/\D/g, "")
+                                e.target.value
+                                    .replace(/\D/g, "")
+                                    .slice(0, 10)
                             )
                         }
+                        onKeyDown={(e) => {
+                            if (
+                                e.key === "Enter" &&
+                                !loading
+                            ) {
+                                handleContinue();
+                            }
+                        }}
                     />
 
                 </div>
 
                 {error && (
-                    <p className="error">{error}</p>
+                    <p className="error">
+                        {error}
+                    </p>
                 )}
 
                 <button
+                    type="button"
                     className="primary-btn"
                     onClick={handleContinue}
+                    disabled={loading}
                 >
-                    Continue
+                    {loading
+                        ? "Sending OTP..."
+                        : "Continue"
+                    }
                 </button>
 
             </div>
@@ -151,4 +172,4 @@ function DriverPhone() {
 
 }
 
-export default DriverPhone;
+export default PassengerPhone;

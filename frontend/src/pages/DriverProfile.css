@@ -1,0 +1,78 @@
+.profile-page {
+  justify-content: flex-start;
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+.profile-card {
+  text-align: center;
+}
+
+.profile-section {
+  text-align: left;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #e2dcd0;
+}
+
+.profile-section:first-of-type {
+  margin-top: 30px;
+  border-top: none;
+  padding-top: 0;
+}
+
+.section-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #9aa7b5;
+  margin-bottom: 14px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee8dd;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 14px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #12233a;
+  text-align: right;
+}
+
+.status-pill {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.status-pill.on {
+  background: #eaf3ec;
+  color: #4a7a4d;
+}
+
+.status-pill.off {
+  background: #f1e9e0;
+  color: #9aa7b5;
+}
+
+.back-btn {
+  margin-top: 30px;
+}

@@ -1,0 +1,55 @@
+.passenger-map-wrapper {
+    width: 100%;
+}
+
+.location-btn {
+    width: 100%;
+    min-height: 48px;
+    margin-bottom: 14px;
+    border: none;
+    border-radius: 14px;
+    background: #12233a;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.location-btn:hover {
+    opacity: 0.9;
+}
+
+.location-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.location-error {
+    margin: 0 0 14px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 14px;
+    text-align: center;
+}
+
+.location-details {
+    margin-bottom: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #f1f5f9;
+}
+
+.location-details p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #334155;
+}
+
+.passenger-map {
+    width: 100%;
+    height: 420px;
+    border-radius: 18px;
+    overflow: hidden;
+}

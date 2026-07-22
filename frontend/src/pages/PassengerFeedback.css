@@ -1,0 +1,179 @@
+.passenger-feedback-page {
+  min-height: 100vh;
+  background: #f4f6f9;
+  color: #162033;
+}
+
+.passenger-feedback-header {
+  position: relative;
+  z-index: 2000;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 18px 24px;
+  background: #12233a;
+  color: white;
+}
+
+.passenger-feedback-header h2 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+
+.passenger-feedback-content {
+  width: min(700px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 35px 0 60px;
+}
+
+.feedback-back-button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #1677ff;
+
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.feedback-title {
+  margin: 22px 0;
+}
+
+.feedback-title p {
+  margin: 0 0 5px;
+  color: #718096;
+}
+
+.feedback-title h1 {
+  margin: 0;
+  font-size: 38px;
+}
+
+.passenger-feedback-card {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+
+  padding: 26px;
+  border-radius: 20px;
+  background: white;
+
+  box-shadow: 0 14px 40px rgba(25, 42, 70, 0.1);
+}
+
+.passenger-feedback-card label {
+  display: block;
+  margin-bottom: 9px;
+
+  color: #34445c;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.feedback-stars {
+  display: flex;
+  gap: 8px;
+}
+
+.feedback-star {
+  padding: 0;
+
+  border: none;
+  background: transparent;
+  color: #cfd5de;
+
+  font-size: 40px;
+  cursor: pointer;
+}
+
+.feedback-star.selected {
+  color: #ffb400;
+}
+
+.feedback-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.feedback-field select,
+.feedback-field textarea {
+  padding: 14px;
+
+  border: 1px solid #ced5df;
+  border-radius: 12px;
+
+  background: white;
+  font: inherit;
+  outline: none;
+}
+
+.feedback-field textarea {
+  resize: vertical;
+}
+
+.feedback-field select:focus,
+.feedback-field textarea:focus {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+}
+
+.feedback-field small {
+  margin-top: 6px;
+  color: #718096;
+  text-align: right;
+}
+
+.feedback-error,
+.feedback-success {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+
+.feedback-error {
+  background: #fff0f0;
+  color: #b42318;
+}
+
+.feedback-success {
+  background: #eaf8ef;
+  color: #18794e;
+}
+
+.submit-feedback-button {
+  padding: 15px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #1677ff;
+  color: white;
+
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .passenger-feedback-header {
+    padding: 15px 16px;
+  }
+
+  .passenger-feedback-content {
+    width: min(100% - 20px, 700px);
+    padding-top: 24px;
+  }
+
+  .passenger-feedback-card {
+    padding: 19px;
+  }
+
+  .feedback-star {
+    font-size: 35px;
+  }
+}

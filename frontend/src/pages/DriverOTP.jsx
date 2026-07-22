@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail } from "lucide-react";
-import "./DriverOTP.css";
+import "./OTP.css";
 
 function DriverOTP() {
 

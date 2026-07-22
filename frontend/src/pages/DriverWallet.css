@@ -1,0 +1,40 @@
+.wallet-page {
+  justify-content: flex-start;
+  padding-top: 32px;
+}
+
+.wallet-card {
+  text-align: center;
+}
+
+.balance-box {
+  margin: 30px 0 10px;
+  padding: 30px 20px;
+
+  background: #eee8dd;
+  border-radius: 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.balance-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #9aa7b5;
+}
+
+.balance-amount {
+  font-size: 38px;
+  font-weight: 800;
+  color: #3e6b96;
+  letter-spacing: -1px;
+}
+
+.back-btn {
+  margin-top: 24px;
+}

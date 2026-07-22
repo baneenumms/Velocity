@@ -3,11 +3,9 @@ import { CarFront, User } from "lucide-react";
 import "./RoleSelection.css";
 
 function RoleSelection() {
-
   const navigate = useNavigate();
 
   return (
-
     <div className="page">
 
       <div className="glow glow-blue"></div>
@@ -15,9 +13,11 @@ function RoleSelection() {
 
       <div className="velocity-title">
         <span className="velo">VEL</span>
+
         <span className="wheel">
           <span className="hub"></span>
         </span>
+
         <span className="city">CITY</span>
       </div>
 
@@ -32,7 +32,7 @@ function RoleSelection() {
         </p>
 
         <button
-          className="role-btn"
+          className="role-btn driver-btn"
           onClick={() => navigate("/driver-phone")}
         >
           <CarFront size={26} />
@@ -40,22 +40,17 @@ function RoleSelection() {
         </button>
 
         <button
-          className="role-btn disabled"
-          disabled
+          className="role-btn passenger-btn"
+          onClick={() => navigate("/passenger-phone")}
         >
           <User size={26} />
           Passenger
-          <span className="coming-soon">
-            Coming Soon
-          </span>
         </button>
 
       </div>
 
     </div>
-
   );
-
 }
 
 export default RoleSelection;
