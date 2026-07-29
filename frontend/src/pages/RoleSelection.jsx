@@ -1,54 +1,82 @@
 import { useNavigate } from "react-router-dom";
-import { CarFront, User } from "lucide-react";
+import {
+  CarFront,
+  ChevronRight,
+  UserRound,
+} from "lucide-react";
+
 import "./RoleSelection.css";
 
 function RoleSelection() {
   const navigate = useNavigate();
 
   return (
-    <div className="page">
-
-      <div className="glow glow-blue"></div>
-      <div className="glow glow-pink"></div>
-
-      <div className="velocity-title">
+    <div className="role-page">
+      <div className="velocity-title role-logo">
         <span className="velo">VEL</span>
 
         <span className="wheel">
-          <span className="hub"></span>
+          <span className="hub" />
         </span>
 
         <span className="city">CITY</span>
       </div>
 
-      <div className="card">
+      <main className="role-card">
+        <h1>Choose your role</h1>
 
-        <h1 className="title">
-          Choose your role
-        </h1>
-
-        <p className="subtitle">
-          Select how you'd like to use Velocity.
+        <p className="role-subtitle">
+          Select how you would like to use Velocity.
         </p>
 
-        <button
-          className="role-btn driver-btn"
-          onClick={() => navigate("/driver-phone")}
-        >
-          <CarFront size={26} />
-          Driver
-        </button>
+        <div className="role-options">
+          <button
+            type="button"
+            className="role-option driver-option"
+            onClick={() => navigate("/driver-phone")}
+          >
+            <span className="role-icon driver-icon">
+              <CarFront size={27} strokeWidth={2} />
+            </span>
 
-        <button
-          className="role-btn passenger-btn"
-          onClick={() => navigate("/passenger-phone")}
-        >
-          <User size={26} />
-          Passenger
-        </button>
+            <span className="role-content">
+              <strong>Driver</strong>
 
-      </div>
+              <small>
+                Accept rides and earn by driving.
+              </small>
+            </span>
 
+            <ChevronRight
+              className="role-arrow"
+              size={22}
+              strokeWidth={2.2}
+            />
+          </button>
+
+          <button
+            type="button"
+            className="role-option passenger-option"
+            onClick={() => navigate("/passenger-phone")}
+          >
+            <span className="role-icon passenger-icon">
+              <UserRound size={27} strokeWidth={2} />
+            </span>
+
+            <span className="role-content">
+              <strong>Passenger</strong>
+
+              <small>Book a ride.</small>
+            </span>
+
+            <ChevronRight
+              className="role-arrow"
+              size={22}
+              strokeWidth={2.2}
+            />
+          </button>
+        </div>
+      </main>
     </div>
   );
 }

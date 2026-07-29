@@ -6,21 +6,22 @@ function PassengerProfile() {
   const navigate = useNavigate();
 
   const passengerName =
-    localStorage.getItem("passengerName") || "Passenger";
+    sessionStorage.getItem("passengerName") || "Passenger";
 
   const passengerPhone =
-    localStorage.getItem("passengerPhone") || "Not available";
+    sessionStorage.getItem("passengerPhone") || "Not available";
 
   const passengerEmail =
-    localStorage.getItem("passengerEmail") || "Not available";
+    sessionStorage.getItem("passengerEmail") || "Not available";
 
   const passengerId =
-    localStorage.getItem("passengerId") || "Not available";
+    sessionStorage.getItem("passengerId") || "Not available";
 
   return (
     <div className="passenger-profile-page">
       <header className="passenger-profile-header">
         <h2>VELOCITY</h2>
+
         <PassengerHamburgerMenu />
       </header>
 
@@ -28,7 +29,9 @@ function PassengerProfile() {
         <button
           type="button"
           className="profile-back-button"
-          onClick={() => navigate("/passenger-dashboard")}
+          onClick={() =>
+            navigate("/passenger-dashboard")
+          }
         >
           ← Back to dashboard
         </button>
@@ -39,7 +42,10 @@ function PassengerProfile() {
           </div>
 
           <h1>{passengerName}</h1>
-          <p className="profile-role">Passenger Account</p>
+
+          <p className="profile-role">
+            Passenger Account
+          </p>
 
           <div className="profile-information">
             <div className="profile-information-row">

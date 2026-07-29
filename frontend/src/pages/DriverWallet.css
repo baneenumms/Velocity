@@ -1,15 +1,94 @@
 .wallet-page {
   justify-content: flex-start;
-  padding-top: 32px;
+  min-height: 100vh;
+  padding: 32px 20px;
 }
 
 .wallet-card {
+  position: relative;
+
+  width: min(700px, 92vw);
+  height: calc(100vh - 150px);
+  min-height: 520px;
+  max-height: 820px;
+  padding: 32px 40px;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   text-align: center;
 }
 
+.wallet-heading {
+  flex-shrink: 0;
+}
+
+/* Wallet information icon */
+
+.wallet-help-button {
+  position: absolute;
+  top: 26px;
+  right: 30px;
+
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #eee8dd;
+  color: #3e6b96;
+
+  cursor: pointer;
+  z-index: 5;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.wallet-help-button:hover {
+  background: #ded6c9;
+  transform: scale(1.05);
+}
+
+.wallet-help-button:active {
+  transform: scale(0.96);
+}
+
+.wallet-help-button:focus-visible {
+  outline: 3px solid rgba(62, 107, 150, 0.3);
+  outline-offset: 3px;
+}
+
+/* Scrollable wallet content */
+
+.wallet-scroll {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+
+  overflow-y: auto;
+  padding: 18px 8px 18px 0;
+}
+
+.wallet-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+
+.wallet-scroll::-webkit-scrollbar-thumb {
+  background: #b8b1a6;
+  border-radius: 20px;
+}
+
+/* Main balance */
+
 .balance-box {
-  margin: 30px 0 10px;
-  padding: 30px 20px;
+  padding: 28px 20px;
 
   background: #eee8dd;
   border-radius: 20px;
@@ -21,20 +100,181 @@
 }
 
 .balance-label {
+  color: #8b97a5;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.balance-amount {
+  color: #3e6b96;
+  font-size: 38px;
+  font-weight: 800;
+}
+
+.balance-description {
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* Low-balance warning */
+
+.wallet-warning {
+  margin-top: 16px;
+  padding: 14px;
+
+  border-radius: 14px;
+  background: #fff3d6;
+  color: #8a641b;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.wallet-warning svg {
+  flex-shrink: 0;
+}
+
+/* Wallet sections */
+
+.wallet-section {
+  margin-top: 22px;
+  padding-top: 20px;
+
+  border-top: 1px solid #e2dcd0;
+  text-align: left;
+}
+
+.section-label {
+  margin: 0 0 12px;
+
+  color: #9aa7b5;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: #9aa7b5;
 }
 
-.balance-amount {
-  font-size: 38px;
-  font-weight: 800;
-  color: #3e6b96;
-  letter-spacing: -1px;
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+
+  padding: 11px 0;
+  border-bottom: 1px solid #eee8dd;
 }
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #12233a;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.reserved-value {
+  color: #a13c62;
+}
+
+.available-value {
+  color: #3e6b96;
+}
+
+/* Wallet status */
+
+.wallet-status {
+  padding: 4px 12px;
+
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.wallet-status.active {
+  background: #eaf3ec;
+  color: #4a7a4d;
+}
+
+.wallet-status.low {
+  background: #fbe6ee;
+  color: #a13c62;
+}
+
+/* Error message */
+
+.wallet-card .error {
+  margin: 20px 0;
+  color: #a13c62;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Back button */
 
 .back-btn {
-  margin-top: 24px;
+  flex-shrink: 0;
+  margin-top: 18px;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .wallet-page {
+    padding: 20px 12px;
+  }
+
+  .wallet-card {
+    width: 100%;
+    height: calc(100vh - 110px);
+    min-height: 0;
+    padding: 25px 18px;
+  }
+
+  .wallet-help-button {
+    top: 18px;
+    right: 18px;
+
+    width: 40px;
+    height: 40px;
+  }
+
+  .wallet-help-button svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .wallet-scroll {
+    padding-right: 5px;
+  }
+
+  .balance-box {
+    padding: 24px 15px;
+  }
+
+  .balance-amount {
+    font-size: 31px;
+  }
+
+  .info-label {
+    font-size: 13px;
+  }
+
+  .info-value {
+    font-size: 14px;
+  }
 }

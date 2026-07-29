@@ -1,9 +1,40 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  useState,
+} from "react";
+
+import {
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  Menu,
+  X,
+} from "lucide-react";
+
 import "./PassengerHamburgerMenu.css";
 
+const PASSENGER_SESSION_KEYS = [
+  "userId",
+  "passengerId",
+  "passengerName",
+  "passengerPhone",
+  "passengerEmail",
+  "rideRequestId",
+  "rideId",
+  "rideStatus",
+  "paymentMethod",
+  "searchStartedAt",
+  "passengerRideDraft",
+  "activeRideRequest",
+  "acceptedRide",
+  "activePassengerRide",
+  "ridePin",
+];
+
 function PassengerHamburgerMenu() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] =
+    useState(false);
+
   const navigate = useNavigate();
 
   const goToPage = (path) => {
@@ -12,15 +43,19 @@ function PassengerHamburgerMenu() {
   };
 
   const logout = () => {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("passengerId");
-    localStorage.removeItem("passengerName");
-    localStorage.removeItem("passengerPhone");
-    localStorage.removeItem("passengerEmail");
+    PASSENGER_SESSION_KEYS.forEach(
+      (key) => {
+        sessionStorage.removeItem(
+          key
+        );
+      }
+    );
 
-    sessionStorage.removeItem("passengerRideDraft");
+    setOpen(false);
 
-    navigate("/");
+    navigate("/", {
+      replace: true,
+    });
   };
 
   return (
@@ -28,11 +63,23 @@ function PassengerHamburgerMenu() {
       <button
         type="button"
         className="menu-button"
-        aria-label="Open passenger menu"
+        aria-label={
+          open
+            ? "Close passenger menu"
+            : "Open passenger menu"
+        }
         aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() =>
+          setOpen(
+            (current) => !current
+          )
+        }
       >
-        ☰
+        {open ? (
+          <X size={25} />
+        ) : (
+          <Menu size={25} />
+        )}
       </button>
 
       {open && (
@@ -40,7 +87,9 @@ function PassengerHamburgerMenu() {
           <button
             type="button"
             onClick={() =>
-              goToPage("/passenger-profile")
+              goToPage(
+                "/passenger-profile"
+              )
             }
           >
             My Profile
@@ -49,7 +98,9 @@ function PassengerHamburgerMenu() {
           <button
             type="button"
             onClick={() =>
-              goToPage("/passenger-ride-history")
+              goToPage(
+                "/passenger-ride-history"
+              )
             }
           >
             Ride History
@@ -58,7 +109,9 @@ function PassengerHamburgerMenu() {
           <button
             type="button"
             onClick={() =>
-              goToPage("/passenger-saved-locations")
+              goToPage(
+                "/passenger-saved-locations"
+              )
             }
           >
             Saved Locations
@@ -67,7 +120,9 @@ function PassengerHamburgerMenu() {
           <button
             type="button"
             onClick={() =>
-              goToPage("/terms-and-policy")
+              goToPage(
+                "/terms-and-policy"
+              )
             }
           >
             Terms and Policy
@@ -76,7 +131,9 @@ function PassengerHamburgerMenu() {
           <button
             type="button"
             onClick={() =>
-              goToPage("/passenger-feedback")
+              goToPage(
+                "/passenger-feedback"
+              )
             }
           >
             Feedback

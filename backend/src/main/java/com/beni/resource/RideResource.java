@@ -1,15 +1,22 @@
 package com.beni.resource;
 
-import com.beni.dto.AcceptRideRequest;
-import com.beni.dto.CreateRideRequest;
-import com.beni.dto.CreateRideResponse;
 import com.beni.dto.EstimateRideRequest;
 import com.beni.dto.EstimateRideResponse;
+import com.beni.dto.PassengerTripResponse;
 import com.beni.dto.RideStatusResponse;
+import com.beni.dto.StartRideRequest;
 import com.beni.service.RideService;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+
+import java.util.List;
 
 @Path("/rides")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -21,39 +28,37 @@ public class RideResource {
 
     @POST
     @Path("/estimate")
-    public EstimateRideResponse estimateRide(
+    public EstimateRideResponse estimate(
             EstimateRideRequest request
     ) {
         return rideService.estimateRide(request);
     }
 
-    @POST
-    @Path("/create")
-    public CreateRideResponse createRide(
-            CreateRideRequest request
+    @GET
+    @Path("/passenger/{passengerId}/history")
+    public List<PassengerTripResponse> passengerHistory(
+            @PathParam("passengerId") Integer passengerId
     ) {
-        return rideService.createRide(request);
-    }
-
-    @POST
-    @Path("/accept")
-    public RideStatusResponse acceptRide(
-            AcceptRideRequest request
-    ) {
-        return rideService.acceptRide(request);
+        return rideService.getPassengerTripHistory(
+                passengerId
+        );
     }
 
     @POST
     @Path("/{rideId}/start")
-    public RideStatusResponse startRide(
-            @PathParam("rideId") Integer rideId
+    public RideStatusResponse start(
+            @PathParam("rideId") Integer rideId,
+            StartRideRequest request
     ) {
-        return rideService.startRide(rideId);
+        return rideService.startRide(
+                rideId,
+                request
+        );
     }
 
     @POST
     @Path("/{rideId}/complete")
-    public RideStatusResponse completeRide(
+    public RideStatusResponse complete(
             @PathParam("rideId") Integer rideId
     ) {
         return rideService.completeRide(rideId);
@@ -61,9 +66,15 @@ public class RideResource {
 
     @POST
     @Path("/{rideId}/cancel")
-    public RideStatusResponse cancelRide(
-            @PathParam("rideId") Integer rideId
+    public RideStatusResponse cancel(
+            @PathParam("rideId") Integer rideId,
+            @QueryParam("cancelledBy") String cancelledBy,
+            @QueryParam("reason") String reason
     ) {
-        return rideService.cancelRide(rideId);
+        return rideService.cancelRide(
+                rideId,
+                cancelledBy,
+                reason
+        );
     }
 }

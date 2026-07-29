@@ -1,222 +1,1016 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import HamburgerMenu from "../components/HamburgerMenu";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  useMap,
+} from "react-leaflet";
+
+import L from "leaflet";
+
+import HamburgerMenu from
+  "../components/HamburgerMenu";
+
+import markerIcon2x from
+  "leaflet/dist/images/marker-icon-2x.png";
+
+import markerIcon from
+  "leaflet/dist/images/marker-icon.png";
+
+import markerShadow from
+  "leaflet/dist/images/marker-shadow.png";
+
+import "leaflet/dist/leaflet.css";
 import "./DriverDashboard.css";
 
+const API =
+  "http://localhost:8080";
+
+const POLL_MS = 3000;
+
+const DEFAULT_CENTER = [
+  24.8607,
+  67.0011,
+];
+
+delete L.Icon.Default.prototype
+  ._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
+async function getJson(response) {
+  const text =
+    await response.text();
+
+  let data = null;
+
+  try {
+    data = text
+      ? JSON.parse(text)
+      : null;
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+        data?.details ||
+        text ||
+        `HTTP ${response.status}`
+    );
+  }
+
+  return data;
+}
+
+function getVehicleId(profile) {
+  const values = [
+    profile?.vehicleId,
+    profile?.vehicle?.vehicleId,
+    profile?.vehicle?.id,
+    profile?.vehicles?.[0]
+      ?.vehicleId,
+    profile?.vehicles?.[0]?.id,
+    sessionStorage.getItem(
+      "vehicleId"
+    ),
+  ];
+
+  return (
+    values
+      .map(Number)
+      .find(
+        (id) =>
+          Number.isInteger(id) &&
+          id > 0
+      ) || null
+  );
+}
+
+function formatFare(value) {
+  const fare = Number(value);
+
+  return Number.isFinite(fare)
+    ? fare.toFixed(0)
+    : "0";
+}
+
+function formatPaymentMethod(value) {
+  return value ===
+    "DIGITAL_TRANSFER"
+    ? "Digital Transfer"
+    : "Cash";
+}
+
+function MapController({
+  location,
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (location) {
+      map.setView(
+        [
+          location.latitude,
+          location.longitude,
+        ],
+        16
+      );
+    }
+  }, [
+    location,
+    map,
+  ]);
+
+  return null;
+}
+
 function DriverDashboard() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [isOnline, setIsOnline] = useState(false);
-    const [updating, setUpdating] = useState(false);
-    const [error, setError] = useState("");
-    const [menuOpen, setMenuOpen] = useState(false);
+  const driverId = Number(
+    sessionStorage.getItem(
+      "driverId"
+    )
+  );
 
-    const driverId =
-        localStorage.getItem("driverId");
+  const driverName =
+    sessionStorage.getItem(
+      "driverName"
+    ) || "Driver";
 
-    const driverName =
-        localStorage.getItem("driverName") ||
-        "Driver";
+  const geoapifyKey =
+    import.meta.env
+      .VITE_GEOAPIFY_API_KEY;
 
-    const handleToggle = async () => {
-        setError("");
-        setUpdating(true);
+  const [profile, setProfile] =
+    useState(null);
 
-        const newStatus =
-            isOnline ? "Offline" : "Online";
+  const [online, setOnline] =
+    useState(false);
 
-        try {
-            const response = await fetch(
-                "http://localhost:8080/drivers/status",
-                {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        driverId: Number(driverId),
-                        status: newStatus,
-                    }),
-                }
-            );
+  const [location, setLocation] =
+    useState(null);
 
-            if (!response.ok) {
-                const text = await response.text();
+  const [address, setAddress] =
+    useState("");
 
-                console.error(
-                    "Server error:",
-                    text
-                );
+  const [requests, setRequests] =
+    useState([]);
 
-                setError(
-                    "Unable to update status. Please try again."
-                );
+  const [
+    offerFares,
+    setOfferFares,
+  ] = useState({});
 
-                return;
-            }
+  const [
+    offerMessages,
+    setOfferMessages,
+  ] = useState({});
 
-            const data = await response.json();
+  const [
+    loadingRequests,
+    setLoadingRequests,
+  ] = useState(false);
 
-            if (data && data.status) {
-                setIsOnline(
-                    data.status === "Online"
-                );
-            } else {
-                setIsOnline(
-                    newStatus === "Online"
-                );
-            }
+  const [
+    submitting,
+    setSubmitting,
+  ] = useState("");
 
-        } catch (err) {
-            console.error(err);
-            setError(
-                "Unable to connect to server."
-            );
+  const [locating, setLocating] =
+    useState(false);
 
-        } finally {
-            setUpdating(false);
-        }
-    };
+  const [updating, setUpdating] =
+    useState(false);
 
-    if (!driverId) {
-        return (
-            <div className="page dashboard-page">
+  const [menuOpen, setMenuOpen] =
+    useState(false);
 
-                <div className="card dashboard-card">
+  const [error, setError] =
+    useState("");
 
-                    <h1 className="title">
-                        No driver session
-                    </h1>
+  const validDriver =
+    Number.isInteger(driverId) &&
+    driverId > 0;
 
-                    <p className="subtitle">
-                        Please log in again.
-                    </p>
-
-                    <button
-                        className="primary-btn"
-                        onClick={() =>
-                            navigate("/driver-phone")
-                        }
-                    >
-                        Driver Login
-                    </button>
-
-                </div>
-
-            </div>
-        );
+  useEffect(() => {
+    if (!validDriver) {
+      return undefined;
     }
 
-    return (
-        <div className="page dashboard-page">
+    let cancelled = false;
 
-            <HamburgerMenu
-                open={menuOpen}
-                onClose={() =>
-                    setMenuOpen(false)
+    const loadProfile = async () => {
+      try {
+        const data =
+          await getJson(
+            await fetch(
+              `${API}/drivers/${driverId}/profile`
+            )
+          );
+
+        if (cancelled) {
+          return;
+        }
+
+        setProfile(data);
+
+        const status =
+          data?.driverStatus ||
+          data?.status ||
+          data?.driver
+            ?.driverStatus ||
+          "Offline";
+
+        setOnline(
+          status === "Online"
+        );
+
+        const vehicleId =
+          getVehicleId(data);
+
+        if (vehicleId) {
+          sessionStorage.setItem(
+            "vehicleId",
+            String(vehicleId)
+          );
+        }
+      } catch (profileError) {
+        console.error(
+          profileError
+        );
+      }
+    };
+
+    loadProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    driverId,
+    validDriver,
+  ]);
+
+  useEffect(() => {
+    if (!validDriver) {
+      return undefined;
+    }
+
+    const checkActiveRide =
+      async () => {
+        try {
+          const data =
+            await getJson(
+              await fetch(
+                `${API}/driver-rides/${driverId}/active`
+              )
+            );
+
+          if (
+            !data?.active ||
+            !data?.rideId
+          ) {
+            return;
+          }
+
+          sessionStorage.setItem(
+            "activeDriverRide",
+            JSON.stringify(data)
+          );
+
+          sessionStorage.setItem(
+            "rideId",
+            String(data.rideId)
+          );
+
+          sessionStorage.setItem(
+            "rideStatus",
+            data.status ||
+              "ACCEPTED"
+          );
+
+          navigate(
+            "/driver-active-ride",
+            {
+              replace: true,
+            }
+          );
+        } catch (
+          activeRideError
+        ) {
+          console.error(
+            activeRideError
+          );
+        }
+      };
+
+    checkActiveRide();
+
+    const interval =
+      window.setInterval(
+        checkActiveRide,
+        POLL_MS
+      );
+
+    return () => {
+      window.clearInterval(
+        interval
+      );
+    };
+  }, [
+    driverId,
+    navigate,
+    validDriver,
+  ]);
+
+  useEffect(() => {
+    if (!online) {
+      setRequests([]);
+      return undefined;
+    }
+
+    let firstLoad = true;
+    let stopped = false;
+
+    const loadRequests =
+      async () => {
+        if (firstLoad) {
+          setLoadingRequests(
+            true
+          );
+        }
+
+        try {
+          const data =
+            await getJson(
+              await fetch(
+                `${API}/ride-requests/available`
+              )
+            );
+
+          if (stopped) {
+            return;
+          }
+
+          const available =
+            Array.isArray(data)
+              ? data.filter(
+                  (request) =>
+                    request.status ===
+                    "SEARCHING"
+                )
+              : [];
+
+          setRequests(
+            available
+          );
+
+          setOfferFares(
+            (current) => {
+              const updated = {
+                ...current,
+              };
+
+              available.forEach(
+                (request) => {
+                  if (
+                    updated[
+                      request
+                        .requestId
+                    ] === undefined
+                  ) {
+                    updated[
+                      request
+                        .requestId
+                    ] = formatFare(
+                      request
+                        .passengerFare
+                    );
+                  }
                 }
+              );
+
+              return updated;
+            }
+          );
+
+          setError("");
+        } catch (requestError) {
+          if (!stopped) {
+            setError(
+              requestError.message
+            );
+          }
+        } finally {
+          if (!stopped) {
+            setLoadingRequests(
+              false
+            );
+          }
+
+          firstLoad = false;
+        }
+      };
+
+    loadRequests();
+
+    const interval =
+      window.setInterval(
+        loadRequests,
+        POLL_MS
+      );
+
+    return () => {
+      stopped = true;
+
+      window.clearInterval(
+        interval
+      );
+    };
+  }, [online]);
+
+  const reverseGeocode = async (
+    latitude,
+    longitude
+  ) => {
+    const fallback =
+      `${latitude.toFixed(6)}, ` +
+      `${longitude.toFixed(6)}`;
+
+    if (!geoapifyKey) {
+      return fallback;
+    }
+
+    try {
+      const params =
+        new URLSearchParams({
+          lat: latitude,
+          lon: longitude,
+          format: "json",
+          apiKey:
+            geoapifyKey,
+        });
+
+      const data =
+        await getJson(
+          await fetch(
+            `https://api.geoapify.com/v1/geocode/reverse?${params}`
+          )
+        );
+
+      return (
+        data?.results?.[0]
+          ?.formatted ||
+        fallback
+      );
+    } catch {
+      return fallback;
+    }
+  };
+
+  const getCurrentLocation = () => {
+    setError("");
+
+    if (!navigator.geolocation) {
+      setError(
+        "Location is not supported."
+      );
+      return;
+    }
+
+    setLocating(true);
+
+    navigator.geolocation
+      .getCurrentPosition(
+        async ({ coords }) => {
+          const current = {
+            latitude: Number(
+              coords.latitude
+            ),
+
+            longitude: Number(
+              coords.longitude
+            ),
+          };
+
+          setLocation(current);
+
+          setAddress(
+            await reverseGeocode(
+              current.latitude,
+              current.longitude
+            )
+          );
+
+          setLocating(false);
+        },
+        () => {
+          setLocating(false);
+
+          setError(
+            "Allow location access to go online."
+          );
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+        }
+      );
+  };
+
+  const toggleStatus = async () => {
+    setError("");
+
+    if (
+      !location &&
+      !online
+    ) {
+      setError(
+        "Turn on your location before going online."
+      );
+      return;
+    }
+
+    const status = online
+      ? "Offline"
+      : "Online";
+
+    try {
+      setUpdating(true);
+
+      const data =
+        await getJson(
+          await fetch(
+            `${API}/drivers/status`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              body: JSON.stringify({
+                driverId,
+                status,
+                latitude:
+                  location?.latitude,
+                longitude:
+                  location?.longitude,
+              }),
+            }
+          )
+        );
+
+      setOnline(
+        (data?.status ||
+          status) === "Online"
+      );
+    } catch (statusError) {
+      setError(
+        statusError.message
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const sendOffer =
+    async (request) => {
+      const requestId =
+        request.requestId;
+
+      const vehicleId =
+        getVehicleId(
+          profile
+        );
+
+      const offeredFare =
+        Number(
+          offerFares[
+            requestId
+          ]
+        );
+
+      if (!vehicleId) {
+        setOfferMessages(
+          (current) => ({
+            ...current,
+            [requestId]:
+              "Vehicle not found.",
+          })
+        );
+        return;
+      }
+
+      if (
+        !Number.isFinite(
+          offeredFare
+        ) ||
+        offeredFare <= 0
+      ) {
+        setOfferMessages(
+          (current) => ({
+            ...current,
+            [requestId]:
+              "Enter a valid fare.",
+          })
+        );
+        return;
+      }
+
+      try {
+        setSubmitting(
+          requestId
+        );
+
+        const data =
+          await getJson(
+            await fetch(
+              `${API}/driver-offers`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
+                body: JSON.stringify({
+                  requestId,
+                  driverId,
+                  vehicleId,
+                  offeredFare,
+                }),
+              }
+            )
+          );
+
+        setOfferMessages(
+          (current) => ({
+            ...current,
+            [requestId]:
+              `Offer sent: PKR ${formatFare(
+                data?.offeredFare ||
+                  offeredFare
+              )}`,
+          })
+        );
+      } catch (offerError) {
+        setOfferMessages(
+          (current) => ({
+            ...current,
+            [requestId]:
+              offerError.message,
+          })
+        );
+      } finally {
+        setSubmitting("");
+      }
+    };
+
+  if (!validDriver) {
+    return (
+      <div className="page dashboard-page">
+        <div className="card dashboard-card">
+          <h1>
+            No driver session
+          </h1>
+
+          <button
+            className="primary-btn"
+            onClick={() =>
+              navigate(
+                "/driver-phone"
+              )
+            }
+          >
+            Driver Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const mapCenter = location
+    ? [
+        location.latitude,
+        location.longitude,
+      ]
+    : DEFAULT_CENTER;
+
+  return (
+    <div className="page dashboard-page">
+      <HamburgerMenu
+        open={menuOpen}
+        onClose={() =>
+          setMenuOpen(false)
+        }
+      />
+
+      <header className="dashboard-header">
+        <button
+          className="menu-btn"
+          onClick={() =>
+            setMenuOpen(true)
+          }
+        >
+          ☰
+        </button>
+
+        <div className="velocity-title small">
+          <span className="velo">
+            VEL
+          </span>
+
+          <span className="wheel">
+            <span className="hub" />
+          </span>
+
+          <span className="city">
+            CITY
+          </span>
+        </div>
+      </header>
+
+      <main className="driver-dashboard-content">
+        <section className="card dashboard-card">
+          <h1>
+            Welcome back,{" "}
+            {driverName}
+          </h1>
+
+          <p>
+            {online
+              ? "You are ready to receive requests."
+              : "Turn on your location and go online."}
+          </p>
+
+          <div className="status-toggle-row">
+            <span
+              className={`status-label ${
+                online
+                  ? "on"
+                  : "off"
+              }`}
+            >
+              {online
+                ? "Online"
+                : "Offline"}
+            </span>
+
+            <button
+              className={`toggle-switch ${
+                online
+                  ? "on"
+                  : "off"
+              }`}
+              onClick={
+                toggleStatus
+              }
+              disabled={updating}
+            >
+              <span className="toggle-knob" />
+            </button>
+          </div>
+
+          {!location && (
+            <button
+              className="location-button"
+              onClick={
+                getCurrentLocation
+              }
+              disabled={locating}
+            >
+              {locating
+                ? "Finding Location..."
+                : "Turn On Location"}
+            </button>
+          )}
+
+          {location && (
+            <div className="driver-location-info">
+              <span>
+                Current location
+              </span>
+
+              <strong>
+                {address}
+              </strong>
+            </div>
+          )}
+
+          {error && (
+            <p className="error">
+              {error}
+            </p>
+          )}
+        </section>
+
+        <section className="driver-map-card">
+          <MapContainer
+            center={mapCenter}
+            zoom={
+              location
+                ? 16
+                : 12
+            }
+            className="driver-map"
+          >
+            <TileLayer
+              attribution="&copy; OpenStreetMap contributors"
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            <div className="dashboard-header">
+            {location && (
+              <Marker
+                position={
+                  mapCenter
+                }
+              />
+            )}
 
-                <button
-                    className="menu-btn"
-                    onClick={() =>
-                        setMenuOpen(true)
-                    }
-                    aria-label="Open menu"
+            <MapController
+              location={
+                location
+              }
+            />
+          </MapContainer>
+        </section>
+
+        <section className="card requests-placeholder">
+          <div className="requests-heading-row">
+            <div>
+              <h2>
+                Available Ride Requests
+              </h2>
+
+              <p>
+                {online
+                  ? "Requests refresh every 3 seconds."
+                  : "Go online to receive requests."}
+              </p>
+            </div>
+
+            {online && (
+              <span className="requests-live-indicator">
+                Online
+              </span>
+            )}
+          </div>
+
+          {loadingRequests && (
+            <p>
+              Loading requests...
+            </p>
+          )}
+
+          {online &&
+            !loadingRequests &&
+            requests.length ===
+              0 && (
+              <p>
+                No requests available.
+              </p>
+            )}
+
+          <div className="ride-request-list">
+            {requests.map(
+              (request) => (
+                <article
+                  className="ride-request-card"
+                  key={
+                    request.requestId
+                  }
                 >
-                    ☰
-                </button>
+                  <div className="ride-request-card-header">
+                    <strong>
+                      Passenger #
+                      {
+                        request.passengerId
+                      }
+                    </strong>
 
-                <div className="velocity-title small">
+                    <div className="request-fare">
+                      <span>
+                        Passenger fare
+                      </span>
 
-                    <span className="velo">
-                        VEL
-                    </span>
+                      <strong>
+                        PKR{" "}
+                        {formatFare(
+                          request.passengerFare
+                        )}
+                      </strong>
+                    </div>
+                  </div>
 
-                    <span className="wheel">
-                        <span className="hub"></span>
-                    </span>
+                  <div className="request-payment">
+                    Preferred payment:{" "}
+                    <strong>
+                      {formatPaymentMethod(
+                        request.paymentMethod
+                      )}
+                    </strong>
+                  </div>
 
-                    <span className="city">
-                        CITY
-                    </span>
+                  <div className="request-route">
+                    <p>
+                      <strong>
+                        Pickup:
+                      </strong>{" "}
+                      {
+                        request.pickupAddress
+                      }
+                    </p>
 
-                </div>
+                    <p>
+                      <strong>
+                        Destination:
+                      </strong>{" "}
+                      {
+                        request.dropoffAddress
+                      }
+                    </p>
+                  </div>
 
-            </div>
+                  <div className="driver-offer-controls">
+                    <input
+                      type="number"
+                      min="1"
+                      step="5"
+                      value={
+                        offerFares[
+                          request.requestId
+                        ] || ""
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setOfferFares(
+                          (
+                            current
+                          ) => ({
+                            ...current,
 
-            <div className="card dashboard-card">
-
-                <h1 className="title">
-                    Welcome back, {driverName}
-                </h1>
-
-                <p className="subtitle">
-                    {isOnline
-                        ? "You're online and visible to riders."
-                        : "You're offline. Go online to start receiving rides."}
-                </p>
-
-                <div className="status-toggle-row">
-
-                    <span
-                        className={
-                            `status-label ${
-                                isOnline ? "on" : "off"
-                            }`
-                        }
-                    >
-                        {isOnline
-                            ? "Online"
-                            : "Offline"}
-                    </span>
+                            [request.requestId]:
+                              event
+                                .target
+                                .value,
+                          })
+                        )
+                      }
+                    />
 
                     <button
-                        type="button"
-                        className={
-                            `toggle-switch ${
-                                isOnline ? "on" : "off"
-                            }`
-                        }
-                        onClick={handleToggle}
-                        disabled={updating}
-                        aria-pressed={isOnline}
-                        aria-label="Toggle online status"
+                      onClick={() =>
+                        sendOffer(
+                          request
+                        )
+                      }
+                      disabled={
+                        submitting ===
+                        request.requestId
+                      }
                     >
-                        <span className="toggle-knob"></span>
+                      {submitting ===
+                      request.requestId
+                        ? "Sending..."
+                        : "Send Offer"}
                     </button>
+                  </div>
 
-                </div>
-
-                {updating && (
-                    <p className="subtitle">
-                        Updating status...
+                  {offerMessages[
+                    request.requestId
+                  ] && (
+                    <p className="driver-offer-message success">
+                      {
+                        offerMessages[
+                          request
+                            .requestId
+                        ]
+                      }
                     </p>
-                )}
-
-                {error && (
-                    <p className="error">
-                        {error}
-                    </p>
-                )}
-
-                {isOnline && (
-                    <button
-                        className="primary-btn"
-                        onClick={() =>
-                            navigate("/available-rides")
-                        }
-                    >
-                        View Available Rides
-                    </button>
-                )}
-
-            </div>
-
-        </div>
-    );
+                  )}
+                </article>
+              )
+            )}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
 }
 
 export default DriverDashboard;

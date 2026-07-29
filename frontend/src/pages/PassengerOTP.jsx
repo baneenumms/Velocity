@@ -1,282 +1,294 @@
 import {
-    useRef,
-    useState
+  useRef,
+  useState,
 } from "react";
+
 import {
-    useLocation,
-    useNavigate
+  useLocation,
+  useNavigate,
 } from "react-router-dom";
+
 import { Mail } from "lucide-react";
 import "./OTP.css";
 
+const SESSION_KEYS_TO_CLEAR = [
+  "userId",
+  "passengerId",
+  "passengerName",
+  "passengerPhone",
+  "passengerEmail",
+  "driverId",
+  "driverName",
+  "vehicleId",
+  "rideRequestId",
+  "rideId",
+  "rideStatus",
+  "paymentMethod",
+  "searchStartedAt",
+  "activeRideRequest",
+  "passengerRideDraft",
+  "acceptedRide",
+  "activeDriverRide",
+  "ridePin",
+];
+
+function clearPreviousTabSession() {
+  SESSION_KEYS_TO_CLEAR.forEach((key) => {
+    sessionStorage.removeItem(key);
+
+    /*
+     * Remove old values left from the previous
+     * localStorage implementation.
+     */
+    localStorage.removeItem(key);
+  });
+}
+
 function PassengerOTP() {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const navigate = useNavigate();
-    const location = useLocation();
+  const {
+    phone,
+    maskedEmail,
+  } = location.state || {};
 
-    const {
-        phone,
-        maskedEmail
-    } = location.state || {};
+  const [otp, setOtp] = useState([
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]);
 
-    const [otp, setOtp] = useState([
-        "",
-        "",
-        "",
-        "",
-        "",
-        ""
-    ]);
+  const [error, setError] = useState("");
+  const [otpFailed, setOtpFailed] =
+    useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-    const [error, setError] = useState("");
-    const [otpFailed, setOtpFailed] =
-        useState(false);
-    const [loading, setLoading] =
-        useState(false);
+  const inputs = useRef([]);
 
-    const inputs = useRef([]);
+  const handleChange = (value, index) => {
+    if (!/^\d?$/.test(value)) {
+      return;
+    }
 
-    const handleChange = (value, index) => {
+    const newOtp = [...otp];
+    newOtp[index] = value;
 
-        if (!/^\d?$/.test(value)) {
-            return;
+    setOtp(newOtp);
+
+    if (value && index < 5) {
+      inputs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (event, index) => {
+    if (
+      event.key === "Backspace" &&
+      otp[index] === "" &&
+      index > 0
+    ) {
+      inputs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerify = async () => {
+    setError("");
+
+    if (!phone) {
+      setError(
+        "Phone number is missing. Please start again."
+      );
+      return;
+    }
+
+    const code = otp.join("");
+
+    if (code.length !== 6) {
+      setError(
+        "Please enter the complete OTP."
+      );
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        "http://localhost:8080/passenger-auth/verify-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            phoneNumber: phone,
+            otp: code,
+          }),
         }
+      );
 
-        const newOtp = [...otp];
-        newOtp[index] = value;
+      const data = await response.json();
 
-        setOtp(newOtp);
+      if (!response.ok || !data.success) {
+        setError(
+          data.message ||
+            "Incorrect OTP. Please request a new code."
+        );
 
-        if (value && index < 5) {
-            inputs.current[index + 1]?.focus();
-        }
-    };
+        setOtpFailed(true);
+        return;
+      }
 
-    const handleKeyDown = (e, index) => {
+      clearPreviousTabSession();
 
-        if (
-            e.key === "Backspace" &&
-            otp[index] === "" &&
-            index > 0
-        ) {
-            inputs.current[index - 1]?.focus();
-        }
-    };
+      sessionStorage.setItem(
+        "userId",
+        String(data.userId)
+      );
 
-    const handleVerify = async () => {
+      sessionStorage.setItem(
+        "passengerId",
+        String(data.passengerId)
+      );
 
-        setError("");
+      sessionStorage.setItem(
+        "passengerName",
+        data.fullName || "Passenger"
+      );
 
-        if (!phone) {
-            setError(
-                "Phone number is missing. Please start again."
-            );
-            return;
-        }
+      sessionStorage.setItem(
+        "passengerPhone",
+        data.phoneNumber || phone
+      );
 
-        const code = otp.join("");
+      sessionStorage.setItem(
+        "passengerEmail",
+        data.email || ""
+      );
 
-        if (code.length !== 6) {
-            setError(
-                "Please enter the complete OTP."
-            );
-            return;
-        }
+      navigate("/otp-verified", {
+        state: {
+          phone,
+          nextRoute:
+            "/passenger-dashboard",
+          verifiedMessage:
+            "Your passenger account has been verified successfully.",
+        },
+      });
+    } catch (err) {
+      console.error(err);
 
-        setLoading(true);
+      setError(
+        "Unable to connect to server."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        try {
+  const handleTryAgain = () => {
+    navigate("/passenger-phone");
+  };
 
-            const response = await fetch(
-                "http://localhost:8080/passenger-auth/verify-otp",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                    },
-                    body: JSON.stringify({
-                        phoneNumber: phone,
-                        otp: code,
-                    }),
-                }
-            );
+  return (
+    <div className="page">
+      <div className="velocity-title">
+        <span className="velo">VEL</span>
 
-            const data = await response.json();
+        <span className="wheel">
+          <span className="hub" />
+        </span>
 
-            if (!response.ok || !data.success) {
+        <span className="city">CITY</span>
+      </div>
 
-                setError(
-                    data.message ||
-                    "Incorrect OTP. Please request a new code."
-                );
-
-                setOtpFailed(true);
-                return;
-            }
-
-            localStorage.setItem(
-                "userId",
-                String(data.userId)
-            );
-
-            localStorage.setItem(
-                "passengerId",
-                String(data.passengerId)
-            );
-
-            localStorage.setItem(
-                "passengerName",
-                data.fullName || "Passenger"
-            );
-
-            localStorage.setItem(
-                "passengerPhone",
-                data.phoneNumber || phone
-            );
-
-            localStorage.setItem(
-                "passengerEmail",
-                data.email || ""
-            );
-
-            navigate("/otp-verified", {
-                state: {
-                    phone,
-                    nextRoute:
-                        "/passenger-dashboard",
-                    verifiedMessage:
-                        "Your passenger account has been verified successfully.",
-                },
-            });
-
-        } catch (err) {
-
-            console.error(err);
-            setError(
-                "Unable to connect to server."
-            );
-
-        } finally {
-
-            setLoading(false);
-
-        }
-    };
-
-    const handleTryAgain = () => {
-        navigate("/passenger-phone");
-    };
-
-    return (
-
-        <div className="page">
-
-            <div className="velocity-title">
-                <span className="velo">VEL</span>
-
-                <span className="wheel">
-                    <span className="hub"></span>
-                </span>
-
-                <span className="city">CITY</span>
-            </div>
-
-            <div className="card">
-
-                <div className="icon-circle">
-                    <Mail
-                        size={36}
-                        color="white"
-                    />
-                </div>
-
-                <h1 className="title">
-                    Email Verification
-                </h1>
-
-                <p className="subtitle">
-                    Enter the 6-digit code sent to
-                </p>
-
-                <p className="email-text">
-                    {maskedEmail ||
-                        "your registered email"}
-                </p>
-
-                <div className="otp-container">
-
-                    {otp.map((digit, index) => (
-
-                        <input
-                            key={index}
-                            ref={(el) =>
-                                inputs.current[index] = el
-                            }
-                            className="otp-box"
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={1}
-                            value={digit}
-                            disabled={
-                                otpFailed || loading
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    e.target.value,
-                                    index
-                                )
-                            }
-                            onKeyDown={(e) =>
-                                handleKeyDown(
-                                    e,
-                                    index
-                                )
-                            }
-                        />
-
-                    ))}
-
-                </div>
-
-                {error && (
-                    <p className="error">
-                        {error}
-                    </p>
-                )}
-
-                {otpFailed ? (
-
-                    <button
-                        type="button"
-                        className="primary-btn"
-                        onClick={handleTryAgain}
-                    >
-                        Try Again
-                    </button>
-
-                ) : (
-
-                    <button
-                        type="button"
-                        className="primary-btn"
-                        onClick={handleVerify}
-                        disabled={loading}
-                    >
-                        {loading
-                            ? "Verifying..."
-                            : "Verify OTP"
-                        }
-                    </button>
-
-                )}
-
-            </div>
-
+      <div className="card">
+        <div className="icon-circle">
+          <Mail
+            size={36}
+            color="white"
+          />
         </div>
 
-    );
+        <h1 className="title">
+          Email Verification
+        </h1>
 
+        <p className="subtitle">
+          Enter the 6-digit code sent to
+        </p>
+
+        <p className="email-text">
+          {maskedEmail ||
+            "your registered email"}
+        </p>
+
+        <div className="otp-container">
+          {otp.map((digit, index) => (
+            <input
+              key={index}
+              ref={(element) => {
+                inputs.current[index] =
+                  element;
+              }}
+              className="otp-box"
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={digit}
+              disabled={
+                otpFailed || loading
+              }
+              onChange={(event) =>
+                handleChange(
+                  event.target.value,
+                  index
+                )
+              }
+              onKeyDown={(event) =>
+                handleKeyDown(
+                  event,
+                  index
+                )
+              }
+            />
+          ))}
+        </div>
+
+        {error && (
+          <p className="error">
+            {error}
+          </p>
+        )}
+
+        {otpFailed ? (
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={handleTryAgain}
+          >
+            Try Again
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={handleVerify}
+            disabled={loading}
+          >
+            {loading
+              ? "Verifying..."
+              : "Verify OTP"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default PassengerOTP;

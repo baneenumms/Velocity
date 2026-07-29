@@ -1,41 +1,72 @@
 .profile-page {
   justify-content: flex-start;
-  padding-top: 32px;
-  padding-bottom: 40px;
+  min-height: 100vh;
+  padding: 32px 20px;
 }
 
 .profile-card {
+  width: min(700px, 92vw);
+  height: calc(100vh - 150px);
+  min-height: 520px;
+  max-height: 820px;
+  padding: 32px 40px;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   text-align: center;
 }
 
-.profile-section {
-  text-align: left;
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid #e2dcd0;
+.profile-heading {
+  flex-shrink: 0;
 }
 
-.profile-section:first-of-type {
-  margin-top: 30px;
-  border-top: none;
+.profile-scroll {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  padding: 18px 8px 18px 0;
+}
+
+.profile-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+
+.profile-scroll::-webkit-scrollbar-thumb {
+  background: #b8b1a6;
+  border-radius: 20px;
+}
+
+.profile-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e2dcd0;
+  text-align: left;
+}
+
+.profile-section.first-section {
+  margin-top: 0;
   padding-top: 0;
+  border-top: none;
 }
 
 .section-label {
+  margin-bottom: 12px;
+  color: #9aa7b5;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: #9aa7b5;
-  margin-bottom: 14px;
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  padding: 10px 0;
+  gap: 16px;
+
+  padding: 11px 0;
   border-bottom: 1px solid #eee8dd;
 }
 
@@ -44,23 +75,39 @@
 }
 
 .info-label {
-  font-size: 14px;
-  color: #64748b;
   flex-shrink: 0;
+  color: #64748b;
+  font-size: 14px;
 }
 
 .info-value {
+  min-width: 0;
+  color: #12233a;
   font-size: 15px;
   font-weight: 600;
-  color: #12233a;
   text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.email-value {
+  font-size: 13px;
+}
+
+.role-value {
+  text-transform: capitalize;
+}
+
+.plate-value {
+  color: #3e6b96;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
 .status-pill {
-  font-size: 13px;
-  font-weight: 700;
   padding: 4px 12px;
   border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .status-pill.on {
@@ -73,6 +120,49 @@
   color: #9aa7b5;
 }
 
+.vehicle-card {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #eee8dd;
+}
+
+.vehicle-heading {
+  margin-bottom: 8px;
+  color: #3e6b96;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.vehicle-heading strong {
+  color: #12233a;
+  font-size: 16px;
+}
+
+.vehicle-card .info-row {
+  border-color: #dcd4c8;
+}
+
 .back-btn {
-  margin-top: 30px;
+  flex-shrink: 0;
+  margin-top: 18px;
+}
+
+@media (max-width: 600px) {
+  .profile-page {
+    padding: 20px 12px;
+  }
+
+  .profile-card {
+    width: 100%;
+    height: calc(100vh - 110px);
+    min-height: 0;
+    padding: 25px 18px;
+  }
+
+  .info-row {
+    align-items: flex-start;
+  }
 }

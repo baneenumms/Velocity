@@ -1,0 +1,614 @@
+package com.beni.riderequest;
+
+import com.beni.entity.Driver;
+import com.beni.entity.DriverStatus;
+import com.beni.entity.Ride;
+import com.beni.entity.Vehicle;
+import com.beni.entity.Wallet;
+import com.beni.repository.DriverRepository;
+import com.beni.repository.VehicleRepository;
+import com.beni.repository.WalletRepository;
+import com.beni.service.RideService;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.WebApplicationException;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HexFormat;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+@ApplicationScoped
+public class DriverOfferService {
+
+    private static final BigDecimal RATE =
+            new BigDecimal("0.12");
+
+    private final Map<String, DriverOffer> offers =
+            new ConcurrentHashMap<>();
+
+    private final SecureRandom random =
+            new SecureRandom();
+
+    @Inject
+    RideRequestService rideRequestService;
+
+    @Inject
+    DriverRepository driverRepository;
+
+    @Inject
+    VehicleRepository vehicleRepository;
+
+    @Inject
+    WalletRepository walletRepository;
+
+    @Inject
+    RideService rideService;
+
+    public DriverOffer submitOffer(
+            SubmitDriverOfferRequest input
+    ) {
+        validate(input);
+
+        RideRequest request =
+                rideRequestService
+                        .getRideRequest(
+                                input.requestId
+                        );
+
+        require(
+                request.status ==
+                        RideRequestStatus.SEARCHING,
+                "Ride request is no longer available",
+                400
+        );
+
+        Driver driver =
+                driver(
+                        input.driverId
+                );
+
+        require(
+                driver.driverStatus ==
+                        DriverStatus.Online,
+                "Driver must be Online",
+                400
+        );
+
+        Vehicle vehicle =
+                vehicle(
+                        input.vehicleId,
+                        driver
+                );
+
+        BigDecimal fare =
+                input.offeredFare.setScale(
+                        2,
+                        RoundingMode.HALF_UP
+                );
+
+        BigDecimal required =
+                reserve(fare);
+
+        require(
+                available(
+                        wallet(driver)
+                ).compareTo(
+                        required
+                ) >= 0,
+                "Insufficient available wallet balance",
+                400
+        );
+
+        DriverOffer offer =
+                findPending(
+                        input.requestId,
+                        input.driverId
+                );
+
+        if (offer == null) {
+            offer =
+                    new DriverOffer();
+
+            offer.offerId =
+                    UUID.randomUUID()
+                            .toString();
+
+            offer.requestId =
+                    input.requestId;
+
+            offer.driverId =
+                    driver.driverId;
+
+            offer.driverName =
+                    driver.user.fullName;
+
+            offer.status =
+                    DriverOfferStatus.PENDING;
+
+            offer.createdAt =
+                    LocalDateTime.now();
+
+            offers.put(
+                    offer.offerId,
+                    offer
+            );
+        }
+
+        offer.vehicleId =
+                vehicle.vehicleId;
+
+        offer.vehicleDescription =
+                vehicle.make +
+                        " " +
+                        vehicle.model;
+
+        offer.plateNumber =
+                vehicle.plateNumber;
+
+        offer.offeredFare =
+                fare;
+
+        offer.requiredReserve =
+                required;
+
+        offer.updatedAt =
+                LocalDateTime.now();
+
+        return offer;
+    }
+
+    public List<DriverOffer>
+    getOffersForRequest(
+            String requestId
+    ) {
+        RideRequest request =
+                rideRequestService
+                        .getRideRequest(
+                                requestId
+                        );
+
+        /*
+         * Do not expose pending offers for an
+         * expired, accepted or cancelled request.
+         */
+        if (
+                request.status !=
+                        RideRequestStatus.SEARCHING
+        ) {
+            return List.of();
+        }
+
+        return offers.values().stream()
+                .filter(offer ->
+                        offer.requestId.equals(
+                                requestId
+                        ) &&
+                                offer.status ==
+                                        DriverOfferStatus.PENDING
+                )
+                .sorted(
+                        Comparator.comparing(
+                                offer ->
+                                        offer.offeredFare
+                        )
+                )
+                .toList();
+    }
+
+    @Transactional
+    public synchronized
+    AcceptDriverOfferResponse acceptOffer(
+            String offerId,
+            AcceptDriverOfferRequest input
+    ) {
+        require(
+                input != null &&
+                        input.passengerId != null,
+                "Passenger ID is required",
+                400
+        );
+
+        DriverOffer offer =
+                offers.get(
+                        offerId
+                );
+
+        require(
+                offer != null,
+                "Driver offer not found",
+                404
+        );
+
+        require(
+                offer.status ==
+                        DriverOfferStatus.PENDING,
+                "Offer is no longer available",
+                400
+        );
+
+        RideRequest request =
+                rideRequestService
+                        .getRideRequest(
+                                offer.requestId
+                        );
+
+        require(
+                request.status ==
+                        RideRequestStatus.SEARCHING,
+                "Ride request is no longer available",
+                400
+        );
+
+        require(
+                request.passengerId.equals(
+                        input.passengerId
+                ),
+                "Passenger cannot accept this offer",
+                403
+        );
+
+        Driver driver =
+                driver(
+                        offer.driverId
+                );
+
+        require(
+                driver.driverStatus ==
+                        DriverStatus.Online,
+                "Driver is no longer available",
+                400
+        );
+
+        Vehicle vehicle =
+                vehicle(
+                        offer.vehicleId,
+                        driver
+                );
+
+        Wallet wallet =
+                wallet(driver);
+
+        BigDecimal required =
+                reserve(
+                        offer.offeredFare
+                );
+
+        require(
+                available(wallet)
+                        .compareTo(
+                                required
+                        ) >= 0,
+                "Driver wallet balance is insufficient",
+                400
+        );
+
+        wallet.reservedBalance =
+                money(
+                        wallet.reservedBalance
+                )
+                        .add(required)
+                        .doubleValue();
+
+        wallet.updatedAt =
+                LocalDateTime.now();
+
+        String pin =
+                String.valueOf(
+                        random.nextInt(
+                                9000
+                        ) + 1000
+                );
+
+        Ride ride =
+                rideService
+                        .createAcceptedRide(
+                                request,
+                                driver,
+                                vehicle,
+                                offer.offeredFare,
+                                required,
+                                hash(pin)
+                        );
+
+        driver.driverStatus =
+                DriverStatus.Assigned;
+
+        rideRequestService
+                .markAccepted(
+                        request.requestId
+                );
+
+        offer.status =
+                DriverOfferStatus.ACCEPTED;
+
+        offers.values().stream()
+                .filter(otherOffer ->
+                        otherOffer.requestId.equals(
+                                request.requestId
+                        ) &&
+                                !otherOffer.offerId.equals(
+                                        offer.offerId
+                                ) &&
+                                otherOffer.status ==
+                                        DriverOfferStatus.PENDING
+                )
+                .forEach(otherOffer ->
+                        otherOffer.status =
+                                DriverOfferStatus.REJECTED
+                );
+
+        return response(
+                offer,
+                ride,
+                driver,
+                vehicle,
+                required,
+                pin
+        );
+    }
+
+    private AcceptDriverOfferResponse response(
+            DriverOffer offer,
+            Ride ride,
+            Driver driver,
+            Vehicle vehicle,
+            BigDecimal reserve,
+            String pin
+    ) {
+        AcceptDriverOfferResponse response =
+                new AcceptDriverOfferResponse();
+
+        response.success =
+                true;
+
+        response.message =
+                "Driver offer accepted successfully";
+
+        response.requestId =
+                offer.requestId;
+
+        response.offerId =
+                offer.offerId;
+
+        response.rideId =
+                ride.rideId;
+
+        response.status =
+                ride.rideStatus.name();
+
+        response.driverId =
+                driver.driverId;
+
+        response.driverName =
+                driver.user.fullName;
+
+        response.vehicleId =
+                vehicle.vehicleId;
+
+        response.vehicleDescription =
+                vehicle.make +
+                        " " +
+                        vehicle.model;
+
+        response.plateNumber =
+                vehicle.plateNumber;
+
+        response.acceptedFare =
+                offer.offeredFare;
+
+        response.reservedAmount =
+                reserve;
+
+        response.ridePin =
+                pin;
+
+        return response;
+    }
+
+    private void validate(
+            SubmitDriverOfferRequest input
+    ) {
+        require(
+                input != null,
+                "Request body is required",
+                400
+        );
+
+        require(
+                input.requestId != null &&
+                        !input.requestId.isBlank(),
+                "Request ID is required",
+                400
+        );
+
+        require(
+                input.driverId != null,
+                "Driver ID is required",
+                400
+        );
+
+        require(
+                input.vehicleId != null,
+                "Vehicle ID is required",
+                400
+        );
+
+        require(
+                input.offeredFare != null &&
+                        input.offeredFare
+                                .compareTo(
+                                        BigDecimal.ZERO
+                                ) > 0,
+                "Offered fare must be positive",
+                400
+        );
+    }
+
+    private Driver driver(
+            Integer id
+    ) {
+        Driver value =
+                driverRepository.findById(
+                        id.longValue()
+                );
+
+        require(
+                value != null,
+                "Driver not found",
+                404
+        );
+
+        return value;
+    }
+
+    private Vehicle vehicle(
+            Integer id,
+            Driver driver
+    ) {
+        Vehicle value =
+                vehicleRepository.findById(
+                        id.longValue()
+                );
+
+        require(
+                value != null,
+                "Vehicle not found",
+                404
+        );
+
+        require(
+                value.driver != null &&
+                        value.driver.driverId
+                                .equals(
+                                        driver.driverId
+                                ),
+                "Vehicle does not belong to driver",
+                400
+        );
+
+        return value;
+    }
+
+    private Wallet wallet(
+            Driver driver
+    ) {
+        Wallet value =
+                walletRepository
+                        .findByDriver(
+                                driver
+                        );
+
+        require(
+                value != null,
+                "Driver wallet not found",
+                404
+        );
+
+        return value;
+    }
+
+    private DriverOffer findPending(
+            String requestId,
+            Integer driverId
+    ) {
+        return offers.values().stream()
+                .filter(offer ->
+                        offer.requestId.equals(
+                                requestId
+                        ) &&
+                                offer.driverId.equals(
+                                        driverId
+                                ) &&
+                                offer.status ==
+                                        DriverOfferStatus.PENDING
+                )
+                .findFirst()
+                .orElse(null);
+    }
+
+    private BigDecimal available(
+            Wallet wallet
+    ) {
+        return money(
+                wallet.balance
+        ).subtract(
+                money(
+                        wallet.reservedBalance
+                )
+        );
+    }
+
+    private BigDecimal reserve(
+            BigDecimal fare
+    ) {
+        return fare.multiply(
+                RATE
+        ).setScale(
+                2,
+                RoundingMode.HALF_UP
+        );
+    }
+
+    private BigDecimal money(
+            Double value
+    ) {
+        return BigDecimal.valueOf(
+                value == null
+                        ? 0
+                        : value
+        ).setScale(
+                2,
+                RoundingMode.HALF_UP
+        );
+    }
+
+    private String hash(
+            String value
+    ) {
+        try {
+            byte[] bytes =
+                    MessageDigest
+                            .getInstance(
+                                    "SHA-256"
+                            )
+                            .digest(
+                                    value.getBytes(
+                                            StandardCharsets.UTF_8
+                                    )
+                            );
+
+            return HexFormat.of()
+                    .formatHex(
+                            bytes
+                    );
+        } catch (Exception exception) {
+            throw new WebApplicationException(
+                    "Could not create ride PIN",
+                    500
+            );
+        }
+    }
+
+    private void require(
+            boolean condition,
+            String message,
+            int status
+    ) {
+        if (!condition) {
+            throw new WebApplicationException(
+                    message,
+                    status
+            );
+        }
+    }
+}

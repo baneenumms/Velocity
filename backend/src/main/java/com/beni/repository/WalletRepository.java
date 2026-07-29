@@ -6,9 +6,15 @@ import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class WalletRepository implements PanacheRepository<Wallet> {
+public class WalletRepository
+        implements PanacheRepository<Wallet> {
 
     public Wallet findByDriver(Driver driver) {
-        return find("driver", driver).firstResult();
+        if (driver == null) {
+            return null;
+        }
+
+        return find("driver", driver)
+                .firstResult();
     }
 }

@@ -1,31 +1,35 @@
 .dashboard-page {
+  min-height: 100vh;
+  padding: 24px 28px 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: flex-start;
-  padding-top: 32px;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .dashboard-header {
   width: 100%;
-  max-width: 420px;
+  max-width: 1180px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 30px;
+  margin-bottom: 22px;
 }
 
 .menu-btn {
   width: 48px;
   height: 48px;
+  border: 1px solid rgba(40, 30, 15, 0.08);
   border-radius: 14px;
   background: #f7f4ee;
-  border: 1px solid rgba(40, 30, 15, 0.06);
-  box-shadow: 0 6px 16px rgba(40, 30, 15, 0.06);
-  font-size: 20px;
   color: #12233a;
+  font-size: 21px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .menu-btn:hover {
@@ -34,8 +38,8 @@
 }
 
 .velocity-title.small {
+  margin: 0;
   font-size: 26px;
-  margin-bottom: 0;
   letter-spacing: -1px;
 }
 
@@ -50,8 +54,41 @@
   height: 8px;
 }
 
+/* Card and map appear side by side */
+.driver-dashboard-content {
+  width: 100%;
+  max-width: 1180px;
+  display: grid;
+  grid-template-columns: 370px minmax(0, 1fr);
+  grid-template-areas:
+    "profile map"
+    "requests requests";
+  gap: 22px;
+  align-items: stretch;
+}
+
 .dashboard-card {
+  grid-area: profile;
+  width: 100%;
+  max-width: none;
+  min-height: 430px;
+  padding: 34px 28px;
   text-align: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dashboard-card .title {
+  margin: 0 0 14px;
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.dashboard-card .subtitle {
+  margin: 0;
+  line-height: 1.6;
 }
 
 .status-toggle-row {
@@ -59,12 +96,12 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
-  margin: 30px 0 10px;
+  margin: 26px 0 18px;
 }
 
 .status-label {
-  font-weight: 600;
   font-size: 15px;
+  font-weight: 700;
   color: #9aa7b5;
 }
 
@@ -73,16 +110,15 @@
 }
 
 .toggle-switch {
+  position: relative;
   width: 60px;
   height: 34px;
+  padding: 0;
+  border: none;
   border-radius: 20px;
   background: #e2dcd0;
-  border: none;
-  position: relative;
   cursor: pointer;
-  padding: 0;
   transition: 0.25s;
-  flex-shrink: 0;
 }
 
 .toggle-switch:hover {
@@ -94,7 +130,7 @@
 }
 
 .toggle-switch:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -106,7 +142,7 @@
   height: 28px;
   border-radius: 50%;
   background: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.18);
   transition: 0.25s;
 }
 
@@ -114,6 +150,444 @@
   left: 29px;
 }
 
-.dashboard-card .primary-btn {
+.location-button,
+.map-location-overlay button {
+  padding: 13px 22px;
+  border: none;
+  border-radius: 12px;
+  background: #12233a;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.location-button:disabled,
+.map-location-overlay button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.driver-location-info {
   margin-top: 20px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #f7f4ee;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.driver-location-info span {
+  display: block;
+  margin-bottom: 6px;
+  color: #7c8794;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.driver-location-info strong {
+  color: #12233a;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Map stays beside profile card */
+.driver-map-card {
+  grid-area: map;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 430px;
+  overflow: hidden;
+  border-radius: 22px;
+  background: white;
+  box-shadow: 0 12px 32px rgba(20, 30, 45, 0.1);
+}
+
+.driver-map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-location-overlay {
+  position: absolute;
+  z-index: 500;
+  top: 50%;
+  left: 50%;
+  width: calc(100% - 50px);
+  max-width: 380px;
+  padding: 24px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  text-align: center;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+  box-sizing: border-box;
+}
+
+.map-location-overlay h3 {
+  margin: 0 0 8px;
+  color: #12233a;
+}
+
+.map-location-overlay p {
+  margin: 0 0 18px;
+  color: #687382;
+  line-height: 1.5;
+}
+
+/* This section will now be clearly visible */
+.requests-placeholder {
+  grid-area: requests;
+  width: 100%;
+  max-width: none;
+  padding: 26px 30px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.requests-placeholder h2 {
+  margin: 0 0 8px;
+  color: #12233a;
+}
+
+.requests-placeholder p {
+  margin: 0;
+  color: #687382;
+}
+
+.error {
+  margin-top: 16px;
+  color: #d12f2f;
+}
+
+/* Tablet and mobile */
+@media (max-width: 850px) {
+  .dashboard-page {
+    padding: 20px 16px 40px;
+  }
+
+  .driver-dashboard-content {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "profile"
+      "map"
+      "requests";
+  }
+
+  .dashboard-card {
+    min-height: auto;
+  }
+
+  .driver-map-card {
+    height: 390px;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-page {
+    padding: 16px 12px 32px;
+  }
+
+  .dashboard-header {
+    margin-bottom: 16px;
+  }
+
+  .velocity-title.small {
+    font-size: 22px;
+  }
+
+  .dashboard-card {
+    padding: 28px 20px;
+  }
+
+  .dashboard-card .title {
+    font-size: 25px;
+  }
+
+  .driver-map-card {
+    height: 330px;
+  }
+
+  .requests-placeholder {
+    padding: 22px 20px;
+  }
+  .requests-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.requests-heading-row h2 {
+  margin: 0 0 7px;
+}
+
+.requests-heading-row p {
+  margin: 0;
+}
+
+.requests-live-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: #e9f8ef;
+  color: #16834a;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.requests-empty-state {
+  display: flex;
+  min-height: 120px;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  border: 1px dashed rgba(17, 37, 68, 0.2);
+  border-radius: 18px;
+  text-align: center;
+}
+
+.requests-empty-state p {
+  margin: 0;
+  color: #667085;
+}
+
+.requests-error {
+  margin: 15px 0;
+  color: #d92d20;
+  font-weight: 700;
+  text-align: center;
+}
+
+.ride-request-list {
+  display: grid;
+  gap: 18px;
+}
+
+.ride-request-card {
+  padding: 22px;
+  border: 1px solid rgba(17, 37, 68, 0.12);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(17, 37, 68, 0.07);
+}
+
+.ride-request-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(17, 37, 68, 0.1);
+}
+
+.ride-request-card-header > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.request-passenger {
+  color: #112544;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.request-time {
+  color: #7a8496;
+  font-size: 13px;
+}
+
+.request-fare {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.request-fare span {
+  color: #7a8496;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.request-fare strong {
+  color: #112544;
+  font-size: 21px;
+}
+
+.request-route {
+  padding: 20px 0 8px;
+}
+
+.request-route-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.request-route-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.request-route-row div > span {
+  color: #7a8496;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.request-route-row strong {
+  color: #112544;
+  line-height: 1.45;
+}
+
+.request-route-dot {
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border-radius: 50%;
+}
+
+.request-route-dot.pickup {
+  background: #16834a;
+}
+
+.request-route-dot.dropoff {
+  background: #c23d6c;
+}
+
+.request-route-line {
+  width: 2px;
+  height: 26px;
+  margin: 4px 0 4px 5px;
+  background: rgba(17, 37, 68, 0.16);
+}
+
+.request-id {
+  padding-top: 13px;
+  border-top: 1px solid rgba(17, 37, 68, 0.08);
+  color: #98a2b3;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .requests-heading-row,
+  .ride-request-card-header {
+    flex-direction: column;
+  }
+
+  .request-fare {
+    align-items: flex-start;
+  }
+
+  .ride-request-card {
+    padding: 18px;
+  }
+  .driver-offer-box {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 16px;
+  background: #f7f4ee;
+}
+
+.driver-offer-box label {
+  display: block;
+  margin-bottom: 9px;
+  color: #112544;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.driver-offer-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.driver-offer-controls input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid
+    rgba(17, 37, 68, 0.18);
+  border-radius: 12px;
+  background: #ffffff;
+  color: #112544;
+  font-size: 16px;
+  outline: none;
+}
+
+.driver-offer-controls input:focus {
+  border-color: #c23d6c;
+  box-shadow:
+    0 0 0 3px
+    rgba(194, 61, 108, 0.12);
+}
+
+.driver-offer-controls button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 12px;
+  background: #112544;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.driver-offer-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.driver-offer-message {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.driver-offer-message.success {
+  color: #16834a;
+}
+
+.driver-offer-message.error {
+  color: #d92d20;
+}
+
+@media (max-width: 600px) {
+  .driver-offer-controls {
+    flex-direction: column;
+  }
+
+  .driver-offer-controls button {
+    width: 100%;
+  }
+  .request-payment {
+  width: fit-content;
+  margin: 12px 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fcebf1;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.request-payment strong {
+  color: #c23d6c;
+}
+}
+}
 }

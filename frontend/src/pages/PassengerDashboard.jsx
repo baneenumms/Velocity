@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MapContainer,
@@ -10,7 +10,7 @@ import {
 import L from "leaflet";
 
 import PassengerHamburgerMenu from "../components/PassengerHamburgerMenu";
-import LocationAutocomplete from "../components/LocationAutocomplete";
+import LocationAutocomplete from "./LocationAutocomplete";
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -19,15 +19,12 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import "leaflet/dist/leaflet.css";
 import "./PassengerDashboard.css";
 
-const GEOAPIFY_REVERSE_URL =
+const GEOAPIFY_URL =
   "https://api.geoapify.com/v1/geocode/reverse";
 
-const OSRM_ROUTE_URL =
+const OSRM_URL =
   "https://router.project-osrm.org/route/v1/driving";
 
-/*
-  Fixes missing Leaflet marker icons inside Vite.
-*/
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -36,51 +33,24 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-function MapController({
-  pickup,
-  destination,
-  routeCoordinates,
-}) {
+function MapController({ pickup, destination, route }) {
   const map = useMap();
 
   useEffect(() => {
-    if (
-      Array.isArray(routeCoordinates) &&
-      routeCoordinates.length > 1
-    ) {
-      map.fitBounds(routeCoordinates, {
-        padding: [45, 45],
-      });
-
-      return;
-    }
-
-    if (pickup && destination) {
+    if (route.length > 1) {
+      map.fitBounds(route, { padding: [40, 40] });
+    } else if (pickup && destination) {
       map.fitBounds(
         [
           [pickup.lat, pickup.lng],
           [destination.lat, destination.lng],
         ],
-        {
-          padding: [45, 45],
-        }
+        { padding: [40, 40] }
       );
-
-      return;
+    } else if (pickup) {
+      map.setView([pickup.lat, pickup.lng], 15);
     }
-
-    if (pickup) {
-      map.setView(
-        [pickup.lat, pickup.lng],
-        15
-      );
-    }
-  }, [
-    map,
-    pickup,
-    destination,
-    routeCoordinates,
-  ]);
+  }, [map, pickup, destination, route]);
 
   return null;
 }
@@ -89,520 +59,276 @@ function PassengerDashboard() {
   const navigate = useNavigate();
 
   const passengerName =
-    localStorage.getItem("passengerName") ||
-    "Passenger";
+    sessionStorage.getItem("passengerName") || "Passenger";
 
   const [pickup, setPickup] = useState(null);
-  const [destination, setDestination] =
+  const [destination, setDestination] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState(null);
+
+  const [route, setRoute] = useState([]);
+  const [distanceKm, setDistanceKm] = useState(null);
+  const [estimatedMinutes, setEstimatedMinutes] =
     useState(null);
+  const [estimatedFare, setEstimatedFare] = useState(null);
 
-  const [currentLocation, setCurrentLocation] =
-    useState(null);
-
-  const [routeCoordinates, setRouteCoordinates] =
-    useState([]);
-
-  const [distanceKm, setDistanceKm] =
-    useState(null);
-
-  const [
-    estimatedMinutes,
-    setEstimatedMinutes,
-  ] = useState(null);
-
-  const [baseFare, setBaseFare] =
-    useState(null);
-
-  const [locating, setLocating] =
-    useState(false);
-
-  const [calculatingRoute, setCalculatingRoute] =
-    useState(false);
-
-  const [locationMessage, setLocationMessage] =
-    useState("");
-
+  const [locating, setLocating] = useState(false);
+  const [calculating, setCalculating] = useState(false);
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const apiKey =
-    import.meta.env.VITE_GEOAPIFY_API_KEY;
+  const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
-  /*
-    Default map centre is Karachi.
+  const mapCenter = pickup
+    ? [Number(pickup.lat), Number(pickup.lng)]
+    : currentLocation
+      ? [
+          Number(currentLocation.lat),
+          Number(currentLocation.lng),
+        ]
+      : [24.8607, 67.0011];
 
-    As soon as the passenger's location or pickup
-    becomes available, the map moves there.
-  */
-  const mapCenter = useMemo(() => {
-    if (pickup) {
-      return [
-        Number(pickup.lat),
-        Number(pickup.lng),
-      ];
-    }
-
-    if (currentLocation) {
-      return [
-        Number(currentLocation.lat),
-        Number(currentLocation.lng),
-      ];
-    }
-
-    return [24.8607, 67.0011];
-  }, [pickup, currentLocation]);
-
-  /*
-    Restore an unfinished ride when the passenger
-    returns from another page.
-  */
-  useEffect(() => {
-    try {
-      const storedDraft = sessionStorage.getItem(
-        "passengerRideDraft"
-      );
-
-      if (!storedDraft) {
-        return;
-      }
-
-      const parsedDraft = JSON.parse(storedDraft);
-
-      if (parsedDraft.pickup) {
-        setPickup(parsedDraft.pickup);
-      }
-
-      if (parsedDraft.destination) {
-        setDestination(parsedDraft.destination);
-      }
-
-      if (
-        Array.isArray(
-          parsedDraft.routeCoordinates
-        )
-      ) {
-        setRouteCoordinates(
-          parsedDraft.routeCoordinates
-        );
-      }
-
-      if (parsedDraft.distanceKm) {
-        setDistanceKm(
-          Number(parsedDraft.distanceKm)
-        );
-      }
-
-      if (parsedDraft.estimatedMinutes) {
-        setEstimatedMinutes(
-          Number(parsedDraft.estimatedMinutes)
-        );
-      }
-
-      if (parsedDraft.baseFare) {
-        setBaseFare(
-          Number(parsedDraft.baseFare)
-        );
-      }
-    } catch (storageError) {
-      console.error(
-        "Could not restore ride draft:",
-        storageError
-      );
-    }
-  }, []);
-
-  /*
-    Attempt to get the passenger's current location
-    when the dashboard first opens.
-  */
-  useEffect(() => {
-    getCurrentLocation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  /*
-    Clear the route whenever pickup or destination
-    changes. The passenger must calculate the route again.
-  */
-  const clearCalculatedRoute = () => {
-    setRouteCoordinates([]);
+  const clearRoute = () => {
+    setRoute([]);
     setDistanceKm(null);
     setEstimatedMinutes(null);
-    setBaseFare(null);
+    setEstimatedFare(null);
   };
 
-  const reverseGeocode = async (lat, lng) => {
-    if (!apiKey) {
-      throw new Error(
-        "Geoapify API key is missing from the .env file."
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(
+        sessionStorage.getItem("passengerRideDraft")
       );
-    }
 
-    const parameters = new URLSearchParams({
-      lat: String(lat),
-      lon: String(lng),
+      if (!saved) return;
+
+      setPickup(saved.pickup || null);
+      setDestination(saved.destination || null);
+      setRoute(saved.routeCoordinates || []);
+      setDistanceKm(
+        saved.distanceKm ? Number(saved.distanceKm) : null
+      );
+      setEstimatedMinutes(
+        saved.estimatedMinutes
+          ? Number(saved.estimatedMinutes)
+          : null
+      );
+      setEstimatedFare(
+        saved.estimatedFare
+          ? Number(saved.estimatedFare)
+          : null
+      );
+    } catch {
+      sessionStorage.removeItem("passengerRideDraft");
+    }
+  }, []);
+
+  const reverseGeocode = async (lat, lng) => {
+    if (!apiKey) return `${lat}, ${lng}`;
+
+    const params = new URLSearchParams({
+      lat,
+      lon: lng,
       format: "json",
-      lang: "en",
       apiKey,
     });
 
     const response = await fetch(
-      `${GEOAPIFY_REVERSE_URL}?${parameters.toString()}`
+      `${GEOAPIFY_URL}?${params}`
     );
 
-    if (!response.ok) {
-      throw new Error(
-        "Your address could not be identified."
-      );
-    }
+    if (!response.ok) return `${lat}, ${lng}`;
 
     const data = await response.json();
 
-    const firstResult = Array.isArray(data.results)
-      ? data.results[0]
-      : null;
-
     return (
-      firstResult?.formatted ||
-      `${Number(lat).toFixed(6)}, ${Number(
-        lng
-      ).toFixed(6)}`
+      data.results?.[0]?.formatted ||
+      `${lat.toFixed(6)}, ${lng.toFixed(6)}`
     );
   };
 
   const getCurrentLocation = () => {
     setError("");
-    setLocationMessage("");
+    setMessage("");
 
     if (!navigator.geolocation) {
-      setError(
-        "Location access is not supported by this browser."
-      );
+      setError("Location is not supported by this browser.");
       return;
     }
 
     setLocating(true);
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = Number(
-          position.coords.latitude
-        );
+      async ({ coords }) => {
+        const lat = Number(coords.latitude);
+        const lng = Number(coords.longitude);
+        const address = await reverseGeocode(lat, lng);
 
-        const lng = Number(
-          position.coords.longitude
-        );
+        const location = {
+          id: "current-location",
+          title: "Current location",
+          subtitle: address,
+          address,
+          lat,
+          lng,
+        };
 
-        try {
-          const address = await reverseGeocode(
-            lat,
-            lng
-          );
-
-          const location = {
-            id: "current-location",
-            title: "Current location",
-            subtitle: address,
-            address,
-            lat,
-            lng,
-          };
-
-          setCurrentLocation(location);
-          setPickup(location);
-
-          clearCalculatedRoute();
-
-          setLocationMessage(
-            "Your current location has been selected as the pickup."
-          );
-        } catch (reverseError) {
-          console.error(
-            "Reverse geocoding failed:",
-            reverseError
-          );
-
-          const fallbackLocation = {
-            id: "current-location",
-            title: "Current location",
-            subtitle: `${lat}, ${lng}`,
-            address: `${lat.toFixed(
-              6
-            )}, ${lng.toFixed(6)}`,
-            lat,
-            lng,
-          };
-
-          setCurrentLocation(fallbackLocation);
-          setPickup(fallbackLocation);
-
-          clearCalculatedRoute();
-
-          setLocationMessage(
-            "Your current coordinates have been selected as the pickup."
-          );
-        } finally {
-          setLocating(false);
-        }
-      },
-      (locationError) => {
-        console.error(
-          "Browser location error:",
-          locationError
-        );
-
+        setCurrentLocation(location);
+        setPickup(location);
+        clearRoute();
+        setMessage("Current location selected as pickup.");
         setLocating(false);
-
-        if (
-          locationError.code ===
-          locationError.PERMISSION_DENIED
-        ) {
-          setError(
-            "Location permission was denied. You can search for your pickup manually."
-          );
-
-          return;
-        }
-
-        if (
-          locationError.code ===
-          locationError.POSITION_UNAVAILABLE
-        ) {
-          setError(
-            "Your current location is unavailable. Enter the pickup manually."
-          );
-
-          return;
-        }
-
-        if (
-          locationError.code ===
-          locationError.TIMEOUT
-        ) {
-          setError(
-            "Location detection took too long. Please try again."
-          );
-
-          return;
-        }
-
+      },
+      () => {
         setError(
-          "Your current location could not be detected."
+          "Location could not be detected. Enter it manually."
         );
+        setLocating(false);
       },
       {
         enableHighAccuracy: true,
         timeout: 12000,
-        maximumAge: 30000,
       }
     );
   };
 
-  const calculateSuggestedFare = (
-    distance,
-    durationMinutes
-  ) => {
-    const startingFare = 80;
-    const distanceCharge = distance * 35;
-    const timeCharge = durationMinutes * 3;
-
-    const calculatedFare =
-      startingFare +
-      distanceCharge +
-      timeCharge;
-
-    return (
-      Math.round(calculatedFare / 5) * 5
-    );
-  };
+  useEffect(() => {
+    getCurrentLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const calculateRoute = async () => {
     setError("");
-    setLocationMessage("");
+    setMessage("");
 
-    if (!pickup) {
-      setError(
-        "Select your pickup location first."
-      );
+    if (!pickup || !destination) {
+      setError("Select pickup and destination.");
       return;
     }
 
-    if (!destination) {
-      setError(
-        "Select your destination first."
-      );
-      return;
-    }
-
-    const pickupLat = Number(pickup.lat);
-    const pickupLng = Number(pickup.lng);
-
-    const destinationLat = Number(
-      destination.lat
+    const passengerId = Number(
+      sessionStorage.getItem("passengerId")
     );
 
-    const destinationLng = Number(
-      destination.lng
-    );
-
-    if (
-      !Number.isFinite(pickupLat) ||
-      !Number.isFinite(pickupLng) ||
-      !Number.isFinite(destinationLat) ||
-      !Number.isFinite(destinationLng)
-    ) {
-      setError(
-        "The selected location coordinates are invalid."
-      );
+    if (!passengerId) {
+      setError("Passenger login information was not found.");
       return;
     }
 
-    setCalculatingRoute(true);
-    clearCalculatedRoute();
+    setCalculating(true);
+    clearRoute();
 
     try {
       const coordinates =
-        `${pickupLng},${pickupLat};` +
-        `${destinationLng},${destinationLat}`;
+        `${pickup.lng},${pickup.lat};` +
+        `${destination.lng},${destination.lat}`;
 
-      const parameters = new URLSearchParams({
-        overview: "full",
-        geometries: "geojson",
-        steps: "false",
-      });
-
-      const response = await fetch(
-        `${OSRM_ROUTE_URL}/${coordinates}?${parameters.toString()}`
+      const routeResponse = await fetch(
+        `${OSRM_URL}/${coordinates}` +
+          "?overview=full&geometries=geojson"
       );
 
-      if (!response.ok) {
-        throw new Error(
-          "The route could not be calculated."
-        );
+      if (!routeResponse.ok) {
+        throw new Error("Route could not be calculated.");
       }
 
-      const data = await response.json();
+      const routeData = await routeResponse.json();
+      const routeResult = routeData.routes?.[0];
 
-      const route = data.routes?.[0];
-
-      if (
-        !route ||
-        !route.geometry ||
-        !Array.isArray(
-          route.geometry.coordinates
-        )
-      ) {
-        throw new Error(
-          "No driving route was found between these locations."
-        );
+      if (!routeResult) {
+        throw new Error("No route was found.");
       }
 
-      /*
-        OSRM gives each coordinate as:
-        [longitude, latitude]
-
-        Leaflet requires:
-        [latitude, longitude]
-      */
-      const formattedCoordinates =
-        route.geometry.coordinates.map(
-          ([lng, lat]) => [
-            Number(lat),
-            Number(lng),
-          ]
+      const formattedRoute =
+        routeResult.geometry.coordinates.map(
+          ([lng, lat]) => [Number(lat), Number(lng)]
         );
 
-      const calculatedDistanceKm =
-        Number(route.distance) / 1000;
+      const estimateResponse = await fetch(
+        "http://localhost:8080/rides/estimate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            passengerId,
 
-      const calculatedMinutes =
-        Number(route.duration) / 60;
+            pickupName:
+              pickup.address ||
+              pickup.subtitle ||
+              pickup.title,
+            pickupLat: Number(pickup.lat),
+            pickupLng: Number(pickup.lng),
 
-      const calculatedFare =
-        calculateSuggestedFare(
-          calculatedDistanceKm,
-          calculatedMinutes
-        );
-
-      setRouteCoordinates(
-        formattedCoordinates
+            dropoffName:
+              destination.address ||
+              destination.subtitle ||
+              destination.title,
+            dropoffLat: Number(destination.lat),
+            dropoffLng: Number(destination.lng),
+          }),
+        }
       );
 
-      setDistanceKm(calculatedDistanceKm);
+      if (!estimateResponse.ok) {
+        throw new Error("Fare estimate failed.");
+      }
 
-      setEstimatedMinutes(
-        calculatedMinutes
-      );
+      const estimate = await estimateResponse.json();
 
-      setBaseFare(calculatedFare);
+      const distance = Number(estimate.distanceKm);
+      const minutes = Number(routeResult.duration) / 60;
+      const fare = Number(estimate.estimatedFare);
 
       const rideDraft = {
         pickup,
         destination,
-        routeCoordinates:
-          formattedCoordinates,
-        distanceKm:
-          calculatedDistanceKm,
-        estimatedMinutes:
-          calculatedMinutes,
-        baseFare: calculatedFare,
-        selectedFare: calculatedFare,
+        routeCoordinates: formattedRoute,
+        estimatedMinutes: minutes,
+
+        pickupName:
+          pickup.address ||
+          pickup.subtitle ||
+          pickup.title,
+        pickupLat: Number(pickup.lat),
+        pickupLng: Number(pickup.lng),
+
+        dropoffName:
+          destination.address ||
+          destination.subtitle ||
+          destination.title,
+        dropoffLat: Number(destination.lat),
+        dropoffLng: Number(destination.lng),
+
+        distanceKm: distance,
+        estimatedFare: fare,
+        minimumFare: Number(estimate.minimumFare),
+        maximumFare: Number(estimate.maximumFare),
       };
+
+      setRoute(formattedRoute);
+      setDistanceKm(distance);
+      setEstimatedMinutes(minutes);
+      setEstimatedFare(fare);
 
       sessionStorage.setItem(
         "passengerRideDraft",
         JSON.stringify(rideDraft)
       );
-    } catch (routeError) {
-      console.error(
-        "Route calculation error:",
-        routeError
-      );
-
-      setError(
-        routeError.message ||
-          "The route could not be calculated."
-      );
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Route calculation failed.");
     } finally {
-      setCalculatingRoute(false);
+      setCalculating(false);
     }
   };
 
   const handleChooseFare = () => {
-    setError("");
-
-    if (!pickup || !destination) {
-      setError(
-        "Select both pickup and destination."
-      );
+    if (!sessionStorage.getItem("passengerRideDraft")) {
+      setError("Calculate the route first.");
       return;
     }
-
-    if (
-      routeCoordinates.length < 2 ||
-      !distanceKm ||
-      !estimatedMinutes ||
-      !baseFare
-    ) {
-      setError(
-        "Calculate the route before choosing your fare."
-      );
-      return;
-    }
-
-    const rideDraft = {
-      pickup,
-      destination,
-      routeCoordinates,
-      distanceKm,
-      estimatedMinutes,
-      baseFare,
-      selectedFare: baseFare,
-    };
-
-    sessionStorage.setItem(
-      "passengerRideDraft",
-      JSON.stringify(rideDraft)
-    );
 
     navigate("/passenger-fare");
   };
@@ -621,10 +347,7 @@ function PassengerDashboard() {
       <main className="passenger-dashboard-content">
         <section className="passenger-dashboard-welcome">
           <p>Ready for your next journey?</p>
-
-          <h1>
-            Hello, {passengerName}
-          </h1>
+          <h1>Hello, {passengerName}</h1>
         </section>
 
         <section className="passenger-booking-layout">
@@ -651,15 +374,12 @@ function PassengerDashboard() {
               <div className="passenger-location-fields">
                 <LocationAutocomplete
                   label="Pickup location"
-                  placeholder="Enter your pickup location"
+                  placeholder="Enter pickup location"
                   value={pickup}
-                  nearbyLocation={
-                    currentLocation
-                  }
+                  nearbyLocation={currentLocation}
                   onSelect={(location) => {
                     setPickup(location);
-                    clearCalculatedRoute();
-                    setLocationMessage("");
+                    clearRoute();
                     setError("");
                   }}
                 />
@@ -669,21 +389,19 @@ function PassengerDashboard() {
                   placeholder="Where are you going?"
                   value={destination}
                   nearbyLocation={
-                    pickup ||
-                    currentLocation
+                    pickup || currentLocation
                   }
                   onSelect={(location) => {
                     setDestination(location);
-                    clearCalculatedRoute();
-                    setLocationMessage("");
+                    clearRoute();
                     setError("");
                   }}
                 />
               </div>
 
-              {locationMessage && (
+              {message && (
                 <p className="passenger-location-message">
-                  {locationMessage}
+                  {message}
                 </p>
               )}
 
@@ -698,45 +416,35 @@ function PassengerDashboard() {
                 className="calculate-route-button"
                 onClick={calculateRoute}
                 disabled={
-                  calculatingRoute ||
+                  calculating ||
                   !pickup ||
                   !destination
                 }
               >
-                {calculatingRoute
-                  ? "Calculating Route..."
+                {calculating
+                  ? "Calculating..."
                   : "Show Route"}
               </button>
             </section>
 
             {distanceKm &&
               estimatedMinutes &&
-              baseFare && (
+              estimatedFare && (
                 <section className="passenger-route-summary">
                   <h2>Route Summary</h2>
 
                   <div className="passenger-summary-grid">
                     <div>
                       <span>Distance</span>
-
                       <strong>
-                        {distanceKm.toFixed(
-                          1
-                        )}{" "}
-                        km
+                        {distanceKm.toFixed(1)} km
                       </strong>
                     </div>
 
                     <div>
-                      <span>
-                        Estimated time
-                      </span>
-
+                      <span>Estimated time</span>
                       <strong>
-                        {Math.round(
-                          estimatedMinutes
-                        )}{" "}
-                        min
+                        {Math.round(estimatedMinutes)} min
                       </strong>
                     </div>
                   </div>
@@ -744,9 +452,7 @@ function PassengerDashboard() {
                   <button
                     type="button"
                     className="choose-fare-button"
-                    onClick={
-                      handleChooseFare
-                    }
+                    onClick={handleChooseFare}
                   >
                     Choose Fare
                   </button>
@@ -768,41 +474,27 @@ function PassengerDashboard() {
 
               {pickup && (
                 <Marker
-                  position={[
-                    Number(pickup.lat),
-                    Number(pickup.lng),
-                  ]}
+                  position={[pickup.lat, pickup.lng]}
                 />
               )}
 
               {destination && (
                 <Marker
                   position={[
-                    Number(
-                      destination.lat
-                    ),
-                    Number(
-                      destination.lng
-                    ),
+                    destination.lat,
+                    destination.lng,
                   ]}
                 />
               )}
 
-              {routeCoordinates.length >
-                1 && (
-                <Polyline
-                  positions={
-                    routeCoordinates
-                  }
-                />
+              {route.length > 1 && (
+                <Polyline positions={route} />
               )}
 
               <MapController
                 pickup={pickup}
                 destination={destination}
-                routeCoordinates={
-                  routeCoordinates
-                }
+                route={route}
               />
             </MapContainer>
           </section>

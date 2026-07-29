@@ -1,204 +1,205 @@
-.page {
+.role-page {
   min-height: 100vh;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
+  padding: 42px 20px;
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  background: linear-gradient(
-    160deg,
-    #f2efe9 0%,
-    #ece7de 50%,
-    #efe9e2 100%
-  );
-
-  font-family: Poppins, sans-serif;
-  padding: 24px;
-}
-
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(110px);
-  opacity: 0.35;
-  pointer-events: none;
-}
-
-.glow-blue {
-  width: 380px;
-  height: 380px;
-  background: #bcd4e6;
-  top: 5%;
-  left: 6%;
-}
-
-.glow-pink {
-  width: 320px;
-  height: 320px;
-  background: #f0c4d6;
-  bottom: 5%;
-  right: 8%;
-}
-
-.velocity-title {
-  position: relative;
-  z-index: 1;
-
-  display: flex;
-  align-items: center;
-
-  margin-bottom: 35px;
-
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: -2px;
-}
-
-.velo {
-  background: linear-gradient(180deg, #3e6b96, #234a6b);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.wheel {
-  width: 34px;
-  height: 34px;
-  margin: 0 4px;
-
-  border-radius: 50%;
-
-  background: repeating-conic-gradient(
-    #111 0deg 10deg,
-    #1c1c1c 10deg 20deg
-  );
-
-  border: 3px solid #0a0a0a;
-
-  box-shadow:
-    0 0 0 2px #2c2c2c,
-    inset 0 0 8px rgba(0, 0, 0, 0.6);
-
-  display: flex;
   align-items: center;
   justify-content: center;
 
-  animation: spin 2.4s linear infinite;
-}
-
-.hub {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-
-  background: radial-gradient(
-    circle at 35% 30%,
-    #d9d9d9,
-    #8a8a8a 70%,
-    #5a5a5a
-  );
-}
-
-.city {
-  font-style: italic;
-
-  background: linear-gradient(180deg, #c2537d, #a13c62);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.card {
-  position: relative;
-  z-index: 1;
-
-  width: 420px;
-  max-width: 100%;
-
-  background: #f7f4ee;
-  border: 1px solid rgba(40, 30, 15, 0.06);
-
-  border-radius: 28px;
-  padding: 45px;
-
-  box-shadow: 0 20px 50px rgba(40, 30, 15, 0.08);
-}
-
-.title {
-  text-align: center;
-  margin-bottom: 12px;
+  background: #f3f0ea;
   color: #12233a;
 }
 
-.subtitle {
-  text-align: center;
-  color: #64748b;
-  margin-bottom: 35px;
+.role-logo {
+  margin-bottom: 42px;
 }
 
-.role-btn {
+.role-card {
+  width: min(420px, 92vw);
+  padding: 42px 38px;
+
+  background: #fffdf9;
+  border-radius: 27px;
+  box-shadow: 0 18px 45px rgba(18, 35, 58, 0.12);
+
+  text-align: center;
+}
+
+.role-card h1 {
+  margin: 0;
+
+  color: #12233a;
+  font-size: 31px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.role-subtitle {
+  margin: 14px 0 0;
+
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.role-options {
   width: 100%;
-  height: 64px;
-
-  border: none;
-  border-radius: 18px;
-
-  color: white;
-  font-size: 18px;
-  font-weight: 600;
+  margin-top: 30px;
 
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.role-option {
+  width: 100%;
+  min-height: 86px;
+  padding: 15px 17px;
+
+  display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
 
+  border-radius: 18px;
   cursor: pointer;
-  transition: 0.25s;
-  margin-bottom: 20px;
+
+  text-align: left;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
-.role-btn:hover {
-  transform: translateY(-1px);
+.driver-option {
+  border: 1.5px solid #b8cfe3;
+  background: #edf4fa;
 }
 
-.driver-btn {
+.passenger-option {
+  border: 1.5px solid #ddbdd0;
+  background: #faedf4;
+}
+
+.role-option:hover {
+  transform: translateY(-2px);
+}
+
+.driver-option:hover {
+  background: #e4eff8;
+  box-shadow: 0 9px 20px rgba(62, 107, 150, 0.15);
+}
+
+.passenger-option:hover {
+  background: #f6e3ed;
+  box-shadow: 0 9px 20px rgba(161, 60, 98, 0.15);
+}
+
+.role-option:active {
+  transform: scale(0.99);
+}
+
+.role-option:focus-visible {
+  outline: 3px solid rgba(62, 107, 150, 0.25);
+  outline-offset: 3px;
+}
+
+.role-icon {
+  width: 54px;
+  height: 54px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  color: white;
+}
+
+.driver-icon {
   background: #3e6b96;
-  box-shadow: 0 6px 18px rgba(62, 107, 150, 0.28);
+  box-shadow: 0 8px 18px rgba(62, 107, 150, 0.24);
 }
 
-.driver-btn:hover {
-  background: #4c7eab;
+.passenger-icon {
+  background: #a13c62;
+  box-shadow: 0 8px 18px rgba(161, 60, 98, 0.24);
 }
 
-.passenger-btn {
-  background: #c2537d;
-  box-shadow: 0 6px 18px rgba(194, 83, 125, 0.28);
+.role-content {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.passenger-btn:hover {
-  background: #d4668d;
+.role-content strong {
+  color: #12233a;
+  font-size: 17px;
+  font-weight: 800;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
+.role-content small {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.role-arrow {
+  flex-shrink: 0;
+}
+
+.driver-option .role-arrow {
+  color: #3e6b96;
+}
+
+.passenger-option .role-arrow {
+  color: #a13c62;
+}
+
+@media (max-width: 600px) {
+  .role-page {
+    padding: 28px 14px;
   }
 
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 520px) {
-  .velocity-title {
-    font-size: 34px;
+  .role-logo {
+    margin-bottom: 30px;
   }
 
-  .card {
-    padding: 32px 24px;
+  .role-card {
+    width: 100%;
+    padding: 35px 22px;
+    border-radius: 24px;
+  }
+
+  .role-card h1 {
+    font-size: 27px;
+  }
+
+  .role-subtitle {
+    font-size: 14px;
+  }
+
+  .role-option {
+    min-height: 82px;
+    padding: 14px;
+  }
+
+  .role-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .role-content strong {
+    font-size: 16px;
+  }
+
+  .role-content small {
+    font-size: 12px;
   }
 }

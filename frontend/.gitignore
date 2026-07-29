@@ -51,3 +51,32 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+# Frontend dependencies and builds
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Backend builds
+backend/target/
+backend/.quarkus/
+
+# Environment and secret files
+.env
+.env.*
+frontend/.env
+frontend/.env.*
+backend/.env
+backend/.env.*
+
+# IDE settings
+.idea/
+.vscode/
+*.iml
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

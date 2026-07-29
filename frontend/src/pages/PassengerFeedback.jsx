@@ -49,9 +49,9 @@ function PassengerFeedback() {
     const feedbackEntry = {
       id: Date.now(),
       passengerId:
-        localStorage.getItem("passengerId") || null,
+        sessionStorage.getItem("passengerId") || null,
       passengerName:
-        localStorage.getItem("passengerName") ||
+        sessionStorage.getItem("passengerName") ||
         "Passenger",
       category,
       rating,

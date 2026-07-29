@@ -1,0 +1,74 @@
+.feedback-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #f4f5f7;
+}
+
+.feedback-card {
+  width: 100%;
+  max-width: 460px;
+  padding: 30px;
+  border-radius: 22px;
+  background: white;
+  text-align: center;
+  box-shadow: 0 12px 35px #00000018;
+}
+
+.rating-row {
+  display: flex;
+  justify-content: center;
+  margin: 22px 0;
+}
+
+.rating-row button {
+  border: 0;
+  background: transparent;
+  color: #ccc;
+  font-size: 38px;
+  cursor: pointer;
+}
+
+.rating-row button.selected {
+  color: #f5a623;
+}
+
+.feedback-card textarea,
+.feedback-card select {
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 13px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.feedback-card textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.feedback-submit,
+.feedback-skip {
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.feedback-submit {
+  background: #112544;
+  color: white;
+}
+
+.feedback-skip {
+  margin-top: 10px;
+  background: #eee;
+}
+
+.feedback-error {
+  color: #c62828;
+}

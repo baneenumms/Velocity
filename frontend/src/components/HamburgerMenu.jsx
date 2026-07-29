@@ -1,73 +1,142 @@
-import { useNavigate } from "react-router-dom";
+import {
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  X,
+} from "lucide-react";
+
 import "./HamburgerMenu.css";
 
-function HamburgerMenu({ open, onClose }) {
+const DRIVER_SESSION_KEYS = [
+  "userId",
+  "driverId",
+  "driverName",
+  "vehicleId",
+  "rideId",
+  "rideStatus",
+  "activeDriverRide",
+];
 
-    const navigate = useNavigate();
+function HamburgerMenu({
+  open,
+  onClose,
+}) {
+  const navigate = useNavigate();
 
-    const goTo = (path) => {
-        onClose();
-        navigate(path);
-    };
+  const goTo = (path) => {
+    onClose();
+    navigate(path);
+  };
 
-    const handleLogout = () => {
-        localStorage.removeItem("driverId");
-        localStorage.removeItem("userId");
-        onClose();
-        navigate("/");
-    };
-
-    return (
-
-        <>
-            <div
-                className={`menu-overlay ${open ? "open" : ""}`}
-                onClick={onClose}
-            ></div>
-
-            <div className={`menu-panel ${open ? "open" : ""}`}>
-
-                <button
-                    className="menu-close"
-                    onClick={onClose}
-                    aria-label="Close menu"
-                >
-                    ✕
-                </button>
-
-                <nav className="menu-nav">
-
-                    <button onClick={() => goTo("/driver-dashboard")}>
-                        Home
-                    </button>
-
-                    <button onClick={() => goTo("/driver-profile")}>
-                        Profile
-                    </button>
-
-                    <button onClick={() => goTo("/driver-wallet")}>
-                        My Wallet
-                    </button>
-
-                    <button onClick={() => goTo("/driver-trips")}>
-                        Trip History
-                    </button>
-
-                    <button onClick={() => goTo("/driver-terms")}>
-                        Terms &amp; Conditions
-                    </button>
-
-                    <button className="menu-logout" onClick={handleLogout}>
-                        Logout
-                    </button>
-
-                </nav>
-
-            </div>
-        </>
-
+  const handleLogout = () => {
+    DRIVER_SESSION_KEYS.forEach(
+      (key) => {
+        sessionStorage.removeItem(
+          key
+        );
+      }
     );
 
+    onClose();
+
+    navigate("/", {
+      replace: true,
+    });
+  };
+
+  return (
+    <>
+      <div
+        className={`menu-overlay ${
+          open ? "open" : ""
+        }`}
+        onClick={onClose}
+      />
+
+      <div
+        className={`menu-panel ${
+          open ? "open" : ""
+        }`}
+      >
+        <button
+          type="button"
+          className="menu-close"
+          onClick={onClose}
+          aria-label="Close menu"
+        >
+          <X size={25} />
+        </button>
+
+        <nav className="menu-nav">
+          <button
+            type="button"
+            onClick={() =>
+              goTo(
+                "/driver-dashboard"
+              )
+            }
+          >
+            Home
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              goTo(
+                "/driver-profile"
+              )
+            }
+          >
+            Profile
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              goTo(
+                "/driver-wallet"
+              )
+            }
+          >
+            My Wallet
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              goTo(
+                "/driver-trips"
+              )
+            }
+          >
+            Trip History
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              goTo(
+                "/driver-terms"
+              )
+            }
+          >
+            Terms &amp; Conditions
+          </button>
+
+          <button
+            type="button"
+            className="menu-logout"
+            onClick={
+              handleLogout
+            }
+          >
+            Logout
+          </button>
+        </nav>
+      </div>
+    </>
+  );
 }
 
 export default HamburgerMenu;

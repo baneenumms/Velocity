@@ -1,0 +1,468 @@
+* {
+  box-sizing: border-box;
+}
+
+.passenger-active-page {
+  min-height: 100vh;
+  padding: 48px 20px;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(38, 99, 235, 0.08),
+      transparent 34%
+    ),
+    #f4f7fb;
+  color: #13213c;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.passenger-active-card {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 34px;
+  background: #ffffff;
+  border: 1px solid #e3e9f2;
+  border-radius: 28px;
+  box-shadow:
+    0 22px 60px rgba(15, 39, 71, 0.1);
+}
+
+.passenger-active-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 26px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid #e7ecf3;
+}
+
+.passenger-active-header p {
+  margin: 0 0 5px;
+  color: #69778d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.passenger-active-header h1 {
+  margin: 0;
+  color: #102544;
+  font-size: clamp(24px, 4vw, 32px);
+  line-height: 1.15;
+}
+
+.passenger-active-success-icon {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: #173761;
+  border-radius: 18px;
+  box-shadow:
+    0 10px 24px rgba(23, 55, 97, 0.22);
+}
+
+.passenger-active-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 104px;
+  padding: 9px 14px;
+  color: #173761;
+  background: #edf3fc;
+  border: 1px solid #d2dff1;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.status-completed {
+  color: #177245;
+  background: #eaf8f0;
+  border-color: #bfe6d0;
+}
+
+.status-cancelled {
+  color: #ad2d2d;
+  background: #fff0f0;
+  border-color: #f2c4c4;
+}
+
+.status-in_progress,
+.status-ontrip {
+  color: #875400;
+  background: #fff7e5;
+  border-color: #f0d79e;
+}
+
+.passenger-driver-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+  background: #f7f9fc;
+  border: 1px solid #e3e9f2;
+  border-radius: 20px;
+}
+
+.passenger-driver-avatar {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  color: #173761;
+  background: #e7eef8;
+  border-radius: 18px;
+}
+
+.passenger-driver-information {
+  min-width: 0;
+}
+
+.passenger-driver-information span {
+  display: block;
+  margin-bottom: 4px;
+  color: #718096;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.passenger-driver-information h2 {
+  margin: 0 0 5px;
+  color: #102544;
+  font-size: 23px;
+  line-height: 1.2;
+}
+
+.passenger-driver-information p {
+  margin: 0;
+  color: #68768a;
+  font-size: 14px;
+}
+
+.passenger-vehicle-card {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #dfe6f0;
+  border-radius: 20px;
+}
+
+.passenger-vehicle-card > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 5px;
+  min-width: 0;
+}
+
+.passenger-vehicle-card svg {
+  grid-row: 1 / 3;
+  color: #173761;
+}
+
+.passenger-vehicle-card span {
+  color: #738096;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.passenger-vehicle-card strong {
+  color: #162947;
+  font-size: 16px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.passenger-active-route {
+  position: relative;
+  padding: 24px;
+  margin-bottom: 18px;
+  background: #f8fafc;
+  border: 1px solid #e1e8f1;
+  border-radius: 20px;
+}
+
+.passenger-active-route-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.passenger-active-route-row div {
+  min-width: 0;
+}
+
+.passenger-active-route-row span:not(
+    .passenger-active-dot
+  ) {
+  display: block;
+  margin-bottom: 5px;
+  color: #748197;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.passenger-active-route-row strong {
+  display: block;
+  color: #152846;
+  font-size: 15px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.passenger-active-dot {
+  width: 14px;
+  height: 14px;
+  margin-top: 4px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px currentColor;
+}
+
+.passenger-active-dot.pickup {
+  color: #1f6fce;
+  background: #1f6fce;
+}
+
+.passenger-active-dot.destination {
+  color: #d14c4c;
+  background: #d14c4c;
+}
+
+.passenger-active-route-line {
+  width: 2px;
+  height: 28px;
+  margin: 4px 0 4px 6px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      #aeb9c8 0,
+      #aeb9c8 5px,
+      transparent 5px,
+      transparent 9px
+    );
+}
+
+.passenger-active-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.passenger-active-details > div {
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #dfe6f0;
+  border-radius: 18px;
+}
+
+.passenger-active-details span {
+  display: block;
+  margin-bottom: 7px;
+  color: #738096;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.passenger-active-details strong {
+  color: #102544;
+  font-size: 19px;
+}
+
+.passenger-active-details .payment-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.passenger-pin-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px;
+  margin-bottom: 22px;
+  color: #ffffff;
+  background:
+    linear-gradient(
+      135deg,
+      #102544,
+      #1d477a
+    );
+  border-radius: 20px;
+  box-shadow:
+    0 14px 30px rgba(16, 37, 68, 0.18);
+}
+
+.passenger-pin-card > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.passenger-pin-card span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.passenger-pin-card p {
+  max-width: 390px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.passenger-pin-card > strong {
+  flex: 0 0 auto;
+  padding: 12px 18px;
+  color: #102544;
+  background: #ffffff;
+  border-radius: 14px;
+  font-size: 27px;
+  letter-spacing: 0.14em;
+}
+
+.passenger-map-button,
+.passenger-active-primary,
+.passenger-cancel-ride-button {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 14px 20px;
+  border-radius: 15px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.passenger-map-button,
+.passenger-active-primary {
+  color: #ffffff;
+  background: #132f55;
+  border: 1px solid #132f55;
+  box-shadow:
+    0 10px 22px rgba(19, 47, 85, 0.16);
+}
+
+.passenger-map-button:hover,
+.passenger-active-primary:hover {
+  background: #0e2544;
+  transform: translateY(-1px);
+}
+
+.passenger-cancel-ride-button {
+  margin-top: 12px;
+  color: #b72f2f;
+  background: #ffffff;
+  border: 1px solid #e6bcbc;
+}
+
+.passenger-cancel-ride-button:hover {
+  background: #fff4f4;
+  transform: translateY(-1px);
+}
+
+.passenger-cancel-ride-button:disabled,
+.passenger-map-button:disabled,
+.passenger-active-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.passenger-active-error {
+  margin: 16px 0 0;
+  padding: 13px 15px;
+  color: #a82d2d;
+  background: #fff1f1;
+  border: 1px solid #f0caca;
+  border-radius: 13px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.passenger-active-loading-icon {
+  display: block;
+  margin: 0 auto 18px;
+  color: #173761;
+}
+
+.passenger-active-error-icon {
+  display: block;
+  margin: 0 auto 18px;
+  color: #bf3737;
+}
+
+.passenger-active-card > h1,
+.passenger-active-card > p {
+  text-align: center;
+}
+
+.passenger-active-card > p {
+  color: #6d798c;
+  line-height: 1.6;
+}
+
+@media (max-width: 680px) {
+  .passenger-active-page {
+    padding: 20px 12px;
+  }
+
+  .passenger-active-card {
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+
+  .passenger-active-header {
+    grid-template-columns: auto 1fr;
+  }
+
+  .passenger-active-status {
+    grid-column: 1 / -1;
+    justify-self: flex-start;
+  }
+
+  .passenger-vehicle-card,
+  .passenger-active-details {
+    grid-template-columns: 1fr;
+  }
+
+  .passenger-pin-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .passenger-pin-card > strong {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -1,428 +1,784 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  MapContainer,
-  Marker,
-  Polyline,
-  TileLayer,
-  useMap,
-} from "react-leaflet";
-import PassengerHamburgerMenu from "../components/PassengerHamburgerMenu";
-import "leaflet/dist/leaflet.css";
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
 import "./PassengerFare.css";
 
-function MapController({ pickup, destination }) {
-  const map = useMap();
+const BACKEND_URL =
+  "http://localhost:8080";
 
-  useEffect(() => {
-    if (!pickup || !destination) {
-      return;
-    }
+const MINIMUM_FARE_FACTOR = 0.9;
+const MAXIMUM_FARE_FACTOR = 2;
 
-    map.fitBounds(
-      [
-        [pickup.lat, pickup.lng],
-        [destination.lat, destination.lng],
-      ],
-      {
-        padding: [45, 45],
-      }
+const numberFrom = (...values) => {
+  const value = values.find(
+    (item) =>
+      item !== undefined &&
+      item !== null
+  );
+
+  return Number(value);
+};
+
+async function readResponse(response) {
+  const text = await response.text();
+
+  let data = null;
+
+  try {
+    data = text
+      ? JSON.parse(text)
+      : null;
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+        data?.details ||
+        text ||
+        `Request failed: HTTP ${response.status}`
     );
-  }, [map, pickup, destination]);
+  }
 
-  return null;
+  return data;
 }
 
 function PassengerFare() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [rideDraft, setRideDraft] = useState(null);
-  const [selectedFare, setSelectedFare] = useState(0);
-  const [error, setError] = useState("");
-  const [requesting, setRequesting] = useState(false);
+  const adjustingFare =
+    location.state?.adjustFare === true;
+
+  const adjustmentRequestId =
+    location.state?.requestId || "";
+
+  const [ride, setRide] =
+    useState(null);
+
+  const [fare, setFare] =
+    useState(0);
+
+  const [
+    paymentMethod,
+    setPaymentMethod,
+  ] = useState("CASH");
+
+  const [searching, setSearching] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
 
   useEffect(() => {
     try {
-      const storedDraft = sessionStorage.getItem(
-        "passengerRideDraft"
-      );
-
-      if (!storedDraft) {
-        setError(
-          "No ride information was found. Please select your route again."
+      const activeRequest =
+        sessionStorage.getItem(
+          "activeRideRequest"
         );
-        return;
+
+      const rideDraft =
+        sessionStorage.getItem(
+          "passengerRideDraft"
+        );
+
+      const savedText =
+        adjustingFare
+          ? activeRequest ||
+            rideDraft
+          : rideDraft ||
+            activeRequest;
+
+      const saved = savedText
+        ? JSON.parse(savedText)
+        : null;
+
+      if (!saved) {
+        throw new Error(
+          "Ride information was not found."
+        );
       }
 
-      const parsedDraft = JSON.parse(storedDraft);
-
-      if (!parsedDraft.pickup || !parsedDraft.destination) {
-        setError(
-          "Pickup or destination is missing. Please select your route again."
+      const estimatedFare =
+        numberFrom(
+          saved.estimatedFare,
+          saved.baseFare,
+          saved.fare
         );
-        return;
-      }
 
-      const originalFare = Number(
-        parsedDraft.baseFare ||
-          parsedDraft.suggestedFare ||
+      const minimumFare =
+        estimatedFare *
+        MINIMUM_FARE_FACTOR;
+
+      const maximumFare =
+        estimatedFare *
+        MAXIMUM_FARE_FACTOR;
+
+      const currentFare =
+        numberFrom(
+          saved.passengerFare,
+          saved.requestedFare,
+          estimatedFare
+        );
+
+      const normalized = {
+        requestId:
+          saved.requestId ||
+          adjustmentRequestId,
+
+        pickupName:
+          saved.pickupName ||
+          saved.pickupAddress ||
+          "Selected pickup",
+
+        pickupLat: numberFrom(
+          saved.pickupLat,
+          saved.pickupLatitude,
+          saved.pickup?.lat
+        ),
+
+        pickupLng: numberFrom(
+          saved.pickupLng,
+          saved.pickupLongitude,
+          saved.pickup?.lng,
+          saved.pickup?.lon
+        ),
+
+        dropoffName:
+          saved.dropoffName ||
+          saved.destinationName ||
+          saved.dropoffAddress ||
+          "Selected destination",
+
+        dropoffLat: numberFrom(
+          saved.dropoffLat,
+          saved.dropoffLatitude,
+          saved.destinationLat,
+          saved.dropoff?.lat
+        ),
+
+        dropoffLng: numberFrom(
+          saved.dropoffLng,
+          saved.dropoffLongitude,
+          saved.destinationLng,
+          saved.dropoff?.lng,
+          saved.dropoff?.lon
+        ),
+
+        distanceKm: numberFrom(
+          saved.distanceKm,
+          saved.distance,
           0
-      );
+        ),
 
-      if (!Number.isFinite(originalFare) || originalFare <= 0) {
-        setError(
-          "The suggested fare could not be calculated. Please calculate your route again."
+        estimatedFare,
+        minimumFare,
+        maximumFare,
+      };
+
+      const requiredNumbers = [
+        normalized.pickupLat,
+        normalized.pickupLng,
+        normalized.dropoffLat,
+        normalized.dropoffLng,
+        normalized.estimatedFare,
+      ];
+
+      if (
+        requiredNumbers.some(
+          (value) =>
+            !Number.isFinite(value)
+        ) ||
+        normalized.estimatedFare <= 0
+      ) {
+        throw new Error(
+          "Route or fare information is incomplete."
         );
-        return;
       }
 
-      const roundedFare = Math.round(originalFare / 5) * 5;
+      const validCurrentFare =
+        Number.isFinite(
+          currentFare
+        )
+          ? currentFare
+          : estimatedFare;
 
-      setRideDraft({
-        ...parsedDraft,
-        baseFare: roundedFare,
-      });
+      const safeCurrentFare =
+        Math.min(
+          maximumFare,
+          Math.max(
+            minimumFare,
+            validCurrentFare
+          )
+        );
 
-      setSelectedFare(
-        Number(parsedDraft.selectedFare) > 0
-          ? Number(parsedDraft.selectedFare)
-          : roundedFare
+      const savedPaymentMethod =
+        saved.paymentMethod ||
+        sessionStorage.getItem(
+          "paymentMethod"
+        );
+
+      setRide(normalized);
+      setFare(safeCurrentFare);
+
+      setPaymentMethod(
+        savedPaymentMethod ===
+          "DIGITAL_TRANSFER"
+          ? "DIGITAL_TRANSFER"
+          : "CASH"
       );
-    } catch (storageError) {
-      console.error(
-        "Could not read passenger ride draft:",
-        storageError
-      );
-
+    } catch (loadError) {
       setError(
-        "The ride information could not be opened. Please select your route again."
+        loadError.message ||
+          "Please select your route again."
       );
     }
-  }, []);
+  }, [
+    adjustingFare,
+    adjustmentRequestId,
+  ]);
 
-  const suggestedFare = Number(rideDraft?.baseFare || 0);
-
-  const minimumFare = useMemo(() => {
-    return suggestedFare * 0.9;
-  }, [suggestedFare]);
-
-  const maximumFare = useMemo(() => {
-    return suggestedFare * 1.1;
-  }, [suggestedFare]);
-
-  const canDecrease =
-    selectedFare - 5 >= minimumFare;
-
-  const canIncrease =
-    selectedFare + 5 <= maximumFare;
-
-  const decreaseFare = () => {
-    if (!canDecrease) {
+  const changeFare = (amount) => {
+    if (!ride) {
       return;
     }
 
-    setSelectedFare((currentFare) => currentFare - 5);
+    setFare((current) =>
+      Math.min(
+        ride.maximumFare,
+        Math.max(
+          ride.minimumFare,
+          Number(current) +
+            amount
+        )
+      )
+    );
   };
 
-  const increaseFare = () => {
-    if (!canIncrease) {
-      return;
-    }
-
-    setSelectedFare((currentFare) => currentFare + 5);
-  };
-
-  const handleRequestRide = () => {
-    if (!rideDraft) {
-      setError(
-        "Ride information is missing. Please return to the dashboard."
+  const handleBack = () => {
+    if (adjustingFare) {
+      navigate(
+        "/searching-ride"
       );
       return;
     }
 
-    setRequesting(true);
+    navigate(
+      "/passenger-dashboard"
+    );
+  };
+
+  const handleSearch = async () => {
     setError("");
 
-    const requestedRide = {
-      ...rideDraft,
-      selectedFare,
-      passengerId:
-        localStorage.getItem("passengerId") || null,
-      passengerName:
-        localStorage.getItem("passengerName") ||
-        "Passenger",
-      status: "Requested",
-      requestedAt: new Date().toISOString(),
-    };
-
-    sessionStorage.setItem(
-      "passengerRideDraft",
-      JSON.stringify(requestedRide)
+    const passengerId = Number(
+      sessionStorage.getItem(
+        "passengerId"
+      )
     );
 
-    /*
-      Later, this is where we will call the Quarkus backend:
-
-      POST http://localhost:8080/rides
-
-      For now, the requested ride remains stored in sessionStorage.
-    */
-
-    setTimeout(() => {
-      setRequesting(false);
-
-      alert(
-        `Ride requested for PKR ${selectedFare}.`
+    if (!ride) {
+      setError(
+        "Ride information was not found."
       );
-    }, 400);
+      return;
+    }
+
+    if (
+      !Number.isInteger(
+        passengerId
+      ) ||
+      passengerId <= 0
+    ) {
+      setError(
+        "Please log in again."
+      );
+      return;
+    }
+
+    try {
+      setSearching(true);
+
+      let response;
+
+      if (adjustingFare) {
+        const requestId =
+          adjustmentRequestId ||
+          ride.requestId ||
+          sessionStorage.getItem(
+            "rideRequestId"
+          );
+
+        if (!requestId) {
+          throw new Error(
+            "Ride request ID was not found."
+          );
+        }
+
+        response = await fetch(
+          `${BACKEND_URL}/ride-requests/${requestId}/fare`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              passengerId,
+              passengerFare:
+                Number(fare),
+            }),
+          }
+        );
+      } else {
+        const body = {
+          passengerId,
+
+          pickupLatitude:
+            ride.pickupLat,
+
+          pickupLongitude:
+            ride.pickupLng,
+
+          pickupAddress:
+            ride.pickupName,
+
+          dropoffLatitude:
+            ride.dropoffLat,
+
+          dropoffLongitude:
+            ride.dropoffLng,
+
+          dropoffAddress:
+            ride.dropoffName,
+
+          distanceKm:
+            ride.distanceKm,
+
+          estimatedFare:
+            ride.estimatedFare,
+
+          estimatedDurationMinutes:
+            Math.max(
+              1,
+              Math.round(
+                Number(
+                  ride.estimatedMinutes
+                ) || 1
+              )
+            ),
+
+          requestedFare:
+            Number(fare),
+
+          passengerFare:
+            Number(fare),
+
+          paymentMethod,
+        };
+
+        response = await fetch(
+          `${BACKEND_URL}/ride-requests`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify(
+              body
+            ),
+          }
+        );
+      }
+
+      const data =
+        await readResponse(
+          response
+        );
+
+      if (!data?.requestId) {
+        throw new Error(
+          "Ride request ID was not returned."
+        );
+      }
+
+      const finalEstimatedFare =
+        Number(
+          data.estimatedFare ??
+            ride.estimatedFare
+        );
+
+      const savedRide = {
+        ...ride,
+        ...data,
+
+        pickupName:
+          data.pickupAddress ||
+          ride.pickupName,
+
+        pickupLat:
+          data.pickupLatitude ??
+          ride.pickupLat,
+
+        pickupLng:
+          data.pickupLongitude ??
+          ride.pickupLng,
+
+        dropoffName:
+          data.dropoffAddress ||
+          ride.dropoffName,
+
+        dropoffLat:
+          data.dropoffLatitude ??
+          ride.dropoffLat,
+
+        dropoffLng:
+          data.dropoffLongitude ??
+          ride.dropoffLng,
+
+        estimatedFare:
+          finalEstimatedFare,
+
+        passengerFare:
+          Number(fare),
+
+        requestedFare:
+          Number(fare),
+
+        paymentMethod:
+          data.paymentMethod ||
+          paymentMethod,
+
+        minimumFare:
+          finalEstimatedFare *
+          MINIMUM_FARE_FACTOR,
+
+        maximumFare:
+          finalEstimatedFare *
+          MAXIMUM_FARE_FACTOR,
+      };
+
+      sessionStorage.setItem(
+        "activeRideRequest",
+        JSON.stringify(
+          savedRide
+        )
+      );
+
+      sessionStorage.setItem(
+        "passengerRideDraft",
+        JSON.stringify(
+          savedRide
+        )
+      );
+
+      sessionStorage.setItem(
+        "rideRequestId",
+        String(
+          data.requestId
+        )
+      );
+
+      sessionStorage.setItem(
+        "rideStatus",
+        data.status ||
+          "SEARCHING"
+      );
+
+      sessionStorage.setItem(
+        "paymentMethod",
+        data.paymentMethod ||
+          paymentMethod
+      );
+
+      if (!adjustingFare) {
+        sessionStorage.setItem(
+          "searchStartedAt",
+          data.createdAt ||
+            new Date()
+              .toISOString()
+        );
+
+        sessionStorage.removeItem(
+          "rideId"
+        );
+      }
+
+      navigate(
+        "/searching-ride",
+        {
+          replace: true,
+        }
+      );
+    } catch (requestError) {
+      setError(
+        requestError.message ||
+          (adjustingFare
+            ? "Unable to update your fare."
+            : "Unable to create your ride request.")
+      );
+    } finally {
+      setSearching(false);
+    }
   };
 
-  if (error && !rideDraft) {
+  const paymentLabel =
+    paymentMethod ===
+    "DIGITAL_TRANSFER"
+      ? "DIGITAL TRANSFER"
+      : "CASH";
+
+  if (!ride) {
     return (
       <div className="passenger-fare-page">
-        <header className="passenger-fare-header">
-          <h2>VELOCITY</h2>
-          <PassengerHamburgerMenu />
-        </header>
+        <div className="fare-card">
+          <h1>
+            {adjustingFare
+              ? "Increase Your Fare"
+              : "Choose Your Fare"}
+          </h1>
 
-        <main className="passenger-fare-content">
-          <section className="fare-missing-card">
-            <h1>Ride information unavailable</h1>
+          <p className="fare-error">
+            {error || "Loading..."}
+          </p>
 
-            <p>{error}</p>
-
-            <button
-              type="button"
-              onClick={() =>
-                navigate("/passenger-dashboard")
-              }
-            >
-              Return to Dashboard
-            </button>
-          </section>
-        </main>
+          <button
+            className="fare-back-button"
+            onClick={handleBack}
+          >
+            {adjustingFare
+              ? "Back to Search"
+              : "Back to Dashboard"}
+          </button>
+        </div>
       </div>
     );
   }
-
-  if (!rideDraft) {
-    return (
-      <div className="passenger-fare-loading">
-        Loading ride information...
-      </div>
-    );
-  }
-
-  const pickup = rideDraft.pickup;
-  const destination = rideDraft.destination;
-
-  const routeCoordinates = Array.isArray(
-    rideDraft.routeCoordinates
-  )
-    ? rideDraft.routeCoordinates
-        .map((coordinate) => {
-          if (Array.isArray(coordinate)) {
-            return [
-              Number(coordinate[0]),
-              Number(coordinate[1]),
-            ];
-          }
-
-          if (
-            coordinate &&
-            coordinate.lat !== undefined &&
-            coordinate.lng !== undefined
-          ) {
-            return [
-              Number(coordinate.lat),
-              Number(coordinate.lng),
-            ];
-          }
-
-          return null;
-        })
-        .filter(Boolean)
-    : [];
-
-  const mapCenter = [
-    Number(pickup.lat),
-    Number(pickup.lng),
-  ];
 
   return (
     <div className="passenger-fare-page">
-      <header className="passenger-fare-header">
-        <h2>VELOCITY</h2>
-        <PassengerHamburgerMenu />
-      </header>
-
-      <main className="passenger-fare-content">
+      <div className="fare-card">
         <button
           type="button"
-          className="passenger-fare-back"
-          onClick={() =>
-            navigate("/passenger-dashboard")
+          className="fare-back-arrow"
+          onClick={handleBack}
+          disabled={searching}
+          aria-label={
+            adjustingFare
+              ? "Back to ride search"
+              : "Back to passenger dashboard"
           }
         >
-          ← Back to route
+          ←
         </button>
 
-        <section className="passenger-fare-title">
-          <p>Confirm your ride</p>
-          <h1>Choose Your Fare</h1>
-        </section>
+        <h1>
+          {adjustingFare
+            ? "Increase Your Fare"
+            : "Choose Your Fare"}
+        </h1>
 
-        <section className="passenger-fare-layout">
-          <div className="fare-route-column">
-            <section className="fare-route-card">
-              <div className="fare-location-row">
-                <span className="fare-pickup-dot" />
+        {adjustingFare && (
+          <p className="fare-adjustment-message">
+            Higher fares may improve your
+            chance of receiving a driver
+            offer.
+          </p>
+        )}
 
-                <div>
-                  <small>Pickup</small>
-                  <p>{pickup.address}</p>
-                </div>
-              </div>
+        <div className="fare-route-section">
+          <div className="fare-location">
+            <span className="fare-location-dot pickup-dot" />
 
-              <div className="fare-location-line" />
+            <div>
+              <span className="fare-location-label">
+                Pickup
+              </span>
 
-              <div className="fare-location-row">
-                <span className="fare-destination-dot" />
-
-                <div>
-                  <small>Destination</small>
-                  <p>{destination.address}</p>
-                </div>
-              </div>
-            </section>
-
-            <section className="fare-map-card">
-              <MapContainer
-                center={mapCenter}
-                zoom={13}
-                scrollWheelZoom
-                className="passenger-fare-map"
-              >
-                <TileLayer
-                  attribution='&copy; OpenStreetMap contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-
-                <Marker
-                  position={[
-                    Number(pickup.lat),
-                    Number(pickup.lng),
-                  ]}
-                />
-
-                <Marker
-                  position={[
-                    Number(destination.lat),
-                    Number(destination.lng),
-                  ]}
-                />
-
-                {routeCoordinates.length > 1 && (
-                  <Polyline
-                    positions={routeCoordinates}
-                  />
-                )}
-
-                <MapController
-                  pickup={pickup}
-                  destination={destination}
-                />
-              </MapContainer>
-            </section>
+              <p>
+                {ride.pickupName}
+              </p>
+            </div>
           </div>
 
-          <div className="fare-selection-column">
-            <section className="fare-summary-card">
-              <h2>Route Summary</h2>
+          <div className="fare-location">
+            <span className="fare-location-dot destination-dot" />
 
-              <div className="fare-summary-grid">
-                <div>
-                  <span>Distance</span>
-                  <strong>
-                    {rideDraft.distanceKm
-                      ? `${Number(
-                          rideDraft.distanceKm
-                        ).toFixed(1)} km`
-                      : "Unavailable"}
-                  </strong>
-                </div>
+            <div>
+              <span className="fare-location-label">
+                Destination
+              </span>
 
-                <div>
-                  <span>Estimated time</span>
-                  <strong>
-                    {rideDraft.estimatedMinutes
-                      ? `${Math.round(
-                          Number(
-                            rideDraft.estimatedMinutes
-                          )
-                        )} min`
-                      : "Unavailable"}
-                  </strong>
-                </div>
-              </div>
-            </section>
-
-            <section className="fare-selector-card">
-              <p className="fare-selector-label">
-                Your fare offer
+              <p>
+                {ride.dropoffName}
               </p>
+            </div>
+          </div>
+        </div>
 
-              <div className="fare-selector">
-                <button
-                  type="button"
-                  className="fare-adjust-button"
-                  onClick={decreaseFare}
-                  disabled={!canDecrease}
-                  aria-label="Decrease fare by five rupees"
-                >
-                  −
-                </button>
+        <p className="fare-distance">
+          Distance:{" "}
+          {ride.distanceKm.toFixed(
+            2
+          )}{" "}
+          km
+        </p>
 
-                <div className="selected-fare">
-                  <span>PKR</span>
-                  <strong>{selectedFare}</strong>
-                </div>
+        <div className="fare-selector">
+          <button
+            type="button"
+            onClick={() =>
+              changeFare(-5)
+            }
+            disabled={
+              searching ||
+              fare <=
+                ride.minimumFare
+            }
+          >
+            −
+          </button>
 
-                <button
-                  type="button"
-                  className="fare-adjust-button"
-                  onClick={increaseFare}
-                  disabled={!canIncrease}
-                  aria-label="Increase fare by five rupees"
-                >
-                  +
-                </button>
-              </div>
+          <div className="selected-fare">
+            <span>PKR</span>
 
-              <p className="fare-selector-note">
-                Adjust your offer using the buttons.
-              </p>
-            </section>
+            <strong>
+              {fare.toFixed(0)}
+            </strong>
+          </div>
 
-            {error && (
-              <p className="passenger-fare-error">
-                {error}
-              </p>
-            )}
+          <button
+            type="button"
+            onClick={() =>
+              changeFare(5)
+            }
+            disabled={
+              searching ||
+              fare >=
+                ride.maximumFare
+            }
+          >
+            +
+          </button>
+        </div>
+
+        <p className="fare-range">
+          Allowed: PKR{" "}
+          {ride.minimumFare.toFixed(
+            0
+          )}
+          {" – "}
+          PKR{" "}
+          {ride.maximumFare.toFixed(
+            0
+          )}
+        </p>
+
+        <p className="fare-limit-note">
+          You can reduce the estimated fare
+          by up to 10% or increase it up to
+          200%.
+        </p>
+
+        <section className="payment-section">
+          <h2>
+            Preferred Payment Method
+          </h2>
+
+          <p className="payment-description">
+            {adjustingFare
+              ? "Your existing payment preference will remain unchanged."
+              : "This only tells the driver how you plan to pay. Velocity does not process the ride payment."}
+          </p>
+
+          <div className="payment-options">
+            <button
+              type="button"
+              className={
+                paymentMethod ===
+                "CASH"
+                  ? "selected"
+                  : ""
+              }
+              onClick={() =>
+                setPaymentMethod(
+                  "CASH"
+                )
+              }
+              disabled={
+                searching ||
+                adjustingFare
+              }
+            >
+              <strong>
+                Cash
+              </strong>
+
+              <span>
+                Pay the driver directly
+                in cash
+              </span>
+            </button>
 
             <button
               type="button"
-              className="request-ride-button"
-              onClick={handleRequestRide}
-              disabled={requesting}
+              className={
+                paymentMethod ===
+                "DIGITAL_TRANSFER"
+                  ? "selected"
+                  : ""
+              }
+              onClick={() =>
+                setPaymentMethod(
+                  "DIGITAL_TRANSFER"
+                )
+              }
+              disabled={
+                searching ||
+                adjustingFare
+              }
             >
-              {requesting
-                ? "Requesting Ride..."
-                : `Request Ride · PKR ${selectedFare}`}
+              <strong>
+                Digital Transfer
+              </strong>
+
+              <span>
+                Transfer payment directly
+                to the driver
+              </span>
             </button>
           </div>
         </section>
-      </main>
+
+        {error && (
+          <p className="fare-error">
+            {error}
+          </p>
+        )}
+
+        <button
+          className="search-ride-button"
+          onClick={handleSearch}
+          disabled={searching}
+        >
+          {searching
+            ? adjustingFare
+              ? "Updating Fare..."
+              : "Searching..."
+            : adjustingFare
+              ? `Update Fare · ${paymentLabel}`
+              : `Search Ride · ${paymentLabel}`}
+        </button>
+      </div>
     </div>
   );
 }
