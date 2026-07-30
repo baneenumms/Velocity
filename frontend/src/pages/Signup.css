@@ -2,31 +2,49 @@
   min-height: 100vh;
   width: 100%;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 
-  background: linear-gradient(160deg, #f2efe9 0%, #ece7de 50%, #efe9e2 100%);
+  background:
+    linear-gradient(
+      160deg,
+      #f2efe9 0%,
+      #ece7de 50%,
+      #efe9e2 100%
+    );
+
   font-family: Poppins, sans-serif;
   padding: 24px;
+  box-sizing: border-box;
 }
 
 .velocity-title {
   position: relative;
   z-index: 1;
+
   display: flex;
   align-items: center;
+
   margin-bottom: 35px;
+
   font-size: 42px;
   font-weight: 800;
   letter-spacing: -2px;
 }
 
 .velo {
-  background: linear-gradient(180deg, #3e6b96, #234a6b);
+  background:
+    linear-gradient(
+      180deg,
+      #3e6b96,
+      #234a6b
+    );
+
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -37,12 +55,24 @@
   height: 34px;
   margin: 0 4px;
   border-radius: 50%;
-  background: repeating-conic-gradient(#111 0deg 10deg, #1c1c1c 10deg 20deg);
+
+  background:
+    repeating-conic-gradient(
+      #111 0deg 10deg,
+      #1c1c1c 10deg 20deg
+    );
+
   border: 3px solid #0a0a0a;
-  box-shadow: 0 0 0 2px #2c2c2c, inset 0 0 8px rgba(0, 0, 0, 0.6);
+
+  box-shadow:
+    0 0 0 2px #2c2c2c,
+    inset 0 0 8px
+      rgba(0, 0, 0, 0.6);
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   animation: spin 2.4s linear infinite;
 }
 
@@ -50,12 +80,26 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #d9d9d9, #8a8a8a 70%, #5a5a5a);
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #d9d9d9,
+      #8a8a8a 70%,
+      #5a5a5a
+    );
 }
 
 .city {
   font-style: italic;
-  background: linear-gradient(180deg, #c2537d, #a13c62);
+
+  background:
+    linear-gradient(
+      180deg,
+      #c2537d,
+      #a13c62
+    );
+
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -64,15 +108,29 @@
 .card {
   position: relative;
   z-index: 1;
+
   width: 420px;
+  max-width: 100%;
+  box-sizing: border-box;
 
   background: #f7f4ee;
-  border: 1px solid rgba(40, 30, 15, 0.06);
+
+  border:
+    1px solid
+    rgba(40, 30, 15, 0.06);
 
   border-radius: 28px;
   padding: 45px;
-  box-shadow: 0 20px 50px rgba(40, 30, 15, 0.08);
+
+  box-shadow:
+    0 20px 50px
+    rgba(40, 30, 15, 0.08);
+
   text-align: center;
+}
+
+.signup-card {
+  padding: 36px 42px;
 }
 
 .icon-circle {
@@ -80,7 +138,6 @@
   height: 80px;
 
   background: #3e6b96;
-
   border-radius: 50%;
 
   margin: 0 auto 25px;
@@ -89,24 +146,26 @@
   justify-content: center;
   align-items: center;
 
-  box-shadow: 0 10px 25px rgba(62, 107, 150, 0.28);
+  box-shadow:
+    0 10px 25px
+    rgba(62, 107, 150, 0.28);
 }
 
 .title {
   text-align: center;
-  margin-bottom: 12px;
+  margin: 0 0 12px;
   color: #12233a;
 }
 
 .subtitle {
   text-align: center;
   color: #64748b;
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .signup-phone {
-  margin: 30px 0 20px;
-  padding: 16px;
+  margin: 25px 0 20px;
+  padding: 14px 16px;
 
   background: #eee8dd;
   border-radius: 16px;
@@ -117,21 +176,190 @@
 
 .signup-phone strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 5px;
+
   font-size: 18px;
   color: #12233a;
 }
 
-.coming-text {
-  font-size: 14px;
+.change-phone-button {
+  margin-top: 7px;
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
   color: #a13c62;
-  background: #fbe6ee;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.change-phone-button:hover {
+  text-decoration: underline;
+}
+
+.change-phone-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.signup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.signup-field > span {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.signup-field input {
+  width: 100%;
+  height: 48px;
+  box-sizing: border-box;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 13px;
+
+  background: #ffffff;
+  color: #12233a;
+
+  font: inherit;
+  font-size: 15px;
+
+  padding: 0 14px;
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.signup-field input:focus {
+  border-color: #3e6b96;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(62, 107, 150, 0.13);
+}
+
+.signup-field input:disabled {
+  background: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.signup-input-icon {
+  position: relative;
+}
+
+.signup-input-icon svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+
+  transform: translateY(-50%);
+  color: #64748b;
+
+  pointer-events: none;
+}
+
+.signup-input-icon input {
+  padding-left: 43px;
+}
+
+.primary-btn {
+  width: 100%;
+  min-height: 48px;
+
+  border: 0;
+  border-radius: 14px;
+
+  background: #3e6b96;
+  color: #ffffff;
+
+  font: inherit;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: #315b82;
+  transform: translateY(-1px);
+}
+
+.primary-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.error {
+  margin: 0 0 14px;
+
+  color: #b42318;
+  font-size: 14px;
+  text-align: center;
+}
+
+.coming-text {
+  display: inline-block;
+
   padding: 10px 16px;
   border-radius: 20px;
-  display: inline-block;
+
+  background: #fbe6ee;
+  color: #a13c62;
+
+  font-size: 14px;
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    padding: 18px;
+    justify-content: flex-start;
+  }
+
+  .velocity-title {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    font-size: 36px;
+  }
+
+  .card,
+  .signup-card {
+    padding: 30px 24px;
+  }
+
+  .icon-circle {
+    width: 70px;
+    height: 70px;
+  }
 }
