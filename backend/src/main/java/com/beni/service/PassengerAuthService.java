@@ -27,52 +27,97 @@ public class PassengerAuthService {
     @Inject
     EmailService emailService;
 
-    public PhoneCheckResponse checkPhone(String phoneNumber) {
+    public PhoneCheckResponse checkPhone(
+            String phoneNumber
+    ) {
+        PhoneCheckResponse response =
+                new PhoneCheckResponse();
 
-        PhoneCheckResponse response = new PhoneCheckResponse();
-
-        if (phoneNumber == null || phoneNumber.isBlank()) {
+        if (
+                phoneNumber == null ||
+                        phoneNumber.isBlank()
+        ) {
             response.exists = false;
             response.success = false;
-            response.message = "Phone number is required.";
+            response.message =
+                    "Phone number is required.";
+
             return response;
         }
 
-        User user = userRepository.findByPhoneNumber(phoneNumber);
+        User user =
+                userRepository.findByPhoneNumber(
+                        phoneNumber
+                );
 
         if (user == null) {
             response.exists = false;
             response.success = false;
-            response.message = "Passenger not found.";
+            response.message =
+                    "Passenger not found.";
+
             return response;
         }
 
-        Passenger passenger = passengerRepository.findByUser(user);
+        Passenger passenger =
+                passengerRepository.findByUser(
+                        user
+                );
 
         if (passenger == null) {
             response.exists = false;
             response.success = false;
-            response.message = "This phone number is not registered as a passenger.";
+            response.message =
+                    "This phone number is not registered as a passenger.";
+
             return response;
         }
 
-        if (user.email == null || user.email.isBlank()) {
+        /*
+         * Keep exists=true so a suspended passenger
+         * is not incorrectly sent to signup.
+         */
+        if (isSuspended(user)) {
             response.exists = true;
             response.success = false;
-            response.message = "No email is registered for this passenger.";
+            response.message =
+                    "This passenger account is suspended.";
+
             return response;
         }
 
-        String otp = otpService.generateOTP();
+        if (
+                user.email == null ||
+                        user.email.isBlank()
+        ) {
+            response.exists = true;
+            response.success = false;
+            response.message =
+                    "No email is registered for this passenger.";
 
-        otpStorageService.saveOTP(user.email, otp);
+            return response;
+        }
 
-        emailService.sendOTPEmail(user.email, otp);
+        String otp =
+                otpService.generateOTP();
+
+        otpStorageService.saveOTP(
+                user.email,
+                otp
+        );
+
+        emailService.sendOTPEmail(
+                user.email,
+                otp
+        );
 
         response.exists = true;
         response.success = true;
-        response.message = "OTP sent successfully.";
-        response.maskedEmail = maskEmail(user.email);
+        response.message =
+                "OTP sent successfully.";
+
+        response.maskedEmail =
+                maskEmail(user.email);
 
         return response;
     }
@@ -81,80 +126,155 @@ public class PassengerAuthService {
             String phoneNumber,
             String otp
     ) {
+        VerifyOtpResponse response =
+                new VerifyOtpResponse();
 
-        VerifyOtpResponse response = new VerifyOtpResponse();
-
-        if (phoneNumber == null || phoneNumber.isBlank()) {
+        if (
+                phoneNumber == null ||
+                        phoneNumber.isBlank()
+        ) {
             response.success = false;
-            response.message = "Phone number is required.";
+            response.message =
+                    "Phone number is required.";
+
             return response;
         }
 
-        if (otp == null || otp.isBlank()) {
+        if (
+                otp == null ||
+                        otp.isBlank()
+        ) {
             response.success = false;
-            response.message = "OTP is required.";
+            response.message =
+                    "OTP is required.";
+
             return response;
         }
 
-        User user = userRepository.findByPhoneNumber(phoneNumber);
+        User user =
+                userRepository.findByPhoneNumber(
+                        phoneNumber
+                );
 
         if (user == null) {
             response.success = false;
-            response.message = "Passenger not found.";
+            response.message =
+                    "Passenger not found.";
+
             return response;
         }
 
-        Passenger passenger = passengerRepository.findByUser(user);
+        Passenger passenger =
+                passengerRepository.findByUser(
+                        user
+                );
 
         if (passenger == null) {
             response.success = false;
-            response.message = "Passenger record not found.";
+            response.message =
+                    "Passenger record not found.";
+
             return response;
         }
 
-        if (user.email == null || user.email.isBlank()) {
+        if (isSuspended(user)) {
             response.success = false;
-            response.message = "No email is registered for this passenger.";
+            response.message =
+                    "This passenger account is suspended.";
+
             return response;
         }
 
-        boolean valid = otpStorageService.verifyOTP(
-                user.email,
-                otp
-        );
+        if (
+                user.email == null ||
+                        user.email.isBlank()
+        ) {
+            response.success = false;
+            response.message =
+                    "No email is registered for this passenger.";
+
+            return response;
+        }
+
+        boolean valid =
+                otpStorageService.verifyOTP(
+                        user.email,
+                        otp
+                );
 
         if (!valid) {
             response.success = false;
-            response.message = "Invalid OTP.";
+            response.message =
+                    "Invalid OTP.";
+
             return response;
         }
 
-        otpStorageService.removeOTP(user.email);
+        otpStorageService.removeOTP(
+                user.email
+        );
 
         response.success = true;
-        response.message = "Login successful.";
-        response.nextStep = "DASHBOARD";
+        response.message =
+                "Login successful.";
 
-        response.userId = user.userId;
-        response.passengerId = passenger.passengerId;
-        response.fullName = user.fullName;
-        response.phoneNumber = user.phoneNumber;
-        response.email = user.email;
+        response.nextStep =
+                "DASHBOARD";
+
+        response.userId =
+                user.userId;
+
+        response.passengerId =
+                passenger.passengerId;
+
+        response.fullName =
+                user.fullName;
+
+        response.phoneNumber =
+                user.phoneNumber;
+
+        response.email =
+                user.email;
 
         return response;
     }
 
-    private String maskEmail(String email) {
+    private boolean isSuspended(
+            User user
+    ) {
+        return user != null &&
+                "SUSPENDED"
+                        .equalsIgnoreCase(
+                                user.accountStatus
+                        );
+    }
 
-        int atIndex = email.indexOf("@");
+    private String maskEmail(
+            String email
+    ) {
+        int atIndex =
+                email.indexOf("@");
 
         if (atIndex <= 1) {
-            return "***" + email.substring(atIndex);
+            return "***" +
+                    email.substring(
+                            atIndex
+                    );
         }
 
-        String firstCharacter = email.substring(0, 1);
-        String domain = email.substring(atIndex);
+        String firstCharacter =
+                email.substring(
+                        0,
+                        1
+                );
 
-        return firstCharacter + "***" + domain;
+        String domain =
+                email.substring(
+                        atIndex
+                );
+
+        return firstCharacter +
+                "***" +
+                domain;
     }
 }

@@ -3,6 +3,7 @@ import {
 } from "react-router-dom";
 
 import {
+  ShieldCheck,
   X,
 } from "lucide-react";
 
@@ -16,6 +17,8 @@ const DRIVER_SESSION_KEYS = [
   "rideId",
   "rideStatus",
   "activeDriverRide",
+  "isAdmin",
+  "adminToken",
 ];
 
 function HamburgerMenu({
@@ -23,6 +26,20 @@ function HamburgerMenu({
   onClose,
 }) {
   const navigate = useNavigate();
+
+  const isAdmin =
+    sessionStorage.getItem(
+      "isAdmin"
+    ) === "true";
+
+  const adminToken =
+    sessionStorage.getItem(
+      "adminToken"
+    );
+
+  const hasAdminAccess =
+    isAdmin &&
+    Boolean(adminToken);
 
   const goTo = (path) => {
     onClose();
@@ -33,6 +50,10 @@ function HamburgerMenu({
     DRIVER_SESSION_KEYS.forEach(
       (key) => {
         sessionStorage.removeItem(
+          key
+        );
+
+        localStorage.removeItem(
           key
         );
       }
@@ -112,6 +133,24 @@ function HamburgerMenu({
           >
             Trip History
           </button>
+
+          {hasAdminAccess && (
+            <button
+              type="button"
+              className="admin-menu-button"
+              onClick={() =>
+                goTo(
+                  "/admin/feedback"
+                )
+              }
+            >
+              <ShieldCheck
+                size={19}
+              />
+
+              Admin Panel
+            </button>
+          )}
 
           <button
             type="button"

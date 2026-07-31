@@ -32,18 +32,22 @@ const SESSION_KEYS_TO_CLEAR = [
   "acceptedRide",
   "activeDriverRide",
   "ridePin",
+  "isAdmin",
+  "adminToken",
 ];
 
 function clearPreviousTabSession() {
-  SESSION_KEYS_TO_CLEAR.forEach((key) => {
-    sessionStorage.removeItem(key);
+  SESSION_KEYS_TO_CLEAR.forEach(
+    (key) => {
+      sessionStorage.removeItem(
+        key
+      );
 
-    /*
-     * Clear values remaining from the old
-     * localStorage-based implementation.
-     */
-    localStorage.removeItem(key);
-  });
+      localStorage.removeItem(
+        key
+      );
+    }
+  );
 }
 
 function DriverPassword() {
@@ -55,10 +59,15 @@ function DriverPassword() {
 
   const [password, setPassword] =
     useState("");
+
   const [error, setError] =
     useState("");
-  const [showPassword, setShowPassword] =
-    useState(false);
+
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false);
+
   const [loading, setLoading] =
     useState(false);
 
@@ -79,9 +88,9 @@ function DriverPassword() {
       return;
     }
 
-    try {
-      setLoading(true);
+    setLoading(true);
 
+    try {
       const response = await fetch(
         "http://localhost:8080/driver-auth/login",
         {
@@ -97,9 +106,13 @@ function DriverPassword() {
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
-      if (!response.ok || !data.success) {
+      if (
+        !response.ok ||
+        !data.success
+      ) {
         setError(
           data.message ||
             "Login failed. Please try again."
@@ -124,14 +137,32 @@ function DriverPassword() {
         data.fullName || "Driver"
       );
 
+      const isAdmin =
+        data.isAdmin === true;
+
+      sessionStorage.setItem(
+        "isAdmin",
+        String(isAdmin)
+      );
+
+      if (
+        isAdmin &&
+        data.adminToken
+      ) {
+        sessionStorage.setItem(
+          "adminToken",
+          data.adminToken
+        );
+      }
+
       navigate(
         "/driver-dashboard",
         {
           replace: true,
         }
       );
-    } catch (err) {
-      console.error(err);
+    } catch (loginError) {
+      console.error(loginError);
 
       setError(
         "Unable to connect to server."
@@ -144,13 +175,17 @@ function DriverPassword() {
   return (
     <div className="page">
       <div className="velocity-title">
-        <span className="velo">VEL</span>
+        <span className="velo">
+          VEL
+        </span>
 
         <span className="wheel">
           <span className="hub" />
         </span>
 
-        <span className="city">CITY</span>
+        <span className="city">
+          CITY
+        </span>
       </div>
 
       <div className="card">
@@ -166,8 +201,8 @@ function DriverPassword() {
         </h1>
 
         <p className="subtitle">
-          Welcome back! Enter your password
-          to continue.
+          Welcome back! Enter your
+          password to continue.
         </p>
 
         <div className="password-input">
@@ -187,7 +222,8 @@ function DriverPassword() {
             }
             onKeyDown={(event) => {
               if (
-                event.key === "Enter" &&
+                event.key ===
+                  "Enter" &&
                 !loading
               ) {
                 handleLogin();
@@ -201,7 +237,8 @@ function DriverPassword() {
             disabled={loading}
             onClick={() =>
               setShowPassword(
-                (current) => !current
+                (current) =>
+                  !current
               )
             }
             aria-label={
@@ -225,6 +262,7 @@ function DriverPassword() {
         )}
 
         <button
+          type="button"
           className="primary-btn"
           onClick={handleLogin}
           disabled={loading}

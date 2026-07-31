@@ -38,11 +38,16 @@ import PassengerRideHistory from "./pages/PassengerRideHistory";
 import PassengerSavedLocations from "./pages/PassengerSavedLocations";
 import PassengerFeedback from "./pages/PassengerFeedback";
 import TermsAndPolicy from "./pages/TermsAndPolicy";
+
+/* Ride Pages */
 import SearchingRide from "./pages/SearchingRide";
 import DriverActiveRide from "./pages/DriverActiveRide";
 import DriverFeedback from "./pages/DriverFeedback";
 import PassengerActiveRide from "./pages/PassengerActiveRide";
 import RideFeedback from "./pages/RideFeedback";
+
+/* Admin */
+import AdminFeedback from "./pages/AdminFeedback";
 
 function App() {
   return (
@@ -173,6 +178,7 @@ function App() {
           element={<TermsAndPolicy />}
         />
 
+        {/* Ride Pages */}
         <Route
           path="/searching-ride"
           element={<SearchingRide />}
@@ -196,6 +202,12 @@ function App() {
         <Route
           path="/ride-feedback"
           element={<RideFeedback />}
+        />
+
+        {/* Admin */}
+        <Route
+          path="/admin/feedback"
+          element={<AdminFeedback />}
         />
       </Routes>
     </BrowserRouter>

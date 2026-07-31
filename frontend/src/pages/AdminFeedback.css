@@ -1,0 +1,344 @@
+.admin-feedback-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 32px;
+
+  background:
+    linear-gradient(
+      160deg,
+      #f2efe9,
+      #ece7de
+    );
+
+  color: #12233a;
+  font-family: Poppins, sans-serif;
+}
+
+.admin-feedback-header {
+  max-width: 1100px;
+  margin: 0 auto 25px;
+
+  display: grid;
+  grid-template-columns:
+    180px 1fr 150px;
+  align-items: center;
+  gap: 20px;
+}
+
+.admin-feedback-header h1 {
+  margin: 0;
+  text-align: center;
+}
+
+.admin-feedback-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+  text-align: center;
+}
+
+.admin-back-button,
+.admin-refresh-button {
+  min-height: 44px;
+  padding: 0 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  border: 0;
+  border-radius: 13px;
+
+  background: #3e6b96;
+  color: white;
+
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-refresh-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-error,
+.admin-success,
+.admin-loading {
+  max-width: 1100px;
+  margin: 0 auto 18px;
+  padding: 13px 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.admin-error {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.admin-success {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.admin-loading {
+  color: #64748b;
+}
+
+.admin-empty-card {
+  max-width: 700px;
+  margin: 60px auto;
+  padding: 35px;
+
+  border-radius: 20px;
+  background: #f7f4ee;
+
+  box-shadow:
+    0 15px 40px
+    rgba(40, 30, 15, 0.08);
+
+  text-align: center;
+  color: #64748b;
+}
+
+.feedback-list {
+  max-width: 1100px;
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-feedback-card {
+  padding: 24px;
+  border-radius: 20px;
+
+  background: #f7f4ee;
+
+  border:
+    1px solid
+    rgba(40, 30, 15, 0.07);
+
+  box-shadow:
+    0 12px 35px
+    rgba(40, 30, 15, 0.07);
+}
+
+.feedback-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+
+  padding-bottom: 17px;
+  border-bottom: 1px solid #ded8cd;
+}
+
+.feedback-card-heading h2 {
+  margin: 8px 0 0;
+  font-size: 20px;
+}
+
+.feedback-role-badge {
+  display: inline-block;
+  padding: 5px 10px;
+
+  border-radius: 20px;
+
+  background: #dbeafe;
+  color: #24527a;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.feedback-ride {
+  text-align: right;
+  font-weight: 700;
+}
+
+.feedback-ride span {
+  display: block;
+  margin-top: 5px;
+
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.feedback-content {
+  padding: 17px 0;
+}
+
+.feedback-content p {
+  margin: 7px 0;
+  line-height: 1.55;
+}
+
+.feedback-date {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.feedback-accounts {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.feedback-account {
+  padding: 17px;
+  border-radius: 15px;
+
+  background: #eee8dd;
+}
+
+.feedback-account h3 {
+  margin: 0 0 5px;
+}
+
+.feedback-account p {
+  margin: 0 0 12px;
+  color: #475569;
+}
+
+.account-status {
+  display: inline-block;
+  margin-bottom: 13px;
+  padding: 4px 9px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.account-status.active {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.account-status.suspended {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.suspend-button,
+.reactivate-button {
+  width: 100%;
+  min-height: 40px;
+
+  border: 0;
+  border-radius: 11px;
+
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.suspend-button {
+  background: #b42318;
+  color: white;
+}
+
+.reactivate-button {
+  background: #067647;
+  color: white;
+}
+
+.suspend-button:disabled,
+.reactivate-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-self-label {
+  display: block;
+  padding: 9px;
+
+  border-radius: 10px;
+
+  background: #dbeafe;
+  color: #24527a;
+
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-access-card {
+  width: 420px;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  margin: 100px auto;
+  padding: 40px;
+
+  border-radius: 22px;
+  background: #f7f4ee;
+
+  box-shadow:
+    0 15px 40px
+    rgba(40, 30, 15, 0.08);
+
+  text-align: center;
+}
+
+.admin-access-card svg {
+  color: #3e6b96;
+}
+
+.admin-access-card h1 {
+  margin: 15px 0 8px;
+}
+
+.admin-access-card p {
+  color: #64748b;
+}
+
+.admin-access-card button {
+  width: 100%;
+  min-height: 45px;
+
+  border: 0;
+  border-radius: 12px;
+
+  background: #3e6b96;
+  color: white;
+
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .admin-feedback-page {
+    padding: 20px 15px;
+  }
+
+  .admin-feedback-header {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-feedback-header h1,
+  .admin-feedback-header p {
+    text-align: left;
+  }
+
+  .feedback-accounts {
+    grid-template-columns: 1fr;
+  }
+
+  .feedback-card-heading {
+    flex-direction: column;
+  }
+
+  .feedback-ride {
+    text-align: left;
+  }
+}
