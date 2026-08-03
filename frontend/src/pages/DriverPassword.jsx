@@ -1,279 +1,361 @@
 import { useState } from "react";
-
 import {
-  useLocation,
-  useNavigate,
+    useLocation,
+    useNavigate,
 } from "react-router-dom";
-
 import {
-  Eye,
-  EyeOff,
-  Lock,
+    Eye,
+    EyeOff,
+    Lock,
 } from "lucide-react";
-
 import "./DriverPassword.css";
 
-const SESSION_KEYS_TO_CLEAR = [
-  "userId",
-  "passengerId",
-  "passengerName",
-  "passengerPhone",
-  "passengerEmail",
-  "driverId",
-  "driverName",
-  "vehicleId",
-  "rideRequestId",
-  "rideId",
-  "rideStatus",
-  "paymentMethod",
-  "searchStartedAt",
-  "activeRideRequest",
-  "passengerRideDraft",
-  "acceptedRide",
-  "activeDriverRide",
-  "ridePin",
-  "isAdmin",
-  "adminToken",
+const API = "http://localhost:8080";
+
+const SESSION_KEYS = [
+    "activeMode",
+    "userId",
+    "passengerId",
+    "passengerName",
+    "passengerPhone",
+    "passengerEmail",
+    "driverId",
+    "driverName",
+    "fullName",
+    "vehicleId",
+    "isAdmin",
+    "adminToken",
+    "applicantToken",
+    "applicationStatus",
+    "canGoOnline",
+    "walletEnabled",
+    "canViewRideOffers",
+    "rideRequestId",
+    "rideId",
+    "rideStatus",
+    "paymentMethod",
+    "searchStartedAt",
+    "activeRideRequest",
+    "passengerRideDraft",
+    "acceptedRide",
+    "activeDriverRide",
+    "ridePin",
 ];
 
-function clearPreviousTabSession() {
-  SESSION_KEYS_TO_CLEAR.forEach(
-    (key) => {
-      sessionStorage.removeItem(
-        key
-      );
+function clearPreviousSession() {
+    SESSION_KEYS.forEach((key) => {
+        sessionStorage.removeItem(key);
+        localStorage.removeItem(key);
+    });
+}
 
-      localStorage.removeItem(
-        key
-      );
+function saveSessionValue(key, value) {
+    if (value === null || value === undefined) {
+        return;
     }
-  );
+
+    const storedValue = String(value);
+
+    sessionStorage.setItem(key, storedValue);
+    localStorage.setItem(key, storedValue);
 }
 
 function DriverPassword() {
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  const { phone } =
-    location.state || {};
+    const navigate = useNavigate();
+    const location = useLocation();
 
-  const [password, setPassword] =
-    useState("");
+    const { phone } = location.state || {};
 
-  const [error, setError] =
-    useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [showPassword, setShowPassword] =
+        useState(false);
+    const [loading, setLoading] = useState(false);
 
-  const [
-    showPassword,
-    setShowPassword,
-  ] = useState(false);
+    const readResponse = async (response) => {
+        const responseText = await response.text();
 
-  const [loading, setLoading] =
-    useState(false);
-
-  const handleLogin = async () => {
-    setError("");
-
-    if (!phone) {
-      setError(
-        "Phone number is missing. Please start again."
-      );
-      return;
-    }
-
-    if (password.trim() === "") {
-      setError(
-        "Please enter your password."
-      );
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch(
-        "http://localhost:8080/driver-auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            phoneNumber: phone,
-            password,
-          }),
+        if (!responseText) {
+            return {};
         }
-      );
 
-      const data =
-        await response.json();
-
-      if (
-        !response.ok ||
-        !data.success
-      ) {
-        setError(
-          data.message ||
-            "Login failed. Please try again."
-        );
-        return;
-      }
-
-      clearPreviousTabSession();
-
-      sessionStorage.setItem(
-        "driverId",
-        String(data.driverId)
-      );
-
-      sessionStorage.setItem(
-        "userId",
-        String(data.userId)
-      );
-
-      sessionStorage.setItem(
-        "driverName",
-        data.fullName || "Driver"
-      );
-
-      const isAdmin =
-        data.isAdmin === true;
-
-      sessionStorage.setItem(
-        "isAdmin",
-        String(isAdmin)
-      );
-
-      if (
-        isAdmin &&
-        data.adminToken
-      ) {
-        sessionStorage.setItem(
-          "adminToken",
-          data.adminToken
-        );
-      }
-
-      navigate(
-        "/driver-dashboard",
-        {
-          replace: true,
+        try {
+            return JSON.parse(responseText);
+        } catch {
+            return {
+                message: responseText,
+            };
         }
-      );
-    } catch (loginError) {
-      console.error(loginError);
+    };
 
-      setError(
-        "Unable to connect to server."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleLogin = async () => {
+        setError("");
 
-  return (
-    <div className="page">
-      <div className="velocity-title">
-        <span className="velo">
-          VEL
-        </span>
+        if (!phone) {
+            setError(
+                "Phone number is missing. Please start again."
+            );
+            return;
+        }
 
-        <span className="wheel">
-          <span className="hub" />
-        </span>
+        if (!password) {
+            setError("Please enter your password.");
+            return;
+        }
 
-        <span className="city">
-          CITY
-        </span>
-      </div>
+        setLoading(true);
 
-      <div className="card">
-        <div className="icon-circle">
-          <Lock
-            size={36}
-            color="white"
-          />
+        try {
+            const response = await fetch(
+                `${API}/driver-auth/login`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: phone,
+                        password,
+                    }),
+                }
+            );
+
+            const data = await readResponse(response);
+
+            if (!response.ok || !data.success) {
+                setError(
+                    data.message
+                    || data.details
+                    || "Login failed. Please try again."
+                );
+                return;
+            }
+
+            clearPreviousSession();
+
+            saveSessionValue("userId", data.userId);
+
+            saveSessionValue(
+                "driverName",
+                data.fullName || "Driver"
+            );
+
+            saveSessionValue(
+                "fullName",
+                data.fullName || "Driver"
+            );
+
+            if (
+                data.nextStep === "APPLICATION_STATUS"
+            ) {
+                if (!data.applicantToken) {
+                    setError(
+                        "Applicant session was not created."
+                    );
+                    return;
+                }
+
+                saveSessionValue(
+                    "activeMode",
+                    "DRIVER_APPLICANT"
+                );
+
+                saveSessionValue(
+                    "applicantToken",
+                    data.applicantToken
+                );
+
+                saveSessionValue(
+                    "applicationStatus",
+                    data.applicationStatus
+                );
+
+                saveSessionValue(
+                    "canGoOnline",
+                    data.canGoOnline
+                );
+
+                saveSessionValue(
+                    "walletEnabled",
+                    data.walletEnabled
+                );
+
+                saveSessionValue(
+                    "canViewRideOffers",
+                    data.canViewRideOffers
+                );
+
+                navigate(
+                    "/driver-application-status",
+                    {
+                        replace: true,
+                    }
+                );
+
+                return;
+            }
+
+            if (!data.driverId) {
+                setError(
+                    "Approved driver record was not found."
+                );
+                return;
+            }
+
+            saveSessionValue(
+                "activeMode",
+                "DRIVER"
+            );
+
+            saveSessionValue(
+                "driverId",
+                data.driverId
+            );
+
+            saveSessionValue(
+                "canGoOnline",
+                data.canGoOnline
+            );
+
+            saveSessionValue(
+                "walletEnabled",
+                data.walletEnabled
+            );
+
+            saveSessionValue(
+                "canViewRideOffers",
+                data.canViewRideOffers
+            );
+
+            saveSessionValue(
+                "isAdmin",
+                data.isAdmin
+            );
+
+            if (data.isAdmin && data.adminToken) {
+                saveSessionValue(
+                    "adminToken",
+                    data.adminToken
+                );
+            }
+
+            navigate(
+                "/driver-dashboard",
+                {
+                    replace: true,
+                }
+            );
+
+        } catch (requestError) {
+            console.error(requestError);
+
+            setError(
+                "Unable to connect to server."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="page">
+
+            <div className="velocity-title">
+                <span className="velo">VEL</span>
+
+                <span className="wheel">
+                    <span className="hub" />
+                </span>
+
+                <span className="city">CITY</span>
+            </div>
+
+            <div className="card">
+
+                <div className="icon-circle">
+                    <Lock size={36} color="white" />
+                </div>
+
+                <h1 className="title">
+                    Enter your password
+                </h1>
+
+                <p className="subtitle">
+                    Welcome back! Enter your password
+                    to continue.
+                </p>
+
+                <div className="password-input">
+
+                    <input
+                        type={
+                            showPassword
+                                ? "text"
+                                : "password"
+                        }
+                        placeholder="Password"
+                        value={password}
+                        disabled={loading}
+                        onChange={(event) =>
+                            setPassword(event.target.value)
+                        }
+                        onKeyDown={(event) => {
+                            if (
+                                event.key === "Enter"
+                                && !loading
+                            ) {
+                                handleLogin();
+                            }
+                        }}
+                    />
+
+                    <button
+                        type="button"
+                        className="eye-btn"
+                        disabled={loading}
+                        onClick={() =>
+                            setShowPassword(
+                                (current) => !current
+                            )
+                        }
+                        aria-label={
+                            showPassword
+                                ? "Hide password"
+                                : "Show password"
+                        }
+                    >
+                        {
+                            showPassword
+                                ? <EyeOff size={20} />
+                                : <Eye size={20} />
+                        }
+                    </button>
+
+                </div>
+
+                {error && (
+                    <p className="error">
+                        {error}
+                    </p>
+                )}
+
+                <button
+                    className="primary-btn"
+                    onClick={handleLogin}
+                    disabled={loading}
+                >
+                    {
+                        loading
+                            ? "Logging in..."
+                            : "Login"
+                    }
+                </button>
+
+            </div>
+
         </div>
-
-        <h1 className="title">
-          Enter your password
-        </h1>
-
-        <p className="subtitle">
-          Welcome back! Enter your
-          password to continue.
-        </p>
-
-        <div className="password-input">
-          <input
-            type={
-              showPassword
-                ? "text"
-                : "password"
-            }
-            placeholder="Password"
-            value={password}
-            disabled={loading}
-            onChange={(event) =>
-              setPassword(
-                event.target.value
-              )
-            }
-            onKeyDown={(event) => {
-              if (
-                event.key ===
-                  "Enter" &&
-                !loading
-              ) {
-                handleLogin();
-              }
-            }}
-          />
-
-          <button
-            type="button"
-            className="eye-btn"
-            disabled={loading}
-            onClick={() =>
-              setShowPassword(
-                (current) =>
-                  !current
-              )
-            }
-            aria-label={
-              showPassword
-                ? "Hide password"
-                : "Show password"
-            }
-          >
-            {showPassword ? (
-              <EyeOff size={20} />
-            ) : (
-              <Eye size={20} />
-            )}
-          </button>
-        </div>
-
-        {error && (
-          <p className="error">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="button"
-          className="primary-btn"
-          onClick={handleLogin}
-          disabled={loading}
-        >
-          {loading
-            ? "Logging in..."
-            : "Login"}
-        </button>
-      </div>
-    </div>
-  );
+    );
 }
 
 export default DriverPassword;

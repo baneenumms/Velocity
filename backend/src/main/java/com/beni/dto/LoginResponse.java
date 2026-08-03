@@ -11,4 +11,12 @@ public class LoginResponse {
 
     public boolean isAdmin;
     public String adminToken;
+
+    public String nextStep;
+    public String applicationStatus;
+    public String applicantToken;
+
+    public boolean canGoOnline;
+    public boolean walletEnabled;
+    public boolean canViewRideOffers;
 }

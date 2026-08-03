@@ -1,0 +1,233 @@
+.driver-signup-page {
+    min-height: 100vh;
+    padding: 28px 18px 60px;
+    background: #f3f0e9;
+    color: #14233a;
+    font-family: inherit;
+}
+
+.driver-signup-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 28px;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -2px;
+}
+
+.driver-signup-logo .velo {
+    color: #285d88;
+}
+
+.driver-signup-logo .city {
+    color: #c43f72;
+    font-style: italic;
+}
+
+.driver-signup-logo .wheel {
+    width: 38px;
+    height: 38px;
+    margin: 0 2px;
+    border-radius: 50%;
+    background: #161616;
+    box-shadow: inset 0 0 0 6px #2f2f2f;
+}
+
+.driver-signup-card {
+    width: min(900px, 100%);
+    margin: 0 auto;
+    padding: 38px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 18px 50px rgba(35, 50, 70, 0.12);
+}
+
+.driver-signup-header {
+    text-align: center;
+    margin-bottom: 34px;
+}
+
+.driver-signup-icon {
+    width: 78px;
+    height: 78px;
+    margin: 0 auto 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: white;
+    background: #3d75a4;
+    box-shadow: 0 12px 28px rgba(61, 117, 164, 0.28);
+}
+
+.driver-signup-title {
+    margin: 0;
+    font-size: clamp(30px, 5vw, 42px);
+    line-height: 1.1;
+}
+
+.driver-signup-subtitle {
+    max-width: 580px;
+    margin: 13px auto 0;
+    color: #61718a;
+    line-height: 1.6;
+}
+
+.driver-signup-phone {
+    width: min(420px, 100%);
+    margin: 20px auto 0;
+    padding: 14px 18px;
+    border-radius: 15px;
+    background: #ece6dc;
+    color: #5d6e85;
+}
+
+.driver-signup-phone strong {
+    display: block;
+    margin-top: 4px;
+    color: #172942;
+}
+
+.driver-signup-section {
+    margin-top: 26px;
+    padding: 24px;
+    border: 1px solid rgba(44, 82, 116, 0.12);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.62);
+}
+
+.driver-signup-section h2 {
+    margin: 0 0 18px;
+    font-size: 20px;
+    color: #285d88;
+}
+
+.driver-signup-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.driver-signup-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.driver-signup-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.driver-signup-field label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #263a54;
+}
+
+.driver-signup-field input,
+.driver-signup-field select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    border: 1px solid #cfd7df;
+    border-radius: 12px;
+    outline: none;
+    background: white;
+    color: #172942;
+    font: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.driver-signup-field input:focus,
+.driver-signup-field select:focus {
+    border-color: #3d75a4;
+    box-shadow: 0 0 0 3px rgba(61, 117, 164, 0.12);
+}
+
+.driver-signup-password-wrap {
+    position: relative;
+}
+
+.driver-signup-password-wrap input {
+    padding-right: 48px;
+}
+
+.driver-signup-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    padding: 5px;
+    border: 0;
+    background: transparent;
+    color: #3d75a4;
+    cursor: pointer;
+}
+
+.driver-signup-hint {
+    margin: 0;
+    font-size: 12px;
+    color: #728198;
+}
+
+.driver-signup-error {
+    margin: 22px 0 0;
+    padding: 13px 16px;
+    border-radius: 12px;
+    background: #ffe2e2;
+    color: #b42323;
+    text-align: center;
+}
+
+.driver-signup-submit {
+    width: 100%;
+    margin-top: 26px;
+    padding: 15px 20px;
+    border: 0;
+    border-radius: 14px;
+    background: #3d75a4;
+    color: white;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.driver-signup-submit:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.driver-signup-submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+@media (max-width: 680px) {
+    .driver-signup-card {
+        padding: 26px 18px;
+        border-radius: 22px;
+    }
+
+    .driver-signup-section {
+        padding: 19px 15px;
+    }
+
+    .driver-signup-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .driver-signup-field.full-width {
+        grid-column: auto;
+    }
+
+    .driver-signup-logo {
+        font-size: 34px;
+    }
+
+    .driver-signup-logo .wheel {
+        width: 31px;
+        height: 31px;
+    }
+}

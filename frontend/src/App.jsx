@@ -1,7 +1,7 @@
 import {
-  BrowserRouter,
-  Routes,
-  Route,
+    BrowserRouter,
+    Routes,
+    Route,
 } from "react-router-dom";
 
 import SplashScreen from "./pages/SplashScreen";
@@ -14,6 +14,8 @@ import DriverPhone from "./pages/DriverPhone";
 import DriverOTP from "./pages/DriverOTP";
 import DriverPassword from "./pages/DriverPassword";
 import DriverSignUP from "./pages/DriverSignUP";
+import DriverSignupOTP from "./pages/DriverSignupOTP";
+import DriverApplicationStatus from "./pages/DriverApplicationStatus";
 
 /* Driver Dashboard */
 import DriverDashboard from "./pages/DriverDashboard";
@@ -38,8 +40,6 @@ import PassengerRideHistory from "./pages/PassengerRideHistory";
 import PassengerSavedLocations from "./pages/PassengerSavedLocations";
 import PassengerFeedback from "./pages/PassengerFeedback";
 import TermsAndPolicy from "./pages/TermsAndPolicy";
-
-/* Ride Pages */
 import SearchingRide from "./pages/SearchingRide";
 import DriverActiveRide from "./pages/DriverActiveRide";
 import DriverFeedback from "./pages/DriverFeedback";
@@ -50,168 +50,191 @@ import RideFeedback from "./pages/RideFeedback";
 import AdminFeedback from "./pages/AdminFeedback";
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={<SplashScreen />}
-        />
 
-        <Route
-          path="/role"
-          element={<RoleSelection />}
-        />
+    return (
 
-        <Route
-          path="/otp-sent"
-          element={<OTPSent />}
-        />
+        <BrowserRouter>
 
-        <Route
-          path="/otp-verified"
-          element={<OTPVerified />}
-        />
+            <Routes>
 
-        {/* Driver Authentication */}
-        <Route
-          path="/driver-phone"
-          element={<DriverPhone />}
-        />
+                <Route
+                    path="/"
+                    element={<SplashScreen />}
+                />
 
-        <Route
-          path="/driver-otp"
-          element={<DriverOTP />}
-        />
+                <Route
+                    path="/role"
+                    element={<RoleSelection />}
+                />
 
-        <Route
-          path="/driver-password"
-          element={<DriverPassword />}
-        />
+                <Route
+                    path="/otp-sent"
+                    element={<OTPSent />}
+                />
 
-        <Route
-          path="/driver-signup"
-          element={<DriverSignUP />}
-        />
+                <Route
+                    path="/otp-verified"
+                    element={<OTPVerified />}
+                />
 
-        {/* Driver Dashboard */}
-        <Route
-          path="/driver-dashboard"
-          element={<DriverDashboard />}
-        />
+                {/* Driver Authentication */}
 
-        <Route
-          path="/driver-profile"
-          element={<DriverProfile />}
-        />
+                <Route
+                    path="/driver-phone"
+                    element={<DriverPhone />}
+                />
 
-        <Route
-          path="/driver-wallet"
-          element={<DriverWallet />}
-        />
+                <Route
+                    path="/driver-otp"
+                    element={<DriverOTP />}
+                />
 
-        <Route
-          path="/driver-wallet-info"
-          element={<DriverWalletInfo />}
-        />
+                <Route
+                    path="/driver-password"
+                    element={<DriverPassword />}
+                />
 
-        <Route
-          path="/driver-trips"
-          element={<DriverTripHistory />}
-        />
+                <Route
+                    path="/driver-signup"
+                    element={<DriverSignUP />}
+                />
 
-        {/* Passenger Authentication */}
-        <Route
-          path="/passenger-phone"
-          element={<PassengerPhone />}
-        />
+                <Route
+                    path="/driver-signup-otp"
+                    element={<DriverSignupOTP />}
+                />
 
-        <Route
-          path="/passenger-otp"
-          element={<PassengerOTP />}
-        />
+                <Route
+                    path="/driver-application-status"
+                    element={<DriverApplicationStatus />}
+                />
 
-        <Route
-          path="/passenger-signup"
-          element={<PassengerSignUP />}
-        />
+                {/* Driver Dashboard */}
 
-        <Route
-          path="/passenger-signup-otp"
-          element={<PassengerSignupOTP />}
-        />
+                <Route
+                    path="/driver-dashboard"
+                    element={<DriverDashboard />}
+                />
 
-        {/* Passenger Dashboard */}
-        <Route
-          path="/passenger-dashboard"
-          element={<PassengerDashboard />}
-        />
+                <Route
+                    path="/driver-profile"
+                    element={<DriverProfile />}
+                />
 
-        <Route
-          path="/passenger-fare"
-          element={<PassengerFare />}
-        />
+                <Route
+                    path="/driver-wallet"
+                    element={<DriverWallet />}
+                />
 
-        {/* Passenger Menu Pages */}
-        <Route
-          path="/passenger-profile"
-          element={<PassengerProfile />}
-        />
+                <Route
+                    path="/driver-wallet-info"
+                    element={<DriverWalletInfo />}
+                />
 
-        <Route
-          path="/passenger-ride-history"
-          element={<PassengerRideHistory />}
-        />
+                <Route
+                    path="/driver-trips"
+                    element={<DriverTripHistory />}
+                />
 
-        <Route
-          path="/passenger-saved-locations"
-          element={<PassengerSavedLocations />}
-        />
+                {/* Passenger Authentication */}
 
-        <Route
-          path="/passenger-feedback"
-          element={<PassengerFeedback />}
-        />
+                <Route
+                    path="/passenger-phone"
+                    element={<PassengerPhone />}
+                />
 
-        <Route
-          path="/terms-and-policy"
-          element={<TermsAndPolicy />}
-        />
+                <Route
+                    path="/passenger-otp"
+                    element={<PassengerOTP />}
+                />
 
-        {/* Ride Pages */}
-        <Route
-          path="/searching-ride"
-          element={<SearchingRide />}
-        />
+                <Route
+                    path="/passenger-signup"
+                    element={<PassengerSignUP />}
+                />
 
-        <Route
-          path="/driver-active-ride"
-          element={<DriverActiveRide />}
-        />
+                <Route
+                    path="/passenger-signup-otp"
+                    element={<PassengerSignupOTP />}
+                />
 
-        <Route
-          path="/driver-feedback"
-          element={<DriverFeedback />}
-        />
+                {/* Passenger Dashboard */}
 
-        <Route
-          path="/passenger-active-ride"
-          element={<PassengerActiveRide />}
-        />
+                <Route
+                    path="/passenger-dashboard"
+                    element={<PassengerDashboard />}
+                />
 
-        <Route
-          path="/ride-feedback"
-          element={<RideFeedback />}
-        />
+                <Route
+                    path="/passenger-fare"
+                    element={<PassengerFare />}
+                />
 
-        {/* Admin */}
-        <Route
-          path="/admin/feedback"
-          element={<AdminFeedback />}
-        />
-      </Routes>
-    </BrowserRouter>
-  );
+                {/* Passenger Menu Pages */}
+
+                <Route
+                    path="/passenger-profile"
+                    element={<PassengerProfile />}
+                />
+
+                <Route
+                    path="/passenger-ride-history"
+                    element={<PassengerRideHistory />}
+                />
+
+                <Route
+                    path="/passenger-saved-locations"
+                    element={<PassengerSavedLocations />}
+                />
+
+                <Route
+                    path="/passenger-feedback"
+                    element={<PassengerFeedback />}
+                />
+
+                <Route
+                    path="/terms-and-policy"
+                    element={<TermsAndPolicy />}
+                />
+
+                <Route
+                    path="/searching-ride"
+                    element={<SearchingRide />}
+                />
+
+                <Route
+                    path="/driver-active-ride"
+                    element={<DriverActiveRide />}
+                />
+
+                <Route
+                    path="/driver-feedback"
+                    element={<DriverFeedback />}
+                />
+
+                <Route
+                    path="/passenger-active-ride"
+                    element={<PassengerActiveRide />}
+                />
+
+                <Route
+                    path="/ride-feedback"
+                    element={<RideFeedback />}
+                />
+
+                {/* Admin */}
+
+                <Route
+                    path="/admin/feedback"
+                    element={<AdminFeedback />}
+                />
+
+            </Routes>
+
+        </BrowserRouter>
+
+    );
+
 }
 
 export default App;
