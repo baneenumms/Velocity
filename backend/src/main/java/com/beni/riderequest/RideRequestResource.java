@@ -1,6 +1,7 @@
 package com.beni.riderequest;
 
 import com.beni.dto.CreateRideRequest;
+import com.beni.service.ActiveRidePolicyService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -20,7 +21,12 @@ import java.util.List;
 public class RideRequestResource {
 
     @Inject
-    RideRequestService rideRequestService;
+    RideRequestService
+            rideRequestService;
+
+    @Inject
+    ActiveRidePolicyService
+            activeRidePolicyService;
 
     @POST
     public RideRequest createRideRequest(
@@ -35,15 +41,29 @@ public class RideRequestResource {
     @GET
     @Path("/available")
     public List<RideRequest>
-    getAvailableRideRequests() {
+    getAvailableRideRequests(
+            @QueryParam("driverId")
+            Integer driverId
+    ) {
+        /*
+         * Active drivers cannot retrieve
+         * other ride requests.
+         */
+        activeRidePolicyService
+                .requireDriverAvailable(
+                        driverId
+                );
 
         return rideRequestService
                 .getAvailableRideRequests();
     }
 
     @GET
-    @Path("/passenger/{passengerId}/active")
-    public RideRequest getPassengerActiveRequest(
+    @Path(
+            "/passenger/{passengerId}/active"
+    )
+    public RideRequest
+    getPassengerActiveRequest(
             @PathParam("passengerId")
             Integer passengerId
     ) {
@@ -67,7 +87,8 @@ public class RideRequestResource {
 
     @PUT
     @Path("/{requestId}/fare")
-    public RideRequest updatePassengerFare(
+    public RideRequest
+    updatePassengerFare(
             @PathParam("requestId")
             String requestId,
 
@@ -82,7 +103,8 @@ public class RideRequestResource {
 
     @POST
     @Path("/{requestId}/cancel")
-    public RideRequest cancelRideRequest(
+    public RideRequest
+    cancelRideRequest(
             @PathParam("requestId")
             String requestId,
 

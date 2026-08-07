@@ -8,6 +8,7 @@ import com.beni.entity.Wallet;
 import com.beni.repository.DriverRepository;
 import com.beni.repository.VehicleRepository;
 import com.beni.repository.WalletRepository;
+import com.beni.service.ActiveRidePolicyService;
 import com.beni.service.RideService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -33,7 +34,10 @@ public class DriverOfferService {
     private static final BigDecimal RATE =
             new BigDecimal("0.12");
 
-    private final Map<String, DriverOffer> offers =
+    private final Map<
+            String,
+            DriverOffer
+            > offers =
             new ConcurrentHashMap<>();
 
     private final SecureRandom random =
@@ -54,10 +58,25 @@ public class DriverOfferService {
     @Inject
     RideService rideService;
 
-    public DriverOffer submitOffer(
+    @Inject
+    ActiveRidePolicyService
+            activeRidePolicyService;
+
+    public synchronized DriverOffer
+    submitOffer(
             SubmitDriverOfferRequest input
     ) {
         validate(input);
+
+        /*
+         * A driver with an ACCEPTED or
+         * IN_PROGRESS ride cannot submit
+         * another offer.
+         */
+        activeRidePolicyService
+                .requireDriverAvailable(
+                        input.driverId
+                );
 
         RideRequest request =
                 rideRequestService
@@ -69,7 +88,7 @@ public class DriverOfferService {
                 request.status ==
                         RideRequestStatus.SEARCHING,
                 "Ride request is no longer available",
-                400
+                409
         );
 
         Driver driver =
@@ -81,7 +100,7 @@ public class DriverOfferService {
                 driver.driverStatus ==
                         DriverStatus.Online,
                 "Driver must be Online",
-                400
+                409
         );
 
         Vehicle vehicle =
@@ -91,10 +110,11 @@ public class DriverOfferService {
                 );
 
         BigDecimal fare =
-                input.offeredFare.setScale(
-                        2,
-                        RoundingMode.HALF_UP
-                );
+                input.offeredFare
+                        .setScale(
+                                2,
+                                RoundingMode.HALF_UP
+                        );
 
         BigDecimal required =
                 reserve(fare);
@@ -177,10 +197,6 @@ public class DriverOfferService {
                                 requestId
                         );
 
-        /*
-         * Do not expose pending offers for an
-         * expired, accepted or cancelled request.
-         */
         if (
                 request.status !=
                         RideRequestStatus.SEARCHING
@@ -188,13 +204,24 @@ public class DriverOfferService {
             return List.of();
         }
 
-        return offers.values().stream()
-                .filter(offer ->
-                        offer.requestId.equals(
-                                requestId
-                        ) &&
-                                offer.status ==
-                                        DriverOfferStatus.PENDING
+        /*
+         * Remove stale pending offers from
+         * drivers who have since accepted
+         * another ride.
+         */
+        withdrawBusyDriverOffers();
+
+        return offers.values()
+                .stream()
+                .filter(
+                        offer ->
+                                offer.requestId
+                                        .equals(
+                                                requestId
+                                        ) &&
+                                        offer.status ==
+                                                DriverOfferStatus
+                                                        .PENDING
                 )
                 .sorted(
                         Comparator.comparing(
@@ -213,15 +240,14 @@ public class DriverOfferService {
     ) {
         require(
                 input != null &&
-                        input.passengerId != null,
+                        input.passengerId !=
+                                null,
                 "Passenger ID is required",
                 400
         );
 
         DriverOffer offer =
-                offers.get(
-                        offerId
-                );
+                offers.get(offerId);
 
         require(
                 offer != null,
@@ -233,7 +259,7 @@ public class DriverOfferService {
                 offer.status ==
                         DriverOfferStatus.PENDING,
                 "Offer is no longer available",
-                400
+                409
         );
 
         RideRequest request =
@@ -246,7 +272,7 @@ public class DriverOfferService {
                 request.status ==
                         RideRequestStatus.SEARCHING,
                 "Ride request is no longer available",
-                400
+                409
         );
 
         require(
@@ -257,6 +283,24 @@ public class DriverOfferService {
                 403
         );
 
+        /*
+         * The passenger cannot accept another
+         * driver while already on an active ride.
+         */
+        activeRidePolicyService
+                .requirePassengerAvailable(
+                        input.passengerId
+                );
+
+        /*
+         * The selected driver cannot be assigned
+         * to two passengers.
+         */
+        activeRidePolicyService
+                .requireDriverAvailable(
+                        offer.driverId
+                );
+
         Driver driver =
                 driver(
                         offer.driverId
@@ -266,7 +310,7 @@ public class DriverOfferService {
                 driver.driverStatus ==
                         DriverStatus.Online,
                 "Driver is no longer available",
-                400
+                409
         );
 
         Vehicle vehicle =
@@ -331,20 +375,59 @@ public class DriverOfferService {
         offer.status =
                 DriverOfferStatus.ACCEPTED;
 
-        offers.values().stream()
-                .filter(otherOffer ->
-                        otherOffer.requestId.equals(
-                                request.requestId
-                        ) &&
-                                !otherOffer.offerId.equals(
-                                        offer.offerId
-                                ) &&
-                                otherOffer.status ==
-                                        DriverOfferStatus.PENDING
+        offer.updatedAt =
+                LocalDateTime.now();
+
+        /*
+         * Close every competing offer for the
+         * accepted passenger request.
+         *
+         * Also withdraw this driver's offers
+         * on every other passenger request.
+         */
+        offers.values()
+                .stream()
+                .filter(
+                        otherOffer ->
+                                !otherOffer.offerId
+                                        .equals(
+                                                offer.offerId
+                                        ) &&
+                                        otherOffer.status ==
+                                                DriverOfferStatus
+                                                        .PENDING
                 )
-                .forEach(otherOffer ->
-                        otherOffer.status =
-                                DriverOfferStatus.REJECTED
+                .forEach(
+                        otherOffer -> {
+                            if (
+                                    otherOffer.requestId
+                                            .equals(
+                                                    request.requestId
+                                            )
+                            ) {
+                                otherOffer.status =
+                                        DriverOfferStatus
+                                                .REJECTED;
+                            } else if (
+                                    otherOffer.driverId
+                                            .equals(
+                                                    driver.driverId
+                                            )
+                            ) {
+                                otherOffer.status =
+                                        DriverOfferStatus
+                                                .WITHDRAWN;
+                            }
+
+                            if (
+                                    otherOffer.status !=
+                                            DriverOfferStatus
+                                                    .PENDING
+                            ) {
+                                otherOffer.updatedAt =
+                                        LocalDateTime.now();
+                            }
+                        }
                 );
 
         return response(
@@ -355,6 +438,34 @@ public class DriverOfferService {
                 required,
                 pin
         );
+    }
+
+    private void withdrawBusyDriverOffers() {
+        offers.values()
+                .stream()
+                .filter(
+                        offer ->
+                                offer.status ==
+                                        DriverOfferStatus
+                                                .PENDING
+                )
+                .forEach(
+                        offer -> {
+                            if (
+                                    activeRidePolicyService
+                                            .driverHasActiveRide(
+                                                    offer.driverId
+                                            )
+                            ) {
+                                offer.status =
+                                        DriverOfferStatus
+                                                .WITHDRAWN;
+
+                                offer.updatedAt =
+                                        LocalDateTime.now();
+                            }
+                        }
+                );
     }
 
     private AcceptDriverOfferResponse response(
@@ -368,8 +479,7 @@ public class DriverOfferService {
         AcceptDriverOfferResponse response =
                 new AcceptDriverOfferResponse();
 
-        response.success =
-                true;
+        response.success = true;
 
         response.message =
                 "Driver offer accepted successfully";
@@ -409,8 +519,7 @@ public class DriverOfferService {
         response.reservedAmount =
                 reserve;
 
-        response.ridePin =
-                pin;
+        response.ridePin = pin;
 
         return response;
     }
@@ -426,7 +535,8 @@ public class DriverOfferService {
 
         require(
                 input.requestId != null &&
-                        !input.requestId.isBlank(),
+                        !input.requestId
+                                .isBlank(),
                 "Request ID is required",
                 400
         );
@@ -455,40 +565,40 @@ public class DriverOfferService {
     }
 
     private Driver driver(
-            Integer id
+            Integer driverId
     ) {
-        Driver value =
+        Driver driver =
                 driverRepository.findById(
-                        id.longValue()
+                        driverId.longValue()
                 );
 
         require(
-                value != null,
+                driver != null,
                 "Driver not found",
                 404
         );
 
-        return value;
+        return driver;
     }
 
     private Vehicle vehicle(
-            Integer id,
+            Integer vehicleId,
             Driver driver
     ) {
-        Vehicle value =
+        Vehicle vehicle =
                 vehicleRepository.findById(
-                        id.longValue()
+                        vehicleId.longValue()
                 );
 
         require(
-                value != null,
+                vehicle != null,
                 "Vehicle not found",
                 404
         );
 
         require(
-                value.driver != null &&
-                        value.driver.driverId
+                vehicle.driver != null &&
+                        vehicle.driver.driverId
                                 .equals(
                                         driver.driverId
                                 ),
@@ -496,41 +606,46 @@ public class DriverOfferService {
                 400
         );
 
-        return value;
+        return vehicle;
     }
 
     private Wallet wallet(
             Driver driver
     ) {
-        Wallet value =
+        Wallet wallet =
                 walletRepository
                         .findByDriver(
                                 driver
                         );
 
         require(
-                value != null,
+                wallet != null,
                 "Driver wallet not found",
                 404
         );
 
-        return value;
+        return wallet;
     }
 
     private DriverOffer findPending(
             String requestId,
             Integer driverId
     ) {
-        return offers.values().stream()
-                .filter(offer ->
-                        offer.requestId.equals(
-                                requestId
-                        ) &&
-                                offer.driverId.equals(
-                                        driverId
-                                ) &&
-                                offer.status ==
-                                        DriverOfferStatus.PENDING
+        return offers.values()
+                .stream()
+                .filter(
+                        offer ->
+                                offer.requestId
+                                        .equals(
+                                                requestId
+                                        ) &&
+                                        offer.driverId
+                                                .equals(
+                                                        driverId
+                                                ) &&
+                                        offer.status ==
+                                                DriverOfferStatus
+                                                        .PENDING
                 )
                 .findFirst()
                 .orElse(null);
@@ -588,10 +703,8 @@ public class DriverOfferService {
                             );
 
             return HexFormat.of()
-                    .formatHex(
-                            bytes
-                    );
-        } catch (Exception exception) {
+                    .formatHex(bytes);
+        } catch (Exception error) {
             throw new WebApplicationException(
                     "Could not create ride PIN",
                     500

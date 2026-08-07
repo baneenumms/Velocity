@@ -1,29 +1,162 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+@import url(
+  "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+);
 
-* {
-  margin: 0;
-  padding: 0;
+:root {
+  font-family:
+    "Poppins",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  color: #12233a;
+  background: #f2efe9;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  --velocity-navy: #12233a;
+  --velocity-blue: #3e6b96;
+  --velocity-red: #ff4040;
+  --velocity-background: #f2efe9;
+  --velocity-card: #ffffff;
+  --velocity-muted: #63748d;
+  --velocity-border: #e2dcd0;
+  --velocity-danger: #d92d20;
+  --velocity-success: #16834a;
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
+html {
   width: 100%;
-  min-height: 100vh;
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
+  min-height: 100dvh;
 
-  background: #f2efe9;
-  color: #12233a;
+  margin: 0;
+  padding: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  background: var(
+    --velocity-background
+  );
+
+  color: var(--velocity-navy);
+
+  -webkit-font-smoothing:
+    antialiased;
+  -moz-osx-font-smoothing:
+    grayscale;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
 button {
-  font-family: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color:
+    transparent;
 }
 
-input {
-  font-family: inherit;
+button,
+a {
+  -webkit-tap-highlight-color:
+    transparent;
+}
+
+input,
+textarea,
+select {
+  max-width: 100%;
+}
+
+img,
+picture,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+svg {
+  flex-shrink: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline:
+    3px solid
+    rgba(62, 107, 150, 0.28);
+
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  input,
+  textarea,
+  select {
+    /*
+     * Prevents automatic input zoom
+     * on mobile browsers.
+     */
+    font-size: 16px;
+  }
+}
+
+@media (
+  prefers-reduced-motion:
+    reduce
+) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration:
+      0.01ms !important;
+    animation-iteration-count:
+      1 !important;
+    transition-duration:
+      0.01ms !important;
+  }
 }

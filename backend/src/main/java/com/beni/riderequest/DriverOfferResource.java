@@ -1,7 +1,12 @@
 package com.beni.riderequest;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
@@ -12,20 +17,23 @@ import java.util.List;
 public class DriverOfferResource {
 
     @Inject
-    DriverOfferService driverOfferService;
+    DriverOfferService
+            driverOfferService;
 
     @POST
     public DriverOffer submitOffer(
             SubmitDriverOfferRequest request
     ) {
-        return driverOfferService.submitOffer(
-                request
-        );
+        return driverOfferService
+                .submitOffer(
+                        request
+                );
     }
 
     @GET
     @Path("/request/{requestId}")
-    public List<DriverOffer> getOffersForRequest(
+    public List<DriverOffer>
+    getOffersForRequest(
             @PathParam("requestId")
             String requestId
     ) {
@@ -37,15 +45,17 @@ public class DriverOfferResource {
 
     @POST
     @Path("/{offerId}/accept")
-    public AcceptDriverOfferResponse acceptOffer(
+    public AcceptDriverOfferResponse
+    acceptOffer(
             @PathParam("offerId")
             String offerId,
 
             AcceptDriverOfferRequest request
     ) {
-        return driverOfferService.acceptOffer(
-                offerId,
-                request
-        );
+        return driverOfferService
+                .acceptOffer(
+                        offerId,
+                        request
+                );
     }
 }

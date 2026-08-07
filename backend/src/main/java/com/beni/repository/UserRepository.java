@@ -39,4 +39,31 @@ public class UserRepository
                 email.trim()
         ).firstResult();
     }
+
+    public User findActiveAdminById(
+            Integer userId
+    ) {
+        if (userId == null) {
+            return null;
+        }
+
+        User user =
+                findById(
+                        userId.longValue()
+                );
+
+        if (
+                user == null ||
+                        !Boolean.TRUE.equals(
+                                user.isAdmin
+                        ) ||
+                        !"ACTIVE".equalsIgnoreCase(
+                                user.accountStatus
+                        )
+        ) {
+            return null;
+        }
+
+        return user;
+    }
 }

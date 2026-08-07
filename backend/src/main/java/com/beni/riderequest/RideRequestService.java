@@ -3,6 +3,7 @@ package com.beni.riderequest;
 import com.beni.dto.CreateRideRequest;
 import com.beni.entity.Passenger;
 import com.beni.repository.PassengerRepository;
+import com.beni.service.ActiveRidePolicyService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -19,36 +20,40 @@ import java.util.concurrent.ConcurrentHashMap;
 @ApplicationScoped
 public class RideRequestService {
 
-    private static final int REQUEST_LIFETIME_MINUTES = 15;
+    private static final int
+            REQUEST_LIFETIME_MINUTES = 15;
 
-    /*
-     * Passenger may reduce the estimated fare
-     * by no more than 10%.
-     */
-    private static final BigDecimal MINIMUM_FARE_FACTOR =
+    private static final BigDecimal
+            MINIMUM_FARE_FACTOR =
             new BigDecimal("0.90");
 
-    /*
-     * Passenger may increase the offer up to
-     * 200% of the estimated fare.
-     */
-    private static final BigDecimal MAXIMUM_FARE_FACTOR =
+    private static final BigDecimal
+            MAXIMUM_FARE_FACTOR =
             new BigDecimal("2.00");
 
-    private final Map<String, RideRequest> requests =
+    private final Map<
+            String,
+            RideRequest
+            > requests =
             new ConcurrentHashMap<>();
 
     @Inject
     PassengerRepository passengerRepository;
 
-    public RideRequest createRideRequest(
+    @Inject
+    ActiveRidePolicyService
+            activeRidePolicyService;
+
+    public synchronized RideRequest
+    createRideRequest(
             CreateRideRequest input
     ) {
         validateCreateRequest(input);
 
         Passenger passenger =
                 passengerRepository.findById(
-                        input.passengerId.longValue()
+                        input.passengerId
+                                .longValue()
                 );
 
         require(
@@ -57,24 +62,41 @@ public class RideRequestService {
                 404
         );
 
+        /*
+         * An ACCEPTED or IN_PROGRESS
+         * database ride blocks a new request.
+         */
+        activeRidePolicyService
+                .requirePassengerAvailable(
+                        input.passengerId
+                );
+
         expireRequests();
 
         /*
-         * A passenger can only have one active
-         * SEARCHING request at a time.
+         * Never silently cancel an existing
+         * search. The passenger must cancel
+         * it explicitly.
          */
-        requests.values().stream()
-                .filter(request ->
-                        request.passengerId.equals(
-                                input.passengerId
-                        ) &&
-                                request.status ==
-                                        RideRequestStatus.SEARCHING
-                )
-                .forEach(request ->
-                        request.status =
-                                RideRequestStatus.CANCELLED
-                );
+        boolean alreadySearching =
+                requests.values()
+                        .stream()
+                        .anyMatch(
+                                request ->
+                                        request.passengerId
+                                                .equals(
+                                                        input.passengerId
+                                                ) &&
+                                                request.status ==
+                                                        RideRequestStatus
+                                                                .SEARCHING
+                        );
+
+        require(
+                !alreadySearching,
+                "You already have an active ride search. Cancel it before requesting another ride.",
+                409
+        );
 
         BigDecimal estimatedFare =
                 estimatedFare(input);
@@ -89,7 +111,8 @@ public class RideRequestService {
                 new RideRequest();
 
         ride.requestId =
-                UUID.randomUUID().toString();
+                UUID.randomUUID()
+                        .toString();
 
         ride.passengerId =
                 input.passengerId;
@@ -113,25 +136,27 @@ public class RideRequestService {
                 dropoffAddress(input);
 
         ride.estimatedFare =
-                money(estimatedFare).doubleValue();
+                money(estimatedFare)
+                        .doubleValue();
 
         ride.passengerFare =
-                money(passengerFare).doubleValue();
+                money(passengerFare)
+                        .doubleValue();
 
         ride.estimatedDurationMinutes =
                 input.estimatedDurationMinutes;
 
         ride.paymentMethod =
-                paymentMethod(input.paymentMethod);
+                paymentMethod(
+                        input.paymentMethod
+                );
 
         ride.status =
                 RideRequestStatus.SEARCHING;
 
-        ride.createdAt =
-                now;
+        ride.createdAt = now;
 
-        ride.fareUpdatedAt =
-                null;
+        ride.fareUpdatedAt = null;
 
         ride.expiresAt =
                 now.plusMinutes(
@@ -146,13 +171,17 @@ public class RideRequestService {
         return ride;
     }
 
-    public List<RideRequest> getAvailableRideRequests() {
+    public List<RideRequest>
+    getAvailableRideRequests() {
         expireRequests();
 
-        return requests.values().stream()
-                .filter(request ->
-                        request.status ==
-                                RideRequestStatus.SEARCHING
+        return requests.values()
+                .stream()
+                .filter(
+                        request ->
+                                request.status ==
+                                        RideRequestStatus
+                                                .SEARCHING
                 )
                 .sorted(
                         Comparator.comparing(
@@ -188,24 +217,30 @@ public class RideRequestService {
         return ride;
     }
 
-    public RideRequest getPassengerActiveRequest(
+    public RideRequest
+    getPassengerActiveRequest(
             Integer passengerId
     ) {
         require(
-                passengerId != null,
-                "Passenger ID is required",
+                passengerId != null &&
+                        passengerId > 0,
+                "Valid passenger ID is required",
                 400
         );
 
         expireRequests();
 
-        return requests.values().stream()
-                .filter(request ->
-                        request.passengerId.equals(
-                                passengerId
-                        ) &&
-                                request.status ==
-                                        RideRequestStatus.SEARCHING
+        return requests.values()
+                .stream()
+                .filter(
+                        request ->
+                                request.passengerId
+                                        .equals(
+                                                passengerId
+                                        ) &&
+                                        request.status ==
+                                                RideRequestStatus
+                                                        .SEARCHING
                 )
                 .max(
                         Comparator.comparing(
@@ -284,14 +319,11 @@ public class RideRequestService {
         ride.fareUpdatedAt =
                 LocalDateTime.now();
 
-        /*
-         * Fare updates do not restart the
-         * original 15-minute expiry timer.
-         */
         return ride;
     }
 
-    public RideRequest cancelRideRequest(
+    public synchronized RideRequest
+    cancelRideRequest(
             String requestId,
             Integer passengerId
     ) {
@@ -316,7 +348,7 @@ public class RideRequestService {
                 ride.status ==
                         RideRequestStatus.SEARCHING,
                 "Only searching requests can be cancelled",
-                400
+                409
         );
 
         ride.status =
@@ -325,7 +357,8 @@ public class RideRequestService {
         return ride;
     }
 
-    public synchronized RideRequest markAccepted(
+    public synchronized RideRequest
+    markAccepted(
             String requestId
     ) {
         RideRequest ride =
@@ -360,8 +393,10 @@ public class RideRequestService {
         );
 
         require(
-                input.estimatedDurationMinutes != null &&
-                        input.estimatedDurationMinutes > 0,
+                input.estimatedDurationMinutes !=
+                        null &&
+                        input.estimatedDurationMinutes >
+                                0,
                 "Estimated duration must be greater than zero",
                 400
         );
@@ -399,13 +434,15 @@ public class RideRequestService {
         );
 
         require(
-                !pickupAddress(input).isBlank(),
+                !pickupAddress(input)
+                        .isBlank(),
                 "Pickup address is required",
                 400
         );
 
         require(
-                !dropoffAddress(input).isBlank(),
+                !dropoffAddress(input)
+                        .isBlank(),
                 "Drop-off address is required",
                 400
         );
@@ -452,11 +489,11 @@ public class RideRequestService {
         BigDecimal offeredFare =
                 money(passengerFare);
 
-        BigDecimal normalizedEstimatedFare =
+        BigDecimal normalizedEstimated =
                 money(estimatedFare);
 
         BigDecimal minimumFare =
-                normalizedEstimatedFare
+                normalizedEstimated
                         .multiply(
                                 MINIMUM_FARE_FACTOR
                         )
@@ -466,7 +503,7 @@ public class RideRequestService {
                         );
 
         BigDecimal maximumFare =
-                normalizedEstimatedFare
+                normalizedEstimated
                         .multiply(
                                 MAXIMUM_FARE_FACTOR
                         )
@@ -480,7 +517,8 @@ public class RideRequestService {
                         minimumFare
                 ) >= 0,
                 "Fare cannot be lower than PKR " +
-                        minimumFare.toPlainString(),
+                        minimumFare
+                                .toPlainString(),
                 400
         );
 
@@ -489,7 +527,8 @@ public class RideRequestService {
                         maximumFare
                 ) <= 0,
                 "Fare cannot be higher than PKR " +
-                        maximumFare.toPlainString(),
+                        maximumFare
+                                .toPlainString(),
                 400
         );
     }
@@ -498,25 +537,33 @@ public class RideRequestService {
         LocalDateTime now =
                 LocalDateTime.now();
 
-        requests.values().stream()
-                .filter(request ->
-                        request.status ==
-                                RideRequestStatus.SEARCHING &&
-                                request.expiresAt != null &&
-                                !now.isBefore(
-                                        request.expiresAt
-                                )
+        requests.values()
+                .stream()
+                .filter(
+                        request ->
+                                request.status ==
+                                        RideRequestStatus
+                                                .SEARCHING &&
+                                        request.expiresAt !=
+                                                null &&
+                                        !now.isBefore(
+                                                request.expiresAt
+                                        )
                 )
-                .forEach(request ->
-                        request.status =
-                                RideRequestStatus.EXPIRED
+                .forEach(
+                        request ->
+                                request.status =
+                                        RideRequestStatus
+                                                .EXPIRED
                 );
     }
 
     private LocalDateTime activityTime(
             RideRequest request
     ) {
-        if (request.fareUpdatedAt != null) {
+        if (
+                request.fareUpdatedAt != null
+        ) {
             return request.fareUpdatedAt;
         }
 
@@ -553,7 +600,8 @@ public class RideRequestService {
     private Double pickupLat(
             CreateRideRequest request
     ) {
-        return request.pickupLatitude != null
+        return request.pickupLatitude !=
+                null
                 ? request.pickupLatitude
                 : request.pickupLat;
     }
@@ -561,7 +609,8 @@ public class RideRequestService {
     private Double pickupLng(
             CreateRideRequest request
     ) {
-        return request.pickupLongitude != null
+        return request.pickupLongitude !=
+                null
                 ? request.pickupLongitude
                 : request.pickupLng;
     }
@@ -569,7 +618,8 @@ public class RideRequestService {
     private Double dropoffLat(
             CreateRideRequest request
     ) {
-        return request.dropoffLatitude != null
+        return request.dropoffLatitude !=
+                null
                 ? request.dropoffLatitude
                 : request.dropoffLat;
     }
@@ -577,7 +627,8 @@ public class RideRequestService {
     private Double dropoffLng(
             CreateRideRequest request
     ) {
-        return request.dropoffLongitude != null
+        return request.dropoffLongitude !=
+                null
                 ? request.dropoffLongitude
                 : request.dropoffLng;
     }
@@ -586,7 +637,8 @@ public class RideRequestService {
             CreateRideRequest request
     ) {
         String value =
-                request.pickupAddress != null
+                request.pickupAddress !=
+                        null
                         ? request.pickupAddress
                         : request.pickupName;
 
@@ -599,7 +651,8 @@ public class RideRequestService {
             CreateRideRequest request
     ) {
         String value =
-                request.dropoffAddress != null
+                request.dropoffAddress !=
+                        null
                         ? request.dropoffAddress
                         : request.dropoffName;
 
@@ -611,13 +664,18 @@ public class RideRequestService {
     private Double fare(
             CreateRideRequest request
     ) {
-        if (request.passengerFare != null) {
+        if (
+                request.passengerFare !=
+                        null
+        ) {
             return request.passengerFare;
         }
 
-        return request.requestedFare == null
+        return request.requestedFare ==
+                null
                 ? null
-                : request.requestedFare.doubleValue();
+                : request.requestedFare
+                .doubleValue();
     }
 
     private BigDecimal money(

@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 
 import {
+  AlertCircle,
   CheckCircle2,
   Flag,
   MapPinned,
@@ -36,15 +37,77 @@ async function getData(response) {
   }
 
   if (!response.ok) {
-    throw new Error(
-      data?.message ||
-        data?.details ||
-        text ||
-        "Request failed"
-    );
+    const requestError =
+      new Error(
+        data?.message ||
+          data?.details ||
+          data?.error ||
+          text ||
+          `Request failed: HTTP ${response.status}`
+      );
+
+    requestError.status =
+      response.status;
+
+    throw requestError;
   }
 
   return data;
+}
+
+function getPinErrorMessage(error) {
+  const message =
+    error?.message || "";
+
+  const normalized =
+    message.toLowerCase();
+
+  const incorrectPin =
+    error?.status === 400 ||
+    error?.status === 401 ||
+    error?.status === 403 ||
+    error?.status === 422 ||
+    normalized.includes(
+      "incorrect pin"
+    ) ||
+    normalized.includes(
+      "invalid pin"
+    ) ||
+    normalized.includes(
+      "ride pin"
+    ) ||
+    normalized.includes(
+      "pin does not match"
+    );
+
+  if (incorrectPin) {
+    return (
+      "Incorrect ride PIN. Ask the " +
+      "passenger to check the PIN and try again."
+    );
+  }
+
+  if (
+    normalized.includes(
+      "failed to fetch"
+    ) ||
+    normalized.includes(
+      "network"
+    ) ||
+    normalized.includes(
+      "connection"
+    )
+  ) {
+    return (
+      "Unable to verify the ride PIN. " +
+      "Please check your connection and try again."
+    );
+  }
+
+  return (
+    message ||
+    "Unable to verify the ride PIN. Please try again."
+  );
 }
 
 function DriverActiveRide() {
@@ -53,7 +116,10 @@ function DriverActiveRide() {
   const driverId = Number(
     sessionStorage.getItem(
       "driverId"
-    )
+    ) ||
+      localStorage.getItem(
+        "driverId"
+      )
   );
 
   const [ride, setRide] =
@@ -84,9 +150,22 @@ function DriverActiveRide() {
   const [error, setError] =
     useState("");
 
+  const [pinError, setPinError] =
+    useState("");
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+  }, []);
+
   useEffect(() => {
     if (
-      !Number.isInteger(driverId) ||
+      !Number.isInteger(
+        driverId
+      ) ||
       driverId <= 0 ||
       busy
     ) {
@@ -97,11 +176,13 @@ function DriverActiveRide() {
 
     const loadRide = async () => {
       try {
-        const data = await getData(
+        const response =
           await fetch(
             `${API}/driver-rides/${driverId}/active`
-          )
-        );
+          );
+
+        const data =
+          await getData(response);
 
         if (stopped) {
           return;
@@ -183,18 +264,24 @@ function DriverActiveRide() {
     busy,
   ]);
 
-  const openMap = (lat, lng) => {
+  const openMap = (
+    latitude,
+    longitude
+  ) => {
+    const lat =
+      Number(latitude);
+
+    const lng =
+      Number(longitude);
+
     if (
-      !Number.isFinite(
-        Number(lat)
-      ) ||
-      !Number.isFinite(
-        Number(lng)
-      )
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng)
     ) {
       setError(
         "Location coordinates are unavailable."
       );
+
       return;
     }
 
@@ -205,18 +292,59 @@ function DriverActiveRide() {
     );
   };
 
+  const showPinSection = () => {
+    setError("");
+    setPinError("");
+    setArrived(true);
+
+    window.setTimeout(() => {
+      document
+        .getElementById(
+          "driver-ride-pin"
+        )
+        ?.focus();
+    }, 0);
+  };
+
+  const handlePinChange = (
+    event
+  ) => {
+    const nextPin =
+      event.target.value
+        .replace(/\D/g, "")
+        .slice(0, 4);
+
+    setPin(nextPin);
+
+    if (pinError) {
+      setPinError("");
+    }
+  };
+
   const startRide = async () => {
+    setError("");
+    setPinError("");
+
     if (!/^\d{4}$/.test(pin)) {
-      setError(
-        "Enter the passenger's 4-digit PIN."
+      setPinError(
+        "Enter the complete 4-digit ride PIN."
       );
+
+      return;
+    }
+
+    if (!ride?.rideId) {
+      setPinError(
+        "Ride information could not be found. Refresh and try again."
+      );
+
       return;
     }
 
     try {
       setBusy(true);
 
-      const data = await getData(
+      const response =
         await fetch(
           `${API}/rides/${ride.rideId}/start`,
           {
@@ -230,8 +358,10 @@ function DriverActiveRide() {
               ridePin: pin,
             }),
           }
-        )
-      );
+        );
+
+      const data =
+        await getData(response);
 
       const updatedRide = {
         ...ride,
@@ -257,92 +387,105 @@ function DriverActiveRide() {
 
       setArrived(false);
       setPin("");
+      setPinError("");
       setError("");
+
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
     } catch (startError) {
-      setError(
-        startError.message ||
-          "Unable to start the ride."
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const completeRide = async () => {
-    setError("");
-
-    if (!ride?.rideId) {
-      setError(
-        "Ride ID was not found."
-      );
-      return;
-    }
-
-    try {
-      setBusy(true);
-
-      const completedRideId =
-        ride.rideId;
-
-      await getData(
-        await fetch(
-          `${API}/rides/${completedRideId}/complete`,
-          {
-            method: "POST",
-          }
+      setPinError(
+        getPinErrorMessage(
+          startError
         )
       );
-
-      sessionStorage.setItem(
-        "lastCompletedRideId",
-        String(completedRideId)
-      );
-
-      sessionStorage.setItem(
-        "lastCompletedRide",
-        JSON.stringify({
-          ...ride,
-          status: "COMPLETED",
-        })
-      );
-
-      sessionStorage.removeItem(
-        "activeDriverRide"
-      );
-
-      sessionStorage.removeItem(
-        "rideId"
-      );
-
-      sessionStorage.removeItem(
-        "rideStatus"
-      );
-
-      navigate(
-        "/driver-feedback",
-        {
-          replace: true,
-          state: {
-            rideId:
-              completedRideId,
-          },
-        }
-      );
-    } catch (completeError) {
-      setError(
-        completeError.message ||
-          "Unable to complete the ride."
-      );
     } finally {
       setBusy(false);
     }
   };
+
+  const completeRide =
+    async () => {
+      setError("");
+
+      if (!ride?.rideId) {
+        setError(
+          "Ride ID was not found."
+        );
+
+        return;
+      }
+
+      try {
+        setBusy(true);
+
+        const completedRideId =
+          ride.rideId;
+
+        const response =
+          await fetch(
+            `${API}/rides/${completedRideId}/complete`,
+            {
+              method: "POST",
+            }
+          );
+
+        await getData(response);
+
+        sessionStorage.setItem(
+          "lastCompletedRideId",
+          String(
+            completedRideId
+          )
+        );
+
+        sessionStorage.setItem(
+          "lastCompletedRide",
+          JSON.stringify({
+            ...ride,
+            status: "COMPLETED",
+          })
+        );
+
+        sessionStorage.removeItem(
+          "activeDriverRide"
+        );
+
+        sessionStorage.removeItem(
+          "rideId"
+        );
+
+        sessionStorage.removeItem(
+          "rideStatus"
+        );
+
+        navigate(
+          "/driver-feedback",
+          {
+            replace: true,
+            state: {
+              rideId:
+                completedRideId,
+            },
+          }
+        );
+      } catch (completeError) {
+        setError(
+          completeError.message ||
+            "Unable to complete the ride."
+        );
+      } finally {
+        setBusy(false);
+      }
+    };
 
   if (!ride) {
     return (
       <div className="driver-active-page">
         <div className="driver-active-card">
-          <p>
+          <p className="driver-active-loading">
             {error ||
               "Loading ride..."}
           </p>
@@ -370,12 +513,22 @@ function DriverActiveRide() {
 
   return (
     <div className="driver-active-page">
-      <div className="driver-active-card">
-        <div className="driver-active-success">
+      <main className="driver-active-card">
+        <div
+          className={
+            `driver-active-success ${
+              inProgress
+                ? "in-progress"
+                : ""
+            }`
+          }
+        >
           {inProgress ? (
             <Navigation size={34} />
           ) : (
-            <CheckCircle2 size={34} />
+            <CheckCircle2
+              size={34}
+            />
           )}
         </div>
 
@@ -385,14 +538,29 @@ function DriverActiveRide() {
             : "Offer Accepted"}
         </h1>
 
-        <div className="driver-active-status">
+        <p className="driver-active-subtitle">
+          {inProgress
+            ? "Follow the destination route and complete the ride when the passenger arrives safely."
+            : "Travel to the pickup location and verify the passenger's ride PIN before starting."}
+        </p>
+
+        <div
+          className={
+            `driver-active-status ${
+              inProgress
+                ? "in-progress"
+                : ""
+            }`
+          }
+        >
           <span>Status</span>
+
           <strong>
             {ride.status}
           </strong>
         </div>
 
-        <div className="driver-active-route">
+        <section className="driver-active-route">
           <div className="driver-active-route-row">
             <span className="driver-active-dot pickup" />
 
@@ -424,9 +592,9 @@ function DriverActiveRide() {
               </strong>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="driver-active-details">
+        <section className="driver-active-details">
           <div>
             <span>Fare</span>
 
@@ -460,7 +628,7 @@ function DriverActiveRide() {
                 "Unavailable"}
             </strong>
           </div>
-        </div>
+        </section>
 
         {!inProgress && (
           <>
@@ -482,8 +650,8 @@ function DriverActiveRide() {
               <button
                 type="button"
                 className="driver-arrived-button"
-                onClick={() =>
-                  setArrived(true)
+                onClick={
+                  showPinSection
                 }
               >
                 <CheckCircle2
@@ -493,30 +661,67 @@ function DriverActiveRide() {
               </button>
             ) : (
               <section className="driver-pin-section">
-                <h2>
-                  Enter Ride PIN
-                </h2>
+                <div className="driver-pin-heading">
+                  <span>
+                    Passenger Verification
+                  </span>
+
+                  <h2>
+                    Enter Ride PIN
+                  </h2>
+
+                  <p>
+                    Ask the passenger
+                    for their four-digit
+                    ride PIN.
+                  </p>
+                </div>
 
                 <input
-                  className="driver-pin-input"
+                  id="driver-ride-pin"
+                  className={
+                    `driver-pin-input ${
+                      pinError
+                        ? "invalid"
+                        : ""
+                    }`
+                  }
                   value={pin}
                   maxLength={4}
                   inputMode="numeric"
+                  autoComplete="one-time-code"
                   placeholder="0000"
-                  onChange={(
-                    event
-                  ) =>
-                    setPin(
-                      event.target
-                        .value
-                        .replace(
-                          /\D/g,
-                          ""
-                        )
-                        .slice(0, 4)
+                  aria-invalid={
+                    Boolean(
+                      pinError
                     )
                   }
+                  aria-describedby={
+                    pinError
+                      ? "driver-pin-error"
+                      : undefined
+                  }
+                  onChange={
+                    handlePinChange
+                  }
                 />
+
+                {pinError && (
+                  <p
+                    id="driver-pin-error"
+                    className="driver-pin-error"
+                    role="alert"
+                    aria-live="assertive"
+                  >
+                    <AlertCircle
+                      size={18}
+                    />
+
+                    <span>
+                      {pinError}
+                    </span>
+                  </p>
+                )}
 
                 <button
                   type="button"
@@ -527,16 +732,18 @@ function DriverActiveRide() {
                   <Play size={18} />
 
                   {busy
-                    ? "Starting..."
+                    ? "Verifying PIN..."
                     : "Start Ride"}
                 </button>
 
                 <button
                   type="button"
                   className="driver-not-arrived-button"
-                  onClick={() =>
-                    setArrived(false)
-                  }
+                  onClick={() => {
+                    setArrived(false);
+                    setPin("");
+                    setPinError("");
+                  }}
                   disabled={busy}
                 >
                   <RotateCcw
@@ -583,11 +790,14 @@ function DriverActiveRide() {
         )}
 
         {error && (
-          <p className="driver-active-error">
+          <p
+            className="driver-active-error"
+            role="alert"
+          >
             {error}
           </p>
         )}
-      </div>
+      </main>
     </div>
   );
 }

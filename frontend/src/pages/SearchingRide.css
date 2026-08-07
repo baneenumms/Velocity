@@ -1,46 +1,88 @@
 .searching-page {
+  width: 100%;
+  min-width: 0;
+
   min-height: 100vh;
-  padding: 36px 18px;
+  min-height: 100dvh;
 
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  box-sizing: border-box;
 
-  background: #f3f1ec;
+  padding:
+    calc(
+      76px +
+      env(
+        safe-area-inset-top
+      )
+    )
+    clamp(12px, 3vw, 28px)
+    calc(
+      32px +
+      env(
+        safe-area-inset-bottom
+      )
+    );
+
+  background:
+    linear-gradient(
+      135deg,
+      #f7f4ee 0%,
+      #efe9df 100%
+    );
+
   color: #12233a;
+
+  /*
+   * The browser page handles scrolling.
+   * There is no separate card scrollbar.
+   */
+  overflow-x: hidden;
 }
 
 .searching-card {
-  width: min(720px, 100%);
-  max-height: calc(100vh - 72px);
-  padding: 34px;
+  width: min(760px, 100%);
+  min-width: 0;
+
+  margin: 0 auto;
+
+  box-sizing: border-box;
+
+  padding:
+    clamp(22px, 4vw, 36px);
+
+  border:
+    1px solid
+    rgba(18, 35, 58, 0.07);
+
+  border-radius: 28px;
 
   background: #fffdf9;
-  border-radius: 28px;
+
   box-shadow:
     0 18px 45px
     rgba(18, 35, 58, 0.12);
 
-  overflow-y: auto;
+  /*
+   * Important mobile fix:
+   * never create an inner scrollbar.
+   */
+  max-height: none;
+  overflow: visible;
 }
 
-.searching-card::-webkit-scrollbar {
-  width: 7px;
-}
-
-.searching-card::-webkit-scrollbar-thumb {
-  background: #c1b9ad;
-  border-radius: 20px;
-}
+/* Loading and timeout screens */
 
 .loading-card,
 .timeout-card {
-  min-height: 390px;
+  min-height:
+    min(
+      520px,
+      calc(100dvh - 130px)
+    );
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   text-align: center;
 }
@@ -52,43 +94,64 @@
 .searching-header h1,
 .loading-card h1,
 .timeout-card h1 {
-  margin: 18px 0 8px;
+  margin: 16px 0 9px;
 
   color: #12233a;
-  font-size: 30px;
-  line-height: 1.2;
+
+  font-size:
+    clamp(25px, 5vw, 32px);
+
+  line-height: 1.25;
+
+  overflow-wrap: anywhere;
 }
 
 .searching-header p,
 .loading-card p,
 .timeout-card > p {
-  max-width: 500px;
+  max-width: 520px;
+
   margin: 0 auto;
 
   color: #64748b;
-  font-size: 14px;
-  line-height: 1.6;
+
+  font-size:
+    clamp(13px, 2vw, 15px);
+
+  line-height: 1.65;
 }
 
 .search-time-remaining {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 7px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  max-width: 100%;
+
+  margin-top: 14px;
+  padding: 8px 13px;
+
+  border-radius: 999px;
 
   background: #eee8dd;
   color: #64748b;
-  border-radius: 20px;
 
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+
+  overflow-wrap: anywhere;
 }
 
+/* Searching animation */
+
 .searching-animation {
-  height: 52px;
+  height: 50px;
 
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -96,13 +159,13 @@
   width: 12px;
   height: 12px;
 
-  background: #3e6b96;
   border-radius: 50%;
+
+  background: #3e6b96;
 
   animation:
     searchingPulse
-    1.2s
-    infinite
+    1.2s infinite
     ease-in-out;
 }
 
@@ -128,15 +191,26 @@
   }
 }
 
+/* Route summary */
+
 .ride-summary {
+  width: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
+
   margin-top: 28px;
-  padding: 22px;
+  padding:
+    clamp(17px, 3vw, 23px);
+
+  border-radius: 20px;
 
   background: #eee8dd;
-  border-radius: 20px;
 }
 
 .route-row {
+  min-width: 0;
+
   display: flex;
   align-items: flex-start;
   gap: 14px;
@@ -145,9 +219,11 @@
 .route-dot {
   width: 13px;
   height: 13px;
-  margin-top: 5px;
 
   flex-shrink: 0;
+
+  margin-top: 5px;
+
   border-radius: 50%;
 }
 
@@ -169,6 +245,7 @@
 
 .route-label {
   color: #8b97a5;
+
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.6px;
@@ -176,78 +253,129 @@
 }
 
 .route-text strong {
+  min-width: 0;
+
   color: #12233a;
-  font-size: 14px;
+
+  font-size:
+    clamp(13px, 2vw, 15px);
+
   line-height: 1.5;
+
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .route-line {
   width: 2px;
-  height: 26px;
-  margin: 5px 0 5px 5px;
+  height: 27px;
+
+  margin:
+    5px
+    0
+    5px
+    5px;
 
   background: #c6beb2;
 }
 
+/* Fare and payment */
+
 .request-details {
+  width: 100%;
+  min-width: 0;
+
   margin-top: 16px;
 
   display: grid;
   grid-template-columns:
-    repeat(2, 1fr);
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
   gap: 14px;
 }
 
 .request-detail {
+  min-width: 0;
+
   padding: 17px;
 
   display: flex;
   flex-direction: column;
   gap: 6px;
 
-  background: #f7f4ee;
-  border: 1px solid #e6ded2;
+  border:
+    1px solid
+    #e6ded2;
+
   border-radius: 16px;
+
+  background: #f7f4ee;
 }
 
 .request-detail span {
   color: #8b97a5;
+
   font-size: 11px;
   font-weight: 700;
+  line-height: 1.4;
   text-transform: uppercase;
 }
 
 .request-detail strong {
   color: #3e6b96;
-  font-size: 18px;
+
+  font-size:
+    clamp(16px, 3vw, 19px);
+
+  line-height: 1.35;
+
+  overflow-wrap: anywhere;
 }
 
+/* Fare reminders */
+
 .fare-guidance-card {
+  width: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
+
   margin-top: 18px;
   padding: 20px;
 
-  background: #eef4fa;
-  border: 1px solid #cbdbea;
+  border:
+    1px solid
+    #cbdbea;
+
   border-radius: 18px;
+
+  background: #eef4fa;
 }
 
 .fare-guidance-card.urgent {
-  background: #fff3d6;
   border-color: #efd597;
+  background: #fff3d6;
 }
 
 .fare-guidance-card h2 {
   margin: 0;
 
   color: #12233a;
-  font-size: 18px;
+
+  font-size:
+    clamp(16px, 3vw, 19px);
+
+  line-height: 1.4;
 }
 
 .fare-guidance-card p {
   margin: 8px 0 0;
 
   color: #64748b;
+
   font-size: 13px;
   line-height: 1.6;
 }
@@ -257,48 +385,57 @@
 
   display: grid;
   grid-template-columns:
-    repeat(2, 1fr);
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
   gap: 10px;
 }
 
 .increase-fare-button,
 .keep-searching-button {
-  padding: 12px 15px;
+  width: 100%;
+  min-height: 46px;
+
+  padding: 11px 15px;
 
   border-radius: 12px;
 
   font-size: 13px;
   font-weight: 800;
+  line-height: 1.3;
+
   cursor: pointer;
 
   transition:
     background 0.2s ease,
+    color 0.2s ease,
     transform 0.2s ease;
 }
 
 .increase-fare-button {
   border: none;
-  background: #3e6b96;
-  color: white;
-}
 
-.increase-fare-button:hover {
-  background: #315979;
-  transform: translateY(-1px);
+  background: #3e6b96;
+  color: #ffffff;
 }
 
 .keep-searching-button {
-  border: 1px solid #b9c8d6;
-  background: white;
+  border:
+    1px solid
+    #b9c8d6;
+
+  background: #ffffff;
   color: #3e6b96;
 }
 
-.keep-searching-button:hover {
-  background: #f4f7fa;
-  transform: translateY(-1px);
-}
-
 .persistent-fare-reminder {
+  width: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
+
   margin-top: 18px;
   padding: 15px 16px;
 
@@ -307,11 +444,14 @@
   justify-content: space-between;
   gap: 15px;
 
-  background: #eef4fa;
   border-radius: 15px;
+
+  background: #eef4fa;
 }
 
 .persistent-fare-reminder div {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -324,78 +464,118 @@
 
 .persistent-fare-reminder span {
   color: #64748b;
+
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.45;
+
+  overflow-wrap: anywhere;
 }
 
 .persistent-fare-reminder button {
+  min-width: 110px;
+  min-height: 44px;
+
   flex-shrink: 0;
+
   padding: 10px 14px;
 
   border: none;
-  border-radius: 10px;
+  border-radius: 11px;
 
   background: #3e6b96;
-  color: white;
+  color: #ffffff;
 
   font-size: 12px;
   font-weight: 800;
+
   cursor: pointer;
 }
 
+/* Driver offers */
+
 .driver-offers-section {
+  width: 100%;
+  min-width: 0;
+
   margin-top: 28px;
 }
 
 .offers-heading {
+  min-width: 0;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   gap: 15px;
+}
+
+.offers-heading > div {
+  min-width: 0;
 }
 
 .offers-heading h2 {
   margin: 0;
 
   color: #12233a;
-  font-size: 21px;
+
+  font-size:
+    clamp(19px, 3vw, 22px);
+
+  line-height: 1.35;
 }
 
 .offers-heading p {
   margin: 4px 0 0;
 
   color: #64748b;
+
   font-size: 13px;
+  line-height: 1.5;
 }
 
 .offers-count {
-  min-width: 34px;
-  height: 34px;
+  min-width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
   padding: 0 10px;
 
-  display: flex;
-  justify-content: center;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
 
   background: #3e6b96;
-  color: white;
-  border-radius: 20px;
+  color: #ffffff;
 
   font-size: 13px;
   font-weight: 800;
 }
 
 .no-offers {
+  width: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
+
   margin-top: 16px;
-  padding: 28px 20px;
+  padding:
+    clamp(22px, 4vw, 30px)
+    clamp(16px, 3vw, 22px);
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  background: #f7f4ee;
-  border: 1px dashed #cfc6ba;
+  border:
+    1px dashed
+    #cfc6ba;
+
   border-radius: 18px;
+
+  background: #f7f4ee;
 
   text-align: center;
 }
@@ -404,14 +584,17 @@
   margin-top: 13px;
 
   color: #12233a;
+
   font-size: 16px;
 }
 
 .no-offers p {
-  max-width: 420px;
+  max-width: 440px;
+
   margin: 7px 0 0;
 
   color: #64748b;
+
   font-size: 13px;
   line-height: 1.55;
 }
@@ -420,22 +603,29 @@
   width: 32px;
   height: 32px;
 
-  border: 4px solid #d9d2c7;
+  border:
+    4px solid
+    #d9d2c7;
+
   border-top-color: #3e6b96;
   border-radius: 50%;
 
   animation:
-    spin 0.9s
-    linear infinite;
+    searchingSpin
+    0.9s linear
+    infinite;
 }
 
-@keyframes spin {
+@keyframes searchingSpin {
   to {
     transform: rotate(360deg);
   }
 }
 
 .offers-list {
+  width: 100%;
+  min-width: 0;
+
   margin-top: 16px;
 
   display: flex;
@@ -444,16 +634,28 @@
 }
 
 .driver-offer-card {
+  width: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
+
   padding: 18px;
 
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+
   align-items: center;
   gap: 18px;
 
-  background: #f7f4ee;
-  border: 1px solid #e5ddd1;
+  border:
+    1px solid
+    #e5ddd1;
+
   border-radius: 18px;
+
+  background: #f7f4ee;
 }
 
 .driver-offer-main {
@@ -471,12 +673,13 @@
   flex-shrink: 0;
 
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
 
   background: #3e6b96;
-  color: white;
-  border-radius: 50%;
+  color: #ffffff;
 
   font-size: 19px;
   font-weight: 800;
@@ -490,23 +693,35 @@
   margin: 0;
 
   color: #12233a;
+
   font-size: 16px;
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
 }
 
 .driver-details p {
   margin: 4px 0;
 
   color: #64748b;
+
   font-size: 13px;
+  line-height: 1.45;
+
+  overflow-wrap: anywhere;
 }
 
 .driver-details span {
   color: #8b97a5;
+
   font-size: 12px;
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
 }
 
 .offer-action {
-  flex-shrink: 0;
+  min-width: 150px;
 
   display: flex;
   flex-direction: column;
@@ -516,6 +731,7 @@
 
 .offer-action > span {
   color: #8b97a5;
+
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -523,10 +739,15 @@
 
 .offer-action > strong {
   color: #3e6b96;
+
   font-size: 20px;
+  line-height: 1.3;
 }
 
 .offer-action button {
+  min-width: 132px;
+  min-height: 44px;
+
   margin-top: 4px;
   padding: 10px 16px;
 
@@ -534,10 +755,11 @@
   border-radius: 11px;
 
   background: #3e6b96;
-  color: white;
+  color: #ffffff;
 
   font-size: 13px;
   font-weight: 700;
+
   cursor: pointer;
 
   transition:
@@ -545,42 +767,50 @@
     transform 0.2s ease;
 }
 
-.offer-action button:hover:not(:disabled) {
-  background: #315979;
-  transform: translateY(-1px);
-}
-
 .offer-action button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
+/* Messages and actions */
+
 .searching-error {
+  width: 100%;
+
+  box-sizing: border-box;
+
   margin: 18px 0 0;
   padding: 13px 15px;
 
+  border-radius: 12px;
+
   background: #fbe6ee;
   color: #a13c62;
-  border-radius: 12px;
 
   font-size: 13px;
   line-height: 1.5;
   text-align: center;
+
+  overflow-wrap: anywhere;
 }
 
-.cancel-search-button {
+.cancel-search-button,
+.search-again-button {
   width: 100%;
+  min-height: 50px;
+
   margin-top: 24px;
-  padding: 15px 20px;
+  padding: 13px 20px;
 
   border: none;
   border-radius: 14px;
 
-  background: #bd3f50;
-  color: white;
+  color: #ffffff;
 
   font-size: 15px;
   font-weight: 800;
+  line-height: 1.35;
+
   cursor: pointer;
 
   transition:
@@ -589,57 +819,72 @@
     opacity 0.2s ease;
 }
 
-.cancel-search-button:hover:not(:disabled) {
-  background: #a73243;
-  transform: translateY(-1px);
+.cancel-search-button {
+  background: #bd3f50;
 }
 
-.cancel-search-button:active:not(:disabled) {
-  transform: scale(0.99);
+.search-again-button {
+  background: #3e6b96;
 }
 
-.cancel-search-button:disabled {
+.cancel-search-button:disabled,
+.search-again-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Timeout */
 
 .timeout-icon {
   width: 72px;
   height: 72px;
 
+  flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
-  background: #eee8dd;
   border-radius: 50%;
+
+  background: #eee8dd;
 
   font-size: 34px;
 }
 
 .timeout-summary {
   width: 100%;
+  min-width: 0;
+
   margin-top: 24px;
 
   display: grid;
   grid-template-columns:
-    repeat(2, 1fr);
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
   gap: 12px;
 }
 
 .timeout-summary div {
+  min-width: 0;
+
   padding: 16px;
 
   display: flex;
   flex-direction: column;
   gap: 6px;
 
-  background: #f7f4ee;
   border-radius: 15px;
+
+  background: #f7f4ee;
 }
 
 .timeout-summary span {
   color: #8b97a5;
+
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -647,55 +892,87 @@
 
 .timeout-summary strong {
   color: #3e6b96;
+
   font-size: 17px;
+
+  overflow-wrap: anywhere;
 }
 
-.search-again-button {
-  width: 100%;
-  margin-top: 24px;
-  padding: 15px 20px;
+/* Hover effects only on mouse devices */
 
-  border: none;
-  border-radius: 14px;
+@media (hover: hover) {
+  .increase-fare-button:hover,
+  .persistent-fare-reminder button:hover,
+  .offer-action button:hover:not(
+    :disabled
+  ),
+  .search-again-button:hover:not(
+    :disabled
+  ) {
+    background: #315979;
+    transform: translateY(-1px);
+  }
 
-  background: #3e6b96;
-  color: white;
+  .keep-searching-button:hover {
+    background: #f4f7fa;
+    transform: translateY(-1px);
+  }
 
-  font-size: 15px;
-  font-weight: 800;
-  cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
+  .cancel-search-button:hover:not(
+    :disabled
+  ) {
+    background: #a73243;
+    transform: translateY(-1px);
+  }
 }
 
-.search-again-button:hover {
-  background: #315979;
-  transform: translateY(-1px);
-}
+/* Tablet and small screens */
 
-@media (max-width: 650px) {
+@media (max-width: 700px) {
   .searching-page {
-    padding: 16px 10px;
+    padding:
+      calc(
+        70px +
+        env(
+          safe-area-inset-top
+        )
+      )
+      12px
+      calc(
+        24px +
+        env(
+          safe-area-inset-bottom
+        )
+      );
   }
 
   .searching-card {
-    max-height: calc(100vh - 32px);
-    padding: 25px 18px;
-    border-radius: 22px;
+    padding: 25px 20px;
+    border-radius: 23px;
   }
 
-  .searching-header h1,
-  .loading-card h1,
-  .timeout-card h1 {
-    font-size: 25px;
+  .driver-offer-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .request-details,
-  .timeout-summary,
-  .fare-guidance-actions {
-    grid-template-columns: 1fr;
+  .offer-action {
+    width: 100%;
+    min-width: 0;
+
+    padding-top: 15px;
+
+    align-items: stretch;
+
+    border-top:
+      1px solid
+      #ded6ca;
+  }
+
+  .offer-action button {
+    width: 100%;
+    min-width: 0;
   }
 
   .persistent-fare-reminder {
@@ -706,22 +983,123 @@
   .persistent-fare-reminder button {
     width: 100%;
   }
+}
+
+/* Phones */
+
+@media (max-width: 480px) {
+  .searching-page {
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+
+  .searching-card {
+    padding: 22px 16px;
+
+    border-radius: 21px;
+
+    box-shadow:
+      0 12px 30px
+      rgba(18, 35, 58, 0.1);
+  }
+
+  .loading-card,
+  .timeout-card {
+    min-height:
+      calc(
+        100dvh -
+        118px
+      );
+  }
+
+  .searching-animation {
+    height: 42px;
+  }
+
+  .searching-animation span {
+    width: 10px;
+    height: 10px;
+  }
+
+  .searching-header h1,
+  .loading-card h1,
+  .timeout-card h1 {
+    margin-top: 12px;
+    font-size: 24px;
+  }
+
+  .ride-summary {
+    margin-top: 23px;
+    padding: 17px 15px;
+    border-radius: 17px;
+  }
+
+  .request-details,
+  .timeout-summary,
+  .fare-guidance-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .request-detail {
+    padding: 15px;
+  }
+
+  .fare-guidance-card {
+    padding: 17px 15px;
+  }
+
+  .offers-heading {
+    align-items: flex-start;
+  }
+
+  .no-offers {
+    padding: 23px 15px;
+  }
 
   .driver-offer-card {
-    align-items: stretch;
-    flex-direction: column;
+    padding: 16px 14px;
   }
 
-  .offer-action {
-    padding-top: 14px;
-
-    align-items: stretch;
-
-    border-top:
-      1px solid #ded6ca;
+  .driver-offer-main {
+    align-items: flex-start;
   }
 
-  .offer-action button {
-    width: 100%;
+  .driver-avatar {
+    width: 44px;
+    height: 44px;
+
+    font-size: 17px;
+  }
+
+  .cancel-search-button,
+  .search-again-button {
+    min-height: 52px;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 350px) {
+  .searching-card {
+    padding-right: 13px;
+    padding-left: 13px;
+  }
+
+  .driver-offer-main {
+    gap: 10px;
+  }
+
+  .driver-avatar {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (
+  prefers-reduced-motion:
+    reduce
+) {
+  .searching-animation span,
+  .small-loader {
+    animation: none;
   }
 }

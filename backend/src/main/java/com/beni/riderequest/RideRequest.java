@@ -17,45 +17,50 @@ public class RideRequest {
     public String dropoffAddress;
 
     /*
-     * Original fare calculated by Velocity.
+     * Original fare calculated
+     * by Velocity.
      */
     public Double estimatedFare;
 
     /*
-     * Fare currently offered by the passenger.
+     * Fare currently offered
+     * by the passenger.
      */
     public Double passengerFare;
 
     /*
-     * Estimated trip duration in minutes.
+     * Estimated trip duration
+     * in minutes.
      */
-    public Integer estimatedDurationMinutes;
+    public Integer
+            estimatedDurationMinutes;
 
     /*
-     * CASH or DIGITAL_TRANSFER
+     * CASH or DIGITAL_TRANSFER.
      *
-     * This only tells the driver how the passenger
-     * intends to pay. Velocity does not process
-     * the ride payment.
+     * This only records how the
+     * passenger intends to pay.
+     * Velocity does not process
+     * the passenger's ride payment.
      */
     public String paymentMethod;
 
     public RideRequestStatus status;
 
     /*
-     * Time when the request was originally created.
+     * Original creation time.
      */
     public LocalDateTime createdAt;
 
     /*
-     * Time when the passenger last changed the fare.
-     * Updating the fare does not restart the
-     * 15-minute request lifetime.
+     * Last fare-change time.
+     * Changing the fare does not
+     * restart the 15-minute timer.
      */
     public LocalDateTime fareUpdatedAt;
 
     /*
-     * The request expires 15 minutes after createdAt.
+     * Search expiry time.
      */
     public LocalDateTime expiresAt;
 

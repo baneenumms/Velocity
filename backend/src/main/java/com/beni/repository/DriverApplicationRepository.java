@@ -5,6 +5,7 @@ import com.beni.entity.DriverApplicationStatus;
 import com.beni.entity.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.LockModeType;
 
 import java.util.List;
 
@@ -12,7 +13,26 @@ import java.util.List;
 public class DriverApplicationRepository
         implements PanacheRepository<DriverApplication> {
 
-    public DriverApplication findLatestByUser(User user) {
+    public DriverApplication findByIdForUpdate(
+            Integer applicationId
+    ) {
+        if (applicationId == null) {
+            return null;
+        }
+
+        return find(
+                "applicationId = ?1",
+                applicationId
+        )
+                .withLock(
+                        LockModeType.PESSIMISTIC_WRITE
+                )
+                .firstResult();
+    }
+
+    public DriverApplication findLatestByUser(
+            User user
+    ) {
         if (user == null) {
             return null;
         }
@@ -23,7 +43,26 @@ public class DriverApplicationRepository
         ).firstResult();
     }
 
-    public DriverApplication findLatestByUserId(Integer userId) {
+    public DriverApplication findLatestByUserForUpdate(
+            User user
+    ) {
+        if (user == null) {
+            return null;
+        }
+
+        return find(
+                "user = ?1 order by attemptNumber desc",
+                user
+        )
+                .withLock(
+                        LockModeType.PESSIMISTIC_WRITE
+                )
+                .firstResult();
+    }
+
+    public DriverApplication findLatestByUserId(
+            Integer userId
+    ) {
         if (userId == null) {
             return null;
         }
@@ -34,7 +73,9 @@ public class DriverApplicationRepository
         ).firstResult();
     }
 
-    public DriverApplication findPendingByUserId(Integer userId) {
+    public DriverApplication findPendingByUserId(
+            Integer userId
+    ) {
         if (userId == null) {
             return null;
         }
@@ -44,6 +85,12 @@ public class DriverApplicationRepository
                 userId,
                 DriverApplicationStatus.PENDING_REVIEW
         ).firstResult();
+    }
+
+    public List<DriverApplication> findAllNewestFirst() {
+        return find(
+                "order by submittedAt desc"
+        ).list();
     }
 
     public List<DriverApplication> findReviewQueue() {
@@ -62,10 +109,16 @@ public class DriverApplicationRepository
         ).list();
     }
 
-    public int nextAttemptNumber(User user) {
-        DriverApplication latest = findLatestByUser(user);
+    public int nextAttemptNumber(
+            User user
+    ) {
+        DriverApplication latest =
+                findLatestByUser(user);
 
-        if (latest == null || latest.attemptNumber == null) {
+        if (
+                latest == null ||
+                        latest.attemptNumber == null
+        ) {
             return 1;
         }
 

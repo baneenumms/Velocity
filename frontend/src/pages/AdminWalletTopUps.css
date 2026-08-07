@@ -1,0 +1,532 @@
+.admin-topups-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 32px 22px 70px;
+  background:
+    linear-gradient(
+      135deg,
+      #f7f4ee 0%,
+      #efe9df 100%
+    );
+  color: #12233a;
+}
+
+.admin-topups-container {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.admin-topups-topbar {
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-topups-topbar button {
+  min-height: 46px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 14px;
+  background: #3f729f;
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-topups-topbar button:hover {
+  background: #315f88;
+}
+
+.admin-topups-topbar button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-topups-topbar .spinning {
+  animation: admin-topup-spin 0.8s linear infinite;
+}
+
+@keyframes admin-topup-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-topups-heading {
+  margin-bottom: 26px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.admin-topups-heading-icon {
+  width: 66px;
+  height: 66px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 19px;
+  background: #dbeafe;
+  color: #315f88;
+}
+
+.admin-topups-heading h1 {
+  margin: 0 0 7px;
+  font-size: clamp(32px, 5vw, 46px);
+  line-height: 1.1;
+}
+
+.admin-topups-heading p {
+  margin: 0;
+  color: #63748d;
+  line-height: 1.55;
+}
+
+.admin-topup-tabs {
+  margin-bottom: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-topup-tabs button {
+  min-height: 44px;
+  padding: 0 17px;
+  border: 1px solid #cad5e1;
+  border-radius: 999px;
+  background: white;
+  color: #324b68;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-topup-tabs button.active {
+  border-color: #3f729f;
+  background: #3f729f;
+  color: white;
+}
+
+.admin-topups-error {
+  margin-bottom: 20px;
+  padding: 15px 17px;
+  border: 1px solid #efb6b6;
+  border-radius: 14px;
+  background: #ffe7e7;
+  color: #af2525;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.admin-topups-loading,
+.admin-topups-empty {
+  padding: 45px 22px;
+  border-radius: 21px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #63748d;
+  box-shadow: 0 15px 38px rgba(40, 30, 15, 0.07);
+  text-align: center;
+}
+
+.admin-topup-list {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 19px;
+}
+
+.admin-topup-card {
+  padding: 23px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border: 1px solid rgba(18, 35, 58, 0.08);
+  border-radius: 21px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 15px 40px rgba(40, 30, 15, 0.08);
+}
+
+.admin-topup-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.admin-topup-card-header h2 {
+  margin: 0 0 5px;
+  font-size: 21px;
+  text-transform: capitalize;
+}
+
+.admin-topup-card-header p {
+  margin: 0;
+  color: #748297;
+  font-size: 13px;
+}
+
+.admin-topup-status {
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-topup-status.pending {
+  background: #fff0c7;
+  color: #946200;
+}
+
+.admin-topup-status.approved {
+  background: #dff6e8;
+  color: #087847;
+}
+
+.admin-topup-status.rejected {
+  background: #ffe0e0;
+  color: #b32323;
+}
+
+.admin-topup-card-amount {
+  color: #315f88;
+  font-size: 30px;
+}
+
+.admin-topup-card-meta {
+  display: grid;
+  gap: 8px;
+  color: #63748d;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.admin-topup-card-meta strong {
+  color: #12233a;
+}
+
+.admin-topup-review-button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: auto;
+  border: none;
+  border-radius: 14px;
+  background: #3f729f;
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-topup-review-button:hover {
+  background: #315f88;
+}
+
+.admin-topup-detail {
+  margin-bottom: 25px;
+  padding: 27px;
+  border: 1px solid rgba(18, 35, 58, 0.09);
+  border-radius: 23px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 19px 50px rgba(40, 30, 15, 0.11);
+}
+
+.admin-topup-detail-header {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid #e1dbd1;
+}
+
+.admin-topup-detail-header span {
+  color: #3f729f;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-topup-detail-header h2 {
+  margin: 5px 0 0;
+  font-size: 27px;
+}
+
+.admin-topup-close {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  background: #eee8dd;
+  color: #12233a;
+  cursor: pointer;
+}
+
+.admin-topup-detail-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.admin-topup-detail-field {
+  min-width: 0;
+  padding: 15px;
+  border-radius: 14px;
+  background: #f2ede5;
+}
+
+.admin-topup-detail-field span {
+  display: block;
+  margin-bottom: 6px;
+  color: #748297;
+  font-size: 11px;
+}
+
+.admin-topup-detail-field strong {
+  display: block;
+  color: #12233a;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.admin-topup-note,
+.admin-topup-rejection-record {
+  margin-top: 16px;
+  padding: 15px;
+  border-radius: 14px;
+}
+
+.admin-topup-note {
+  background: #edf4fa;
+  color: #315f88;
+}
+
+.admin-topup-rejection-record {
+  background: #fff0f0;
+  color: #a52828;
+}
+
+.admin-topup-note p,
+.admin-topup-rejection-record p {
+  margin: 7px 0 0;
+  line-height: 1.5;
+}
+
+.admin-topup-warning {
+  margin-top: 17px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 14px;
+  background: #fff3d6;
+  color: #815b11;
+}
+
+.admin-topup-warning svg {
+  flex-shrink: 0;
+}
+
+.admin-topup-warning p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.admin-topup-actions {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-topup-approve,
+.admin-topup-reject {
+  min-height: 50px;
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-topup-approve {
+  background: #087847;
+}
+
+.admin-topup-reject {
+  background: #b42323;
+}
+
+.admin-topup-approve:disabled,
+.admin-topup-reject:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-topup-reject-form {
+  margin-top: 16px;
+  padding: 17px;
+  border: 1px solid #efbaba;
+  border-radius: 15px;
+  background: #fff6f6;
+}
+
+.admin-topup-reject-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: #8f1f1f;
+  font-weight: 800;
+}
+
+.admin-topup-reject-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  border: 1px solid #d8caca;
+  border-radius: 12px;
+  background: white;
+  color: #12233a;
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+
+.admin-topup-reject-form textarea:focus {
+  border-color: #b42323;
+  box-shadow: 0 0 0 3px rgba(180, 35, 35, 0.12);
+}
+
+.admin-topup-reject-form button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 13px;
+  background: #b42323;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-topup-message-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(18, 35, 58, 0.57);
+  backdrop-filter: blur(5px);
+}
+
+.admin-topup-message-card {
+  width: min(430px, 100%);
+  box-sizing: border-box;
+  padding: 34px 28px 27px;
+  border-radius: 23px;
+  background: #fdfbf7;
+  color: #12233a;
+  box-shadow: 0 25px 70px rgba(18, 35, 58, 0.28);
+  text-align: center;
+}
+
+.admin-topup-message-icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #dff6e8;
+  color: #13834f;
+}
+
+.admin-topup-message-card h2 {
+  margin: 0 0 10px;
+  font-size: 27px;
+}
+
+.admin-topup-message-card p {
+  margin: 0 0 23px;
+  color: #63748d;
+  line-height: 1.6;
+}
+
+.admin-topup-message-card button {
+  width: 100%;
+  min-height: 49px;
+  border: none;
+  border-radius: 14px;
+  background: #3f729f;
+  color: white;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+@media (max-width: 850px) {
+  .admin-topup-detail-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-topups-page {
+    padding: 20px 13px 50px;
+  }
+
+  .admin-topup-list,
+  .admin-topup-actions,
+  .admin-topup-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-topups-heading {
+    align-items: flex-start;
+  }
+
+  .admin-topups-heading-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .admin-topup-card-header {
+    flex-direction: column;
+  }
+
+  .admin-topup-detail {
+    padding: 21px 16px;
+  }
+
+  .admin-topups-topbar button {
+    padding: 0 13px;
+    font-size: 12px;
+  }
+}

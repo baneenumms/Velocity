@@ -1,11 +1,13 @@
 package com.beni.resource;
-
+import com.beni.dto.DriverApplicationCorrectionFormResponse;
+import com.beni.dto.DriverApplicationResubmitRequest;
 import com.beni.dto.DriverApplicationStatusResponse;
 import com.beni.dto.DriverSignupRequest;
 import com.beni.dto.DriverSignupStartResponse;
 import com.beni.dto.DriverSignupVerifyRequest;
 import com.beni.entity.User;
 import com.beni.service.DriverApplicantSessionService;
+import com.beni.service.DriverApplicationResubmissionService;
 import com.beni.service.DriverRegistrationService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -23,6 +25,10 @@ public class DriverRegistrationResource {
     DriverRegistrationService registrationService;
 
     @Inject
+    DriverApplicationResubmissionService
+            resubmissionService;
+
+    @Inject
     DriverApplicantSessionService applicantSessionService;
 
     @POST
@@ -30,7 +36,9 @@ public class DriverRegistrationResource {
     public DriverSignupStartResponse sendSignupOtp(
             DriverSignupRequest request
     ) {
-        return registrationService.startSignup(request);
+        return registrationService.startSignup(
+                request
+        );
     }
 
     @POST
@@ -38,7 +46,9 @@ public class DriverRegistrationResource {
     public DriverApplicationStatusResponse verifySignupOtp(
             DriverSignupVerifyRequest request
     ) {
-        return registrationService.verifySignup(request);
+        return registrationService.verifySignup(
+                request
+        );
     }
 
     @GET
@@ -47,11 +57,49 @@ public class DriverRegistrationResource {
             @HeaderParam("Authorization")
             String authorizationHeader
     ) {
-        User user = applicantSessionService.requireApplicant(
-                authorizationHeader
-        );
+        User user =
+                applicantSessionService.requireApplicant(
+                        authorizationHeader
+                );
 
-        return registrationService.getCurrentStatus(user);
+        return registrationService.getCurrentStatus(
+                user
+        );
+    }
+
+    @GET
+    @Path("/application/correction-form")
+    public DriverApplicationCorrectionFormResponse
+    getCorrectionForm(
+            @HeaderParam("Authorization")
+            String authorizationHeader
+    ) {
+        User user =
+                applicantSessionService.requireApplicant(
+                        authorizationHeader
+                );
+
+        return resubmissionService.getCorrectionForm(
+                user
+        );
+    }
+
+    @POST
+    @Path("/application/resubmit")
+    public DriverApplicationStatusResponse resubmitApplication(
+            @HeaderParam("Authorization")
+            String authorizationHeader,
+            DriverApplicationResubmitRequest request
+    ) {
+        User user =
+                applicantSessionService.requireApplicant(
+                        authorizationHeader
+                );
+
+        return resubmissionService.resubmit(
+                user,
+                request
+        );
     }
 
     @POST
@@ -66,8 +114,10 @@ public class DriverRegistrationResource {
 
         return Response.ok(
                 Map.of(
-                        "success", true,
-                        "message", "Applicant session ended"
+                        "success",
+                        true,
+                        "message",
+                        "Applicant session ended"
                 )
         ).build();
     }

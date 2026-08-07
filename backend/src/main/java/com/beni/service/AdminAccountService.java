@@ -29,15 +29,13 @@ public class AdminAccountService {
             AccountSuspensionRequest request,
             User admin
     ) {
-        User target =
-                findManageableUser(
-                        targetUserId,
-                        admin
-                );
+        User target = findManageableUser(
+                targetUserId,
+                admin
+        );
 
         String reason =
-                request == null ||
-                        request.reason == null
+                request == null || request.reason == null
                         ? ""
                         : request.reason.trim();
 
@@ -61,33 +59,19 @@ public class AdminAccountService {
                 409
         );
 
-        LocalDateTime now =
-                LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
-        target.accountStatus =
-                "SUSPENDED";
+        target.accountStatus = "SUSPENDED";
+        target.suspensionReason = reason;
+        target.suspendedAt = now;
+        target.suspendedBy = admin.userId;
+        target.reactivatedAt = null;
+        target.reactivatedBy = null;
 
-        target.suspensionReason =
-                reason;
-
-        target.suspendedAt =
-                now;
-
-        target.suspendedBy =
-                admin.userId;
-
-        target.reactivatedAt =
-                null;
-
-        target.reactivatedBy =
-                null;
-
-        Driver driver =
-                driverFor(target);
+        Driver driver = driverFor(target);
 
         if (driver != null) {
-            driver.driverStatus =
-                    DriverStatus.Suspended;
+            driver.driverStatus = DriverStatus.Suspended;
         }
 
         return response(
@@ -102,11 +86,10 @@ public class AdminAccountService {
             Integer targetUserId,
             User admin
     ) {
-        User target =
-                findManageableUser(
-                        targetUserId,
-                        admin
-                );
+        User target = findManageableUser(
+                targetUserId,
+                admin
+        );
 
         require(
                 "SUSPENDED".equalsIgnoreCase(
@@ -116,21 +99,14 @@ public class AdminAccountService {
                 409
         );
 
-        target.accountStatus =
-                "ACTIVE";
+        target.accountStatus = "ACTIVE";
+        target.reactivatedAt = LocalDateTime.now();
+        target.reactivatedBy = admin.userId;
 
-        target.reactivatedAt =
-                LocalDateTime.now();
-
-        target.reactivatedBy =
-                admin.userId;
-
-        Driver driver =
-                driverFor(target);
+        Driver driver = driverFor(target);
 
         if (driver != null) {
-            driver.driverStatus =
-                    DriverStatus.Offline;
+            driver.driverStatus = DriverStatus.Offline;
         }
 
         return response(
@@ -145,23 +121,20 @@ public class AdminAccountService {
             User admin
     ) {
         require(
-                targetUserId != null &&
-                        targetUserId > 0,
+                targetUserId != null && targetUserId > 0,
                 "Valid user ID is required.",
                 400
         );
 
         require(
-                admin != null &&
-                        admin.userId != null,
+                admin != null && admin.userId != null,
                 "Admin access is required.",
                 403
         );
 
-        User target =
-                userRepository.findById(
-                        targetUserId.longValue()
-                );
+        User target = userRepository.findById(
+                targetUserId.longValue()
+        );
 
         require(
                 target != null,
@@ -170,17 +143,13 @@ public class AdminAccountService {
         );
 
         require(
-                !target.userId.equals(
-                        admin.userId
-                ),
+                !target.userId.equals(admin.userId),
                 "You cannot suspend or reactivate your own account.",
                 403
         );
 
         require(
-                !Boolean.TRUE.equals(
-                        target.isAdmin
-                ),
+                !Boolean.TRUE.equals(target.isAdmin),
                 "Another admin account cannot be managed here.",
                 403
         );
@@ -193,8 +162,8 @@ public class AdminAccountService {
                         .toLowerCase();
 
         require(
-                role.equals("driver") ||
-                        role.equals("passenger"),
+                role.equals("driver")
+                        || role.equals("passenger"),
                 "Only driver and passenger accounts can be managed.",
                 400
         );
@@ -202,30 +171,13 @@ public class AdminAccountService {
         return target;
     }
 
-    private Driver driverFor(
-            User user
-    ) {
-        if (
-                user.role == null ||
-                        !user.role.equalsIgnoreCase(
-                                "driver"
-                        )
-        ) {
-            return null;
-        }
-
-        Driver driver =
-                driverRepository.findByUser(
-                        user
-                );
-
-        require(
-                driver != null,
-                "Driver record was not found.",
-                404
-        );
-
-        return driver;
+    private Driver driverFor(User user) {
+        /*
+         * A single user may have both Passenger and Driver records.
+         * Therefore, driver access is determined by the drivers table,
+         * not only by users.role.
+         */
+        return driverRepository.findByUser(user);
     }
 
     private AccountStatusResponse response(
@@ -239,22 +191,14 @@ public class AdminAccountService {
         response.success = true;
         response.message = message;
 
-        response.userId =
-                user.userId;
-
-        response.role =
-                user.role;
-
-        response.accountStatus =
-                user.accountStatus;
+        response.userId = user.userId;
+        response.role = user.role;
+        response.accountStatus = user.accountStatus;
 
         if (driver != null) {
-            response.driverId =
-                    driver.driverId;
-
+            response.driverId = driver.driverId;
             response.driverStatus =
-                    driver.driverStatus
-                            .name();
+                    driver.driverStatus.name();
         }
 
         return response;

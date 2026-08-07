@@ -9,17 +9,49 @@ import {
 
 import "./HamburgerMenu.css";
 
-const DRIVER_SESSION_KEYS = [
+const AUTHENTICATED_SESSION_KEYS = [
+  "activeMode",
+
   "userId",
+
   "driverId",
   "driverName",
+  "fullName",
   "vehicleId",
+
+  "passengerId",
+  "passengerName",
+  "passengerPhone",
+  "passengerEmail",
+
+  "rideRequestId",
   "rideId",
   "rideStatus",
+  "paymentMethod",
+  "searchStartedAt",
+
+  "passengerRideDraft",
+  "activeRideRequest",
+  "acceptedRide",
+  "activePassengerRide",
   "activeDriverRide",
+  "ridePin",
+
   "isAdmin",
   "adminToken",
+
+  "applicantToken",
+  "applicationStatus",
+  "canGoOnline",
+  "walletEnabled",
 ];
+
+function readStoredValue(key) {
+  return (
+    sessionStorage.getItem(key) ||
+    localStorage.getItem(key)
+  );
+}
 
 function HamburgerMenu({
   open,
@@ -28,12 +60,12 @@ function HamburgerMenu({
   const navigate = useNavigate();
 
   const isAdmin =
-    sessionStorage.getItem(
+    readStoredValue(
       "isAdmin"
     ) === "true";
 
   const adminToken =
-    sessionStorage.getItem(
+    readStoredValue(
       "adminToken"
     );
 
@@ -41,14 +73,28 @@ function HamburgerMenu({
     isAdmin &&
     Boolean(adminToken);
 
-  const goTo = (path) => {
+  const goTo = (
+    path,
+    mode = "DRIVER"
+  ) => {
+    sessionStorage.setItem(
+      "activeMode",
+      mode
+    );
+
+    localStorage.setItem(
+      "activeMode",
+      mode
+    );
+
     onClose();
+
     navigate(path);
   };
 
   const handleLogout = () => {
-    DRIVER_SESSION_KEYS.forEach(
-      (key) => {
+    AUTHENTICATED_SESSION_KEYS
+      .forEach((key) => {
         sessionStorage.removeItem(
           key
         );
@@ -56,29 +102,36 @@ function HamburgerMenu({
         localStorage.removeItem(
           key
         );
-      }
-    );
+      });
 
     onClose();
 
-    navigate("/", {
-      replace: true,
-    });
+    navigate(
+      "/role",
+      {
+        replace: true,
+      }
+    );
   };
 
   return (
     <>
       <div
-        className={`menu-overlay ${
-          open ? "open" : ""
-        }`}
+        className={
+          `menu-overlay ${
+            open ? "open" : ""
+          }`
+        }
         onClick={onClose}
       />
 
-      <div
-        className={`menu-panel ${
-          open ? "open" : ""
-        }`}
+      <aside
+        className={
+          `menu-panel ${
+            open ? "open" : ""
+          }`
+        }
+        aria-hidden={!open}
       >
         <button
           type="button"
@@ -140,7 +193,8 @@ function HamburgerMenu({
               className="admin-menu-button"
               onClick={() =>
                 goTo(
-                  "/admin/feedback"
+                  "/admin",
+                  "ADMIN"
                 )
               }
             >
@@ -156,11 +210,11 @@ function HamburgerMenu({
             type="button"
             onClick={() =>
               goTo(
-                "/driver-terms"
+                "/terms-and-policy"
               )
             }
           >
-            Terms &amp; Conditions
+            Terms &amp; Policy
           </button>
 
           <button
@@ -173,7 +227,7 @@ function HamburgerMenu({
             Logout
           </button>
         </nav>
-      </div>
+      </aside>
     </>
   );
 }
