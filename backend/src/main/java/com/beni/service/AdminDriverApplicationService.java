@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.WebApplicationException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -212,8 +213,8 @@ public class AdminDriverApplicationService {
 
         Wallet wallet = new Wallet();
         wallet.driver = driver;
-        wallet.balance = 0.0;
-        wallet.reservedBalance = 0.0;
+        wallet.balance = BigDecimal.ZERO;
+        wallet.reservedBalance = BigDecimal.ZERO;
 
         walletRepository.persist(wallet);
         walletRepository.flush();

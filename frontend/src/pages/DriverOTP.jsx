@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail } from "lucide-react";
 import "./OTP.css";
+import VelocityMark from "../components/VelocityMark";
 
 function DriverOTP() {
 
@@ -15,6 +16,8 @@ function DriverOTP() {
     const [otpFailed, setOtpFailed] = useState(false);
 
     const inputs = useRef([]);
+
+    useEffect(() => { inputs.current[0]?.focus(); }, []);
 
     const handleChange = (value, index) => {
 
@@ -30,6 +33,11 @@ function DriverOTP() {
     };
 
     const handleKeyDown = (e, index) => {
+
+        if (e.key === "Enter") {
+            handleVerify();
+            return;
+        }
 
         if (
             e.key === "Backspace" &&
@@ -95,15 +103,8 @@ function DriverOTP() {
 
     return (
 
-        <div className="page">
-
-            <div className="velocity-title">
-                <span className="velo">VEL</span>
-                <span className="wheel">
-                    <span className="hub"></span>
-                </span>
-                <span className="city">CITY</span>
-            </div>
+        <div className="page auth-page">
+            <VelocityMark className="auth-logo" />
 
             <div className="card">
 
@@ -131,6 +132,14 @@ function DriverOTP() {
                             key={index}
                             ref={(el) => (inputs.current[index] = el)}
                             className="otp-box"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            autoComplete={
+                                index === 0
+                                    ? "one-time-code"
+                                    : "off"
+                            }
                             maxLength={1}
                             value={digit}
                             disabled={otpFailed}

@@ -74,10 +74,6 @@ public class Ride {
     @Column(name = "driver_fee_reserved_amount", nullable = false)
     public BigDecimal walletReservedAmount = BigDecimal.ZERO;
 
-    // Legacy column; always remains zero
-    @Column(name = "passenger_wallet_reserved_amount", nullable = false)
-    public BigDecimal passengerWalletReservedAmount = BigDecimal.ZERO;
-
     @Column(name = "platform_fee_amount", nullable = false)
     public BigDecimal platformFeeAmount = BigDecimal.ZERO;
 
@@ -110,9 +106,6 @@ public class Ride {
     void applyDefaults() {
         if (paymentStatus == null) paymentStatus = "PENDING";
         if (walletReservedAmount == null) walletReservedAmount = BigDecimal.ZERO;
-        if (passengerWalletReservedAmount == null) {
-            passengerWalletReservedAmount = BigDecimal.ZERO;
-        }
         if (platformFeeAmount == null) platformFeeAmount = BigDecimal.ZERO;
         if (cancellationFee == null) cancellationFee = BigDecimal.ZERO;
     }

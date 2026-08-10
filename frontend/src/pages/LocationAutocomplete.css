@@ -5,11 +5,18 @@
 
 .location-autocomplete-label {
   display: block;
-  margin-bottom: 7px;
 
   color: #34445c;
   font-size: 14px;
   font-weight: 700;
+}
+
+.location-autocomplete-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
 }
 
 .location-autocomplete-input-wrapper {

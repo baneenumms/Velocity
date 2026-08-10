@@ -14,6 +14,8 @@ function LocationAutocomplete({
   value,
   onSelect,
   nearbyLocation = null,
+  labelAction = null,
+  variant = "",
 }) {
   const containerRef = useRef(null);
 
@@ -271,13 +273,17 @@ function LocationAutocomplete({
 
   return (
     <div
-      className="location-autocomplete"
+      className={`location-autocomplete ${variant}`}
       ref={containerRef}
     >
       {label && (
-        <label className="location-autocomplete-label">
-          {label}
-        </label>
+        <div className="location-autocomplete-label-row">
+          <label className="location-autocomplete-label">
+            {label}
+          </label>
+
+          {labelAction}
+        </div>
       )}
 
       <div className="location-autocomplete-input-wrapper">

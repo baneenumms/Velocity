@@ -141,7 +141,12 @@ public class DriverAuthService {
 
         String otp = otpService.generateOTP();
 
-        otpStorageService.saveOTP(user.email, otp);
+        otpStorageService.saveOTP(
+                user,
+                user.email,
+                "DRIVER_LOGIN",
+                otp
+        );
         emailService.sendOTPEmail(user.email, otp);
 
         SendOtpResponse response = new SendOtpResponse();
@@ -156,16 +161,11 @@ public class DriverAuthService {
             String email,
             String enteredOtp
     ) {
-        boolean valid = otpStorageService.verifyOTP(
+        return otpStorageService.consumeOTP(
                 email,
+                "DRIVER_LOGIN",
                 enteredOtp
         );
-
-        if (valid) {
-            otpStorageService.removeOTP(email);
-        }
-
-        return valid;
     }
 
     public boolean isDriverRegistered(String phoneNumber) {

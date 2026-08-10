@@ -245,9 +245,6 @@ public class RideService {
         ride.walletReservedAmount =
                 scale(reservedAmount);
 
-        ride.passengerWalletReservedAmount =
-                BigDecimal.ZERO;
-
         ride.platformFeeAmount =
                 BigDecimal.ZERO;
 
@@ -516,14 +513,12 @@ public class RideService {
 
         wallet.balance =
                 balance
-                        .subtract(fee)
-                        .doubleValue();
+                        .subtract(fee);
 
         wallet.reservedBalance =
                 reservedBalance
                         .subtract(fee)
-                        .max(BigDecimal.ZERO)
-                        .doubleValue();
+                        .max(BigDecimal.ZERO);
 
         wallet.updatedAt =
                 now;
@@ -608,8 +603,7 @@ public class RideService {
                 balance
                         .subtract(
                                 cancellationFee
-                        )
-                        .doubleValue();
+                        );
 
         wallet.reservedBalance =
                 reserved
@@ -618,8 +612,7 @@ public class RideService {
                         )
                         .max(
                                 BigDecimal.ZERO
-                        )
-                        .doubleValue();
+                        );
 
         wallet.updatedAt =
                 LocalDateTime.now();
@@ -847,14 +840,6 @@ public class RideService {
         }
 
         if (
-                ride.passengerWalletReservedAmount ==
-                        null
-        ) {
-            ride.passengerWalletReservedAmount =
-                    BigDecimal.ZERO;
-        }
-
-        if (
                 ride.platformFeeAmount ==
                         null
         ) {
@@ -1028,12 +1013,13 @@ public class RideService {
     }
 
     private BigDecimal money(
-            Double value
+            BigDecimal value
     ) {
-        return money(
-                value == null
-                        ? 0
-                        : value
+        return (value == null
+                ? BigDecimal.ZERO
+                : value).setScale(
+                2,
+                RoundingMode.HALF_UP
         );
     }
 

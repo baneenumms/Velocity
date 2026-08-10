@@ -6,6 +6,7 @@ import {
     UserRoundPlus,
 } from "lucide-react";
 import "./DriverSignUP.css";
+import VelocityMark from "../components/VelocityMark";
 
 const API = "http://localhost:8080";
 
@@ -232,11 +233,7 @@ function DriverSignUP() {
 
         <div className="driver-signup-page">
 
-            <div className="driver-signup-logo">
-                <span className="velo">VEL</span>
-                <span className="wheel"></span>
-                <span className="city">CITY</span>
-            </div>
+            <VelocityMark className="driver-signup-logo" />
 
             <form
                 className="driver-signup-card"
@@ -286,6 +283,7 @@ function DriverSignUP() {
                                 type="text"
                                 maxLength={100}
                                 value={form.fullName}
+                                autoFocus
                                 onChange={updateField}
                                 autoComplete="name"
                             />

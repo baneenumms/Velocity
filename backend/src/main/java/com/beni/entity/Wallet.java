@@ -1,6 +1,7 @@
 package com.beni.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,10 +18,10 @@ public class Wallet {
     public Driver driver;
 
     @Column(nullable = false)
-    public Double balance = 0.0;
+    public BigDecimal balance = BigDecimal.ZERO;
 
     @Column(name = "reserved_balance", nullable = false)
-    public Double reservedBalance = 0.0;
+    public BigDecimal reservedBalance = BigDecimal.ZERO;
 
     @Column(name = "updated_at")
     public LocalDateTime updatedAt;

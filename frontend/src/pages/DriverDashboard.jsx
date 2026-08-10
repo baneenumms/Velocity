@@ -888,17 +888,6 @@ function DriverDashboard() {
         }
       />
 
-      <button
-        type="button"
-        className="menu-btn"
-        aria-label="Open menu"
-        onClick={() =>
-          setMenuOpen(true)
-        }
-      >
-        ☰
-      </button>
-
       <div
         className="dashboard-page"
         ref={
@@ -909,6 +898,17 @@ function DriverDashboard() {
           <VelocityHomeButton
             mode="DRIVER"
           />
+
+          <button
+            type="button"
+            className="menu-btn"
+            aria-label="Open menu"
+            onClick={() =>
+              setMenuOpen(true)
+            }
+          >
+            ☰
+          </button>
         </header>
 
         <DashboardRideState
@@ -920,13 +920,16 @@ function DriverDashboard() {
         />
 
         <main className="driver-dashboard-content">
-          <section className="card dashboard-card">
-            <h1>
-              Welcome back,{" "}
-              {driverName}
-            </h1>
+          <section className="driver-dashboard-welcome">
+            <p>Ready to receive requests?</p>
 
-            <p>
+            <h1>
+              Welcome back, {driverName}
+            </h1>
+          </section>
+
+          <section className="card dashboard-card">
+            <p className="driver-status-copy">
               {hasActiveRide
                 ? "Complete or cancel your current ride before receiving new requests."
                 : online

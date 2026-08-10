@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Phone } from "lucide-react";
 import "./Phone.css";
+import VelocityMark from "../components/VelocityMark";
 
 function PassengerPhone() {
 
@@ -88,17 +89,8 @@ function PassengerPhone() {
 
     return (
 
-        <div className="page">
-
-            <div className="velocity-title">
-                <span className="velo">VEL</span>
-
-                <span className="wheel">
-                    <span className="hub"></span>
-                </span>
-
-                <span className="city">CITY</span>
-            </div>
+        <div className="page auth-page">
+            <VelocityMark className="auth-logo" />
 
             <div className="card">
 
@@ -126,6 +118,7 @@ function PassengerPhone() {
                         placeholder="3001234567"
                         value={phone}
                         maxLength={10}
+                        autoFocus
                         disabled={loading}
                         onChange={(e) =>
                             setPhone(

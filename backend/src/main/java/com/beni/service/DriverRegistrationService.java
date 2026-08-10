@@ -100,14 +100,17 @@ public class DriverRegistrationService {
         String otp = otpService.generateOTP();
 
         try {
-            otpStorageService.saveOTP(request.email, otp);
+            otpStorageService.saveOTP(
+                    null,
+                    request.email,
+                    "DRIVER_SIGNUP",
+                    otp
+            );
             emailService.sendOTPEmail(request.email, otp);
         } catch (RuntimeException exception) {
             registrationSessionService.removeSession(
                     registrationToken
             );
-
-            otpStorageService.removeOTP(request.email);
 
             throw new WebApplicationException(
                     "Unable to send the verification email",
@@ -159,8 +162,9 @@ public class DriverRegistrationService {
             );
         }
 
-        boolean validOtp = otpStorageService.verifyOTP(
+        boolean validOtp = otpStorageService.consumeOTP(
                 pending.email,
+                "DRIVER_SIGNUP",
                 request.otp
         );
 
@@ -175,6 +179,12 @@ public class DriverRegistrationService {
         }
 
         User user = resolveUserAtVerification(pending);
+
+        otpStorageService.linkLatestOtpToUser(
+                pending.email,
+                "DRIVER_SIGNUP",
+                user
+        );
 
         validateApplicationIdentifiers(
                 pending.cnicNumber,
@@ -228,7 +238,6 @@ public class DriverRegistrationService {
 
         applicationRepository.persist(application);
 
-        otpStorageService.removeOTP(pending.email);
         registrationSessionService.removeSession(
                 request.registrationToken
         );

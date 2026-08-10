@@ -6,21 +6,14 @@ import {
 } from "lucide-react";
 
 import "./RoleSelection.css";
+import VelocityMark from "../components/VelocityMark";
 
 function RoleSelection() {
   const navigate = useNavigate();
 
   return (
     <div className="role-page">
-      <div className="velocity-title role-logo">
-        <span className="velo">VEL</span>
-
-        <span className="wheel">
-          <span className="hub" />
-        </span>
-
-        <span className="city">CITY</span>
-      </div>
+      <VelocityMark className="role-logo" />
 
       <main className="role-card">
         <h1>Choose your role</h1>

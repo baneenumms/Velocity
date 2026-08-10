@@ -102,7 +102,9 @@ public class PassengerAuthService {
                 otpService.generateOTP();
 
         otpStorageService.saveOTP(
+                user,
                 user.email,
+                "PASSENGER_LOGIN",
                 otp
         );
 
@@ -197,8 +199,9 @@ public class PassengerAuthService {
         }
 
         boolean valid =
-                otpStorageService.verifyOTP(
+                otpStorageService.consumeOTP(
                         user.email,
+                        "PASSENGER_LOGIN",
                         otp
                 );
 
@@ -209,10 +212,6 @@ public class PassengerAuthService {
 
             return response;
         }
-
-        otpStorageService.removeOTP(
-                user.email
-        );
 
         response.success = true;
         response.message =

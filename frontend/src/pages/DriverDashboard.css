@@ -115,11 +115,16 @@
     minmax(0, 1fr);
 
   grid-template-areas:
+    "welcome welcome"
     "profile map"
     "requests requests";
 
   gap: 22px;
   align-items: stretch;
+}
+
+.driver-dashboard-welcome {
+  grid-area: welcome;
 }
 
 .dashboard-card {
@@ -693,6 +698,7 @@
     grid-template-columns: 1fr;
 
     grid-template-areas:
+      "welcome"
       "profile"
       "map"
       "requests";

@@ -60,7 +60,9 @@ public class PassengerRegistrationService {
                 otpService.generateOTP();
 
         otpStorageService.saveOTP(
+                null,
                 email,
+                "PASSENGER_SIGNUP",
                 otp
         );
 
@@ -122,8 +124,9 @@ public class PassengerRegistrationService {
         );
 
         boolean valid =
-                otpStorageService.verifyOTP(
+                otpStorageService.consumeOTP(
                         email,
+                        "PASSENGER_SIGNUP",
                         otp
                 );
 
@@ -148,6 +151,12 @@ public class PassengerRegistrationService {
         userRepository.persist(user);
         userRepository.flush();
 
+        otpStorageService.linkLatestOtpToUser(
+                email,
+                "PASSENGER_SIGNUP",
+                user
+        );
+
         Passenger passenger =
                 new Passenger();
 
@@ -158,12 +167,6 @@ public class PassengerRegistrationService {
         );
 
         passengerRepository.flush();
-
-        /*
-         * Remove the OTP only after both records
-         * have been created successfully.
-         */
-        otpStorageService.removeOTP(email);
 
         VerifyOtpResponse response =
                 new VerifyOtpResponse();

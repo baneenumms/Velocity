@@ -11,6 +11,7 @@ import {
     Wallet,
 } from "lucide-react";
 import "./DriverApplicationStatus.css";
+import VelocityMark from "../components/VelocityMark";
 
 const API = "http://localhost:8080";
 
@@ -326,11 +327,9 @@ function DriverApplicationStatus() {
 
             <header className="application-dashboard-header">
 
-                <div className="application-dashboard-brand">
-                    <span className="velo">VEL</span>
-                    <span className="wheel"></span>
-                    <span className="city">CITY</span>
-                </div>
+                <VelocityMark
+                    className="application-dashboard-brand"
+                />
 
                 <div className="application-header-actions">
 

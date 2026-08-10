@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 import { UserRoundPlus } from "lucide-react";
 import "./Signup.css";
+import VelocityMark from "../components/VelocityMark";
 
 const API = "http://localhost:8080";
 
@@ -159,20 +160,8 @@ function PassengerSignUP() {
   }
 
   return (
-    <div className="page">
-      <div className="velocity-title">
-        <span className="velo">
-          VEL
-        </span>
-
-        <span className="wheel">
-          <span className="hub" />
-        </span>
-
-        <span className="city">
-          CITY
-        </span>
-      </div>
+    <div className="page auth-page">
+      <VelocityMark className="auth-logo" />
 
       <div className="card signup-card">
         <div className="icon-circle">
@@ -216,6 +205,7 @@ function PassengerSignUP() {
             <input
               type="text"
               value={fullName}
+              autoFocus
               maxLength={100}
               placeholder="Enter your full name"
               disabled={loading}

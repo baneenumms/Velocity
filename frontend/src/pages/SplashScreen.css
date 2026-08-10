@@ -1,119 +1,47 @@
-.page {
-  width: 100%;
-  height: 100vh;
+.velocity-splash {
+  position: relative;
+  display: grid;
+  min-height: 100svh;
   overflow: hidden;
-  position: relative;
-
-  background: linear-gradient(160deg, #f2efe9 0%, #ece7de 50%, #efe9e2 100%);
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  font-family: "Poppins", sans-serif;
-  animation: fadeIn 0.9s ease;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 16% 14%, rgba(248, 188, 207, .62), transparent 31%),
+    linear-gradient(135deg, #edf3fc 0%, #c9d8f0 52%, #f8d2df 100%);
 }
 
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(110px);
-  opacity: 0.35;
-  pointer-events: none;
-}
-.glow-blue {
-  width: 380px;
-  height: 380px;
-  background: #bcd4e6;
-  top: 5%;
-  left: 6%;
-}
-.glow-pink {
-  width: 320px;
-  height: 320px;
-  background: #f0c4d6;
-  bottom: 5%;
-  right: 8%;
-}
-
-.velocity-title {
+.splash-orb { position: absolute; width: 420px; height: 420px; border-radius: 50%; filter: blur(65px); opacity: .35; pointer-events: none; }
+.splash-orb-one { top: -190px; left: -160px; background: #f2b8c9; }
+.splash-orb-two { right: -160px; bottom: -210px; background: #a9c6e5; }
+.splash-mark { position: relative; z-index: 1; font-size: clamp(36px, 9vw, 56px); }
+.splash-tagline {
   position: relative;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 72px;
-  letter-spacing: -3px;
-}
-
-.velo {
-  background: linear-gradient(180deg, #3e6b96, #234a6b);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.wheel {
-  width: 72px;
-  height: 72px;
-  margin: 0 8px;
-  border-radius: 50%;
-  background: repeating-conic-gradient(#111 0deg 10deg, #1c1c1c 10deg 20deg);
-  border: 4px solid #0a0a0a;
-  box-shadow: 0 0 0 3px #2c2c2c, inset 0 0 12px rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: spin 2.2s linear infinite;
-}
-
-.hub {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #d9d9d9, #8a8a8a 70%, #5a5a5a);
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
-}
-
-.city-wrap {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-}
-
-.city {
+  margin: 0;
+  color: #c87898;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(19px, 4vw, 27px);
   font-style: italic;
-  background: linear-gradient(180deg, #c2537d, #a13c62);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font-weight: 600;
+  letter-spacing: .025em;
+  line-height: 1.1;
 }
-
-.city-reflect {
-  transform: scaleY(-1);
-  opacity: 0.18;
-  mask-image: linear-gradient(to bottom, black, transparent 70%);
-  -webkit-mask-image: linear-gradient(to bottom, black, transparent 70%);
-  margin-top: -6px;
-}
-
-.tagline {
-  position: relative;
-  z-index: 1;
-  margin-top: 26px;
-  font-size: 18px;
-  color: #7c8ba0;
-  letter-spacing: 3px;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
-}
+.splash-car { position: relative; z-index: 1; width: min(92vw, 590px); margin-top: 26px; overflow: visible; }
+.splash-road-bed { fill: #36516b; opacity: .96; }
+.splash-road-edge { stroke: #f6bed0; stroke-width: 3; opacity: .9; }
+.splash-road { stroke: #f7e8b0; stroke-width: 3; stroke-dasharray: 35 14; opacity: .94; }
+.splash-car-body { fill: #eaa6bd; stroke: #17243a; stroke-width: 3; }
+.splash-car-roof { fill: #a9c6e5; stroke: #17243a; stroke-width: 3; }
+.splash-window { fill: #5f89a6; stroke: #f9fbff; stroke-width: 2; }
+.splash-bumper { fill: #d886a5; }
+.splash-wheel { fill: #17243a; stroke: #f9fbff; stroke-width: 4; transform-box: fill-box; transform-origin: center; animation: splash-wheel-roll 1.4s linear infinite; }
+.splash-wheel-hub { fill: #f9fbff; stroke: #6b94bd; stroke-width: 4; }
+.splash-headlight { fill: #fff7d9; filter: drop-shadow(0 0 8px #fff9e4); }
+.splash-headlight-left { animation: splash-blink-left 1.1s steps(1, end) infinite; }
+.splash-headlight-right { animation: splash-blink-right 1.1s steps(1, end) infinite; }
+@keyframes splash-wheel-roll { to { transform: rotate(360deg); } }
+@keyframes splash-blink-left { 0%, 46%, 100% { opacity: 1; } 47%, 95% { opacity: .16; } }
+@keyframes splash-blink-right { 0%, 46%, 100% { opacity: .16; } 47%, 95% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .splash-wheel, .splash-headlight-left, .splash-headlight-right { animation: none; } }

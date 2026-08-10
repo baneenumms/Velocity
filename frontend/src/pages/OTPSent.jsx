@@ -4,6 +4,7 @@ import {
     useNavigate
 } from "react-router-dom";
 import "./OTPSent.css";
+import VelocityMark from "../components/VelocityMark";
 
 function OTPSent() {
 
@@ -45,17 +46,8 @@ function OTPSent() {
 
     return (
 
-        <div className="page">
-
-            <div className="velocity-title">
-                <span className="velo">VEL</span>
-
-                <span className="wheel">
-                    <span className="hub"></span>
-                </span>
-
-                <span className="city">CITY</span>
-            </div>
+        <div className="page auth-page">
+            <VelocityMark className="auth-logo" />
 
             <div className="card status-card">
 

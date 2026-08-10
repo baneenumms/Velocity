@@ -363,3 +363,12 @@
     height: 70px;
   }
 }
+
+.auth-page { background: radial-gradient(circle at 15% 12%, rgba(249, 194, 212, .52), transparent 29%), linear-gradient(135deg, #edf3fc 0%, #c9d8f0 52%, #f8d2df 100%); }
+.auth-page .card { background: rgba(255,255,255,.88); border-color: rgba(115,78,94,.08); box-shadow: 0 18px 42px rgba(97,65,82,.10); }
+.auth-page .icon-circle { background: #f2b8c9; }
+.auth-page .primary-btn { background: #eaa6bd; }
+.auth-page .primary-btn:hover:not(:disabled) { background: #df96af; }
+.auth-page .signup-field input:focus { border-color: #e5a6ba; box-shadow: 0 0 0 3px rgba(229,166,186,.22); }
+.auth-page .signup-phone { background: #eaf2fb; color: #4d6f95; }
+.auth-page .change-phone-button { color: #8c536b; }

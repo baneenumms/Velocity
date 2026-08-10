@@ -342,8 +342,7 @@ public class WalletTopUpService {
                         .setScale(
                                 2,
                                 RoundingMode.HALF_UP
-                        )
-                        .doubleValue();
+                        );
 
         lockedWallet.updatedAt =
                 now;
@@ -482,15 +481,11 @@ public class WalletTopUpService {
     }
 
     private BigDecimal money(
-            Double value
+            BigDecimal value
     ) {
-        if (value == null) {
-            return new BigDecimal("0.00");
-        }
-
-        return BigDecimal
-                .valueOf(value)
-                .setScale(
+        return (value == null
+                ? BigDecimal.ZERO
+                : value).setScale(
                         2,
                         RoundingMode.HALF_UP
                 );

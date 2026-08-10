@@ -9,6 +9,7 @@ import {
     Lock,
 } from "lucide-react";
 import "./DriverPassword.css";
+import VelocityMark from "../components/VelocityMark";
 
 const API = "http://localhost:8080";
 
@@ -259,17 +260,8 @@ function DriverPassword() {
     };
 
     return (
-        <div className="page">
-
-            <div className="velocity-title">
-                <span className="velo">VEL</span>
-
-                <span className="wheel">
-                    <span className="hub" />
-                </span>
-
-                <span className="city">CITY</span>
-            </div>
+        <div className="page auth-page">
+            <VelocityMark className="auth-logo" />
 
             <div className="card">
 
@@ -295,6 +287,7 @@ function DriverPassword() {
                                 : "password"
                         }
                         placeholder="Password"
+                        autoFocus
                         value={password}
                         disabled={loading}
                         onChange={(event) =>

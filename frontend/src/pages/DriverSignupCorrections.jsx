@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import "./DriverSignUP.css";
 import "./DriverSignupCorrections.css";
+import VelocityMark from "../components/VelocityMark";
 
 const API = "http://localhost:8080";
 
@@ -590,17 +591,9 @@ function DriverSignupCorrections() {
     if (successMessage) {
         return (
             <div className="driver-signup-page">
-                <div className="driver-signup-logo">
-                    <span className="velo">
-                        VEL
-                    </span>
-
-                    <span className="wheel"></span>
-
-                    <span className="city">
-                        CITY
-                    </span>
-                </div>
+                <VelocityMark
+                    className="driver-signup-logo"
+                />
 
                 <section className="driver-correction-success-card">
                     <div className="driver-correction-success-icon">
@@ -632,17 +625,9 @@ function DriverSignupCorrections() {
 
     return (
         <div className="driver-signup-page">
-            <div className="driver-signup-logo">
-                <span className="velo">
-                    VEL
-                </span>
-
-                <span className="wheel"></span>
-
-                <span className="city">
-                    CITY
-                </span>
-            </div>
+            <VelocityMark
+                className="driver-signup-logo"
+            />
 
             <form
                 className="driver-signup-card"

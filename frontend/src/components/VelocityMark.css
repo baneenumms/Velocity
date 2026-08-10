@@ -1,0 +1,10 @@
+.velocity-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #d987a5;
+  font-size: clamp(23px, 5vw, 30px);
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  line-height: 1;
+}

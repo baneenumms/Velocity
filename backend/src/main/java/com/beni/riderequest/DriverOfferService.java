@@ -340,8 +340,7 @@ public class DriverOfferService {
                 money(
                         wallet.reservedBalance
                 )
-                        .add(required)
-                        .doubleValue();
+                        .add(required);
 
         wallet.updatedAt =
                 LocalDateTime.now();
@@ -675,13 +674,11 @@ public class DriverOfferService {
     }
 
     private BigDecimal money(
-            Double value
+            BigDecimal value
     ) {
-        return BigDecimal.valueOf(
-                value == null
-                        ? 0
-                        : value
-        ).setScale(
+        return (value == null
+                ? BigDecimal.ZERO
+                : value).setScale(
                 2,
                 RoundingMode.HALF_UP
         );

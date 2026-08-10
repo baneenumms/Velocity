@@ -1,10 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     useLocation,
     useNavigate,
 } from "react-router-dom";
 import { Mail } from "lucide-react";
 import "./OTP.css";
+import VelocityMark from "../components/VelocityMark";
 
 const API = "http://localhost:8080";
 
@@ -27,6 +28,8 @@ function DriverSignupOTP() {
 
     const inputs = useRef([]);
 
+    useEffect(() => { inputs.current[0]?.focus(); }, []);
+
     const handleChange = (value, index) => {
 
         if (!/^\d?$/.test(value)) {
@@ -44,6 +47,11 @@ function DriverSignupOTP() {
     };
 
     const handleKeyDown = (event, index) => {
+
+        if (event.key === "Enter") {
+            handleVerify();
+            return;
+        }
 
         if (
             event.key === "Backspace"
@@ -264,15 +272,8 @@ function DriverSignupOTP() {
 
     return (
 
-        <div className="page">
-
-            <div className="velocity-title">
-                <span className="velo">VEL</span>
-                <span className="wheel">
-                    <span className="hub"></span>
-                </span>
-                <span className="city">CITY</span>
-            </div>
+        <div className="page auth-page">
+            <VelocityMark className="auth-logo" />
 
             <div className="card">
 
@@ -307,6 +308,12 @@ function DriverSignupOTP() {
                             className="otp-box"
                             type="text"
                             inputMode="numeric"
+                            pattern="[0-9]*"
+                            autoComplete={
+                                index === 0
+                                    ? "one-time-code"
+                                    : "off"
+                            }
                             maxLength={1}
                             value={digit}
                             disabled={loading}

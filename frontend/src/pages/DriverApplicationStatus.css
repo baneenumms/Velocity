@@ -271,3 +271,30 @@
         flex-direction: column;
     }
 }
+
+/* Pre-login driver-status screen shares the auth identity. */
+.application-dashboard {
+    background:
+        radial-gradient(circle at 15% 12%, rgba(249, 194, 212, .52), transparent 29%),
+        linear-gradient(135deg, #edf3fc 0%, #c9d8f0 52%, #f8d2df 100%);
+}
+
+.application-dashboard-brand {
+    font-size: clamp(21px, 5vw, 29px);
+    letter-spacing: .11em;
+}
+
+.application-header-button { background: #6b94bd; }
+.application-header-button.logout { background: #d88ca7; }
+.application-feature-icon { background: #eaf2fb; color: #4d6f95; }
+.application-correction-item { border-left-color: #eaa6bd; background: #fff4f7; }
+.application-correct-button { background: #eaa6bd; }
+
+@media (max-width: 620px) {
+    .application-dashboard { padding: 20px 14px 44px; }
+    .application-dashboard-brand { font-size: 23px; }
+    .application-header-actions { gap: 8px; }
+    .application-status-banner,
+    .application-feature-card,
+    .application-corrections { padding: 18px; }
+}

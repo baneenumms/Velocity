@@ -828,8 +828,6 @@ function PassengerDashboard() {
           <VelocityHomeButton
             mode="PASSENGER"
           />
-
-          <p>Passenger</p>
         </div>
 
         <PassengerHamburgerMenu />
@@ -875,20 +873,6 @@ function PassengerDashboard() {
                     </h2>
                   </div>
 
-                  <button
-                    type="button"
-                    className="current-location-button"
-                    onClick={
-                      getCurrentLocation
-                    }
-                    disabled={
-                      locating
-                    }
-                  >
-                    {locating
-                      ? "Finding..."
-                      : "Use my location"}
-                  </button>
                 </div>
 
                 <div className="passenger-location-fields">
@@ -898,6 +882,23 @@ function PassengerDashboard() {
                     value={pickup}
                     nearbyLocation={
                       currentLocation
+                    }
+                    variant="pickup-field"
+                    labelAction={
+                      <button
+                        type="button"
+                        className="current-location-button"
+                        onClick={
+                          getCurrentLocation
+                        }
+                        disabled={
+                          locating
+                        }
+                      >
+                        {locating
+                          ? "Finding..."
+                          : "Use my location"}
+                      </button>
                     }
                     onSelect={(
                       location
@@ -921,6 +922,7 @@ function PassengerDashboard() {
                       pickup ||
                       currentLocation
                     }
+                    variant="destination-field"
                     onSelect={(
                       location
                     ) => {

@@ -16,6 +16,7 @@ import {
 
 import HamburgerMenu from
   "../components/HamburgerMenu";
+import VelocityMark from "../components/VelocityMark";
 
 import "./DriverProfile.css";
 
@@ -144,19 +145,7 @@ function DriverProfile() {
           <Menu size={25} />
         </button>
 
-        <div className="velocity-title small">
-          <span className="velo">
-            VEL
-          </span>
-
-          <span className="wheel">
-            <span className="hub" />
-          </span>
-
-          <span className="city">
-            CITY
-          </span>
-        </div>
+        <VelocityMark className="driver-header-mark" />
       </div>
 
       <div className="card profile-card">

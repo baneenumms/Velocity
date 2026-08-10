@@ -1,0 +1,632 @@
+/* One visual language for every signed-in Velocity screen. */
+:root {
+  --velocity-app-navy: #3e6b96;
+  --velocity-app-blue: #3e6b96;
+  --velocity-app-blue-soft: #e8eef3;
+  --velocity-app-pink: #b65b7e;
+  --velocity-app-pink-strong: #a13c62;
+  --velocity-app-pink-soft: #f8e9ee;
+  --velocity-app-surface: #fffdfb;
+  --velocity-app-border: #d8e0e5;
+  --velocity-app-shadow: 0 14px 38px rgba(62, 83, 111, .13);
+}
+
+/* Typography is deliberately soft; reserve dark navy for icons only. */
+:is(
+  .passenger-dashboard-page, .passenger-profile-page, .ride-history-page,
+  .saved-locations-page, .passenger-fare-page, .passenger-feedback-page,
+  .passenger-active-page, .searching-page, .feedback-page,
+  .driver-dashboard-shell, .profile-page, .trips-page, .wallet-page,
+  .wallet-info-page, .driver-active-page, .driver-feedback-page,
+  .admin-dashboard-page, .admin-applications-page, .admin-feedback-page,
+  .admin-topups-page, .terms-page
+) :is(h1, h2, h3, h4, .title, .info-value, .vehicle-heading strong) {
+  color: var(--velocity-app-blue);
+}
+
+:is(
+  .passenger-dashboard-page, .passenger-profile-page, .ride-history-page,
+  .saved-locations-page, .passenger-fare-page, .passenger-feedback-page,
+  .passenger-active-page, .searching-page, .feedback-page,
+  .driver-dashboard-shell, .profile-page, .trips-page, .wallet-page,
+  .wallet-info-page, .driver-active-page, .driver-feedback-page,
+  .admin-dashboard-page, .admin-applications-page, .admin-feedback-page,
+  .admin-topups-page, .terms-page
+) :is(p, small, .subtitle, .info-label, .section-label, .profile-role) {
+  color: rgba(47, 94, 136, .76);
+}
+
+.driver-header-mark {
+  margin-left: auto;
+  font-size: 23px;
+}
+
+:is(
+  .passenger-dashboard-header, .passenger-profile-header,
+  .ride-history-header, .saved-locations-header, .passenger-feedback-header,
+  .wallet-header, .dashboard-header, .terms-header,
+  .admin-dashboard-topbar, .admin-applications-topbar,
+  .admin-feedback-header, .admin-topups-topbar
+) :is(h1, h2, h3, p, small) {
+  color: #fff;
+}
+
+:is(
+  .passenger-dashboard-page, .passenger-profile-page, .ride-history-page,
+  .saved-locations-page, .passenger-fare-page, .passenger-feedback-page,
+  .passenger-active-page, .searching-page, .feedback-page,
+  .driver-dashboard-shell, .profile-page, .trips-page, .wallet-page,
+  .wallet-info-page, .driver-active-page, .driver-feedback-page,
+  .admin-dashboard-page, .admin-applications-page, .admin-feedback-page,
+  .admin-topups-page, .terms-page
+) {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(214, 167, 184, .27), transparent 27%),
+    linear-gradient(135deg, #f2efe9 0%, #f5edf0 58%, #edf2f4 100%);
+  color: var(--velocity-app-navy);
+}
+
+:is(
+  .passenger-dashboard-header, .passenger-profile-header,
+  .ride-history-header, .saved-locations-header, .passenger-feedback-header,
+  .wallet-header, .dashboard-header, .terms-header,
+  .admin-dashboard-topbar, .admin-applications-topbar,
+  .admin-feedback-header, .admin-topups-topbar
+) {
+  background: var(--velocity-app-pink-strong);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(214, 119, 151, .22);
+}
+
+/* Shared cards and panels. The map itself remains untouched. */
+:is(
+  .passenger-location-card, .passenger-route-summary, .passenger-dashboard-map-card,
+  .passenger-profile-card, .ride-history-card, .empty-ride-history,
+  .add-location-card, .saved-location-card, .fare-card,
+  .passenger-feedback-card, .passenger-active-card, .searching-card,
+  .feedback-card, .dashboard-card, .trips-card, .trip-item,
+  .wallet-container, .wallet-info-card, .driver-active-card,
+  .driver-feedback-card, .admin-dashboard-card, .admin-application-card,
+  .admin-feedback-card, .admin-topup-card, .terms-card
+) {
+  background: var(--velocity-app-surface);
+  border: 1px solid rgba(107, 148, 189, .14);
+  box-shadow: var(--velocity-app-shadow);
+}
+
+:is(
+  .passenger-summary-grid > div, .ride-history-details div,
+  .profile-information, .profile-information-row,
+  .wallet-example, .wallet-help-section, .trip-meta,
+  .admin-dashboard-coming
+) {
+  border-color: var(--velocity-app-border);
+  background: var(--velocity-app-blue-soft);
+}
+
+:is(
+  .profile-avatar, .passenger-profile-card .profile-avatar,
+  .passenger-icon, .driver-feedback-complete-icon,
+  .passenger-active-success-icon, .driver-active-success,
+  .admin-dashboard-card-icon
+) {
+  background: var(--velocity-app-pink);
+}
+
+:is(
+  .profile-back-button, .ride-history-back, .saved-locations-back,
+  .feedback-back-button, .fare-back-arrow, .terms-back-button,
+  .wallet-back-button, .trips-back-button
+) {
+  color: var(--velocity-app-pink-strong);
+}
+
+/* Pink means the main action; blue means an assistive/secondary action. */
+:is(
+  .calculate-route-button, .choose-fare-button, .fare-continue-button,
+  .feedback-submit, .feedback-skip, .saved-location-submit,
+  .passenger-active-primary-button, .driver-active-primary-button,
+  .wallet-topup-button, .wallet-confirm-button, .admin-dashboard-card button,
+  .admin-applications-button.primary, .admin-refresh-button,
+  .admin-topups-button.primary
+) {
+  background: var(--velocity-app-pink);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(218, 135, 165, .24);
+}
+
+:is(
+  .calculate-route-button, .choose-fare-button, .fare-continue-button,
+  .feedback-submit, .feedback-skip, .saved-location-submit,
+  .passenger-active-primary-button, .driver-active-primary-button,
+  .wallet-topup-button, .wallet-confirm-button, .admin-dashboard-card button,
+  .admin-applications-button.primary, .admin-refresh-button,
+  .admin-topups-button.primary
+):hover:not(:disabled) {
+  background: var(--velocity-app-pink-strong);
+}
+
+:is(
+  .current-location-button, .location-btn, .wallet-refresh-button,
+  .admin-dashboard-back, .admin-applications-button,
+  .admin-back-button, .admin-topups-topbar button
+) {
+  background: var(--velocity-app-blue-soft);
+  color: var(--velocity-app-blue);
+}
+
+.location-autocomplete-input-wrapper input:focus,
+.location-autocomplete-option.active,
+.location-autocomplete-option:hover {
+  border-color: var(--velocity-app-blue);
+  background: var(--velocity-app-blue-soft);
+  box-shadow: 0 0 0 3px rgba(107, 148, 189, .16);
+}
+
+.history-pickup-dot, .pickup-dot { background: var(--velocity-app-blue); }
+.history-destination-dot, .destination-dot { background: var(--velocity-app-pink-strong); }
+.ride-status-accepted, .ride-status-ontrip { background: var(--velocity-app-blue-soft); color: var(--velocity-app-blue); }
+.ride-status-completed { background: #e9f6ee; color: #2c8060; }
+
+/* Pink/blue alternation: headings and labels = blue; eyebrows/actions = pink. */
+:is(
+  .passenger-dashboard-welcome p, .passenger-card-heading p,
+  .ride-history-title p, .saved-locations-title p, .fare-route-section > p,
+  .passenger-feedback-eyebrow, .driver-feedback-eyebrow,
+  .wallet-eyebrow, .trips-eyebrow, .admin-dashboard-heading p,
+  .admin-applications-heading p, .admin-topups-heading p
+) {
+  color: #d987a5;
+  font-weight: 700;
+}
+
+:is(
+  .passenger-location-fields label, .location-autocomplete-label,
+  .info-label, .section-label, .ride-location small,
+  .ride-history-details span, .profile-information-row span
+) {
+  color: #d987a5;
+  font-weight: 700;
+}
+
+:is(
+  .passenger-dashboard-page .location-autocomplete-input-wrapper input,
+  .passenger-dashboard-page .passenger-summary-grid strong,
+  .profile-information-row strong, .info-value,
+  .ride-history-card-header strong, .ride-location p,
+  .ride-history-details strong, .trip-item strong
+) {
+  color: var(--velocity-app-blue);
+}
+
+:is(
+  .passenger-summary-grid span, .ride-history-card-header span,
+  .trip-date, .trip-status, .wallet-label, .wallet-meta-label
+) {
+  color: #d987a5;
+}
+
+.current-location-button {
+  background: #fff;
+  color: #d987a5;
+  border: 1px solid rgba(217, 135, 165, .45);
+  box-shadow: none;
+}
+
+.current-location-button:hover:not(:disabled) {
+  background: #fff3f7;
+  color: #c96f90;
+}
+
+/* App-wide reading rhythm: a pink prompt followed by a blue answer. */
+:is(
+  .passenger-dashboard-page, .passenger-profile-page, .ride-history-page,
+  .saved-locations-page, .passenger-fare-page, .passenger-feedback-page,
+  .passenger-active-page, .searching-page, .feedback-page,
+  .driver-dashboard-shell, .profile-page, .trips-page, .wallet-page,
+  .wallet-info-page, .driver-active-page, .driver-feedback-page,
+  .admin-dashboard-page, .admin-applications-page, .admin-feedback-page,
+  .admin-topups-page, .terms-page
+) :is(
+  [class*="label"], [class*="eyebrow"], [class*="subtitle"],
+  [class*="hint"], [class*="caption"], [class*="meta"]
+) {
+  color: #d987a5;
+}
+
+:is(
+  .passenger-dashboard-page, .passenger-profile-page, .ride-history-page,
+  .saved-locations-page, .passenger-fare-page, .passenger-feedback-page,
+  .passenger-active-page, .searching-page, .feedback-page,
+  .driver-dashboard-shell, .profile-page, .trips-page, .wallet-page,
+  .wallet-info-page, .driver-active-page, .driver-feedback-page,
+  .admin-dashboard-page, .admin-applications-page, .admin-feedback-page,
+  .admin-topups-page, .terms-page
+) :is(
+  [class*="value"], [class*="title"], [class*="heading"] :is(h1, h2, h3, strong),
+  [class*="details"] strong, [class*="information"] strong
+) {
+  color: var(--velocity-app-blue);
+}
+
+/* Profile pages deliberately have no full-width coloured header behind Home. */
+:is(.profile-page .dashboard-header, .passenger-profile-page .passenger-profile-header) {
+  width: min(700px, calc(100% - 32px));
+  min-height: 54px;
+  margin: 0 auto 18px;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.profile-page .dashboard-header {
+  justify-content: flex-end;
+}
+
+.passenger-profile-page .passenger-profile-header h2 {
+  color: #d987a5;
+}
+
+.profile-page .driver-header-mark {
+  margin-left: 14px;
+}
+
+@media (max-width: 600px) {
+  :is(.profile-page .dashboard-header, .passenger-profile-page .passenger-profile-header) {
+    width: min(100% - 24px, 700px);
+    margin-top: 54px;
+  }
+}
+
+/* Shared navigation, including the menus shown on every dashboard. */
+.global-home-button,
+.velocity-home-button,
+.menu-button,
+.menu-close {
+  border-color: rgba(107, 148, 189, .25);
+  background: #fffdfd;
+  color: var(--velocity-app-navy);
+  box-shadow: 0 8px 22px rgba(62, 83, 111, .12);
+}
+
+.global-home-button:hover,
+.velocity-home-button:hover,
+.menu-button:hover,
+.menu-close:hover {
+  background: var(--velocity-app-pink-soft);
+  color: var(--velocity-app-pink-strong);
+}
+
+.menu-panel,
+.menu-dropdown {
+  border-color: rgba(107, 148, 189, .18);
+  background: #fffdfd;
+  box-shadow: 0 18px 45px rgba(62, 83, 111, .18);
+}
+
+.menu-nav button:hover,
+.menu-dropdown button:hover {
+  background: var(--velocity-app-blue-soft);
+}
+
+.menu-dropdown button svg { color: var(--velocity-app-blue); }
+.menu-dropdown .logout-btn:hover,
+.menu-logout:hover { background: #fff0f4 !important; }
+
+/* Signed-in fields use the same calm blue surface and pink focus state. */
+:is(
+  .passenger-dashboard-page, .saved-locations-page, .passenger-fare-page,
+  .passenger-feedback-page, .driver-wallet-shell, .driver-active-page,
+  .passenger-active-page, .admin-applications-page, .admin-topups-page
+) input:not([type="checkbox"]):not([type="radio"]),
+:is(
+  .passenger-dashboard-page, .saved-locations-page, .passenger-fare-page,
+  .passenger-feedback-page, .driver-wallet-shell, .driver-active-page,
+  .passenger-active-page, .admin-applications-page, .admin-topups-page
+) textarea,
+:is(
+  .passenger-dashboard-page, .saved-locations-page, .passenger-fare-page,
+  .passenger-feedback-page, .driver-wallet-shell, .driver-active-page,
+  .passenger-active-page, .admin-applications-page, .admin-topups-page
+) select {
+  border-color: var(--velocity-app-border);
+  background: #fff;
+}
+
+:is(
+  .passenger-dashboard-page, .saved-locations-page, .passenger-fare-page,
+  .passenger-feedback-page, .driver-wallet-shell, .driver-active-page,
+  .passenger-active-page, .admin-applications-page, .admin-topups-page
+) input:focus,
+:is(
+  .passenger-dashboard-page, .saved-locations-page, .passenger-fare-page,
+  .passenger-feedback-page, .driver-wallet-shell, .driver-active-page,
+  .passenger-active-page, .admin-applications-page, .admin-topups-page
+) textarea:focus,
+:is(
+  .passenger-dashboard-page, .saved-locations-page, .passenger-fare-page,
+  .passenger-feedback-page, .driver-wallet-shell, .driver-active-page,
+  .passenger-active-page, .admin-applications-page, .admin-topups-page
+) select:focus {
+  border-color: var(--velocity-app-pink);
+  box-shadow: 0 0 0 3px rgba(234, 166, 189, .2);
+}
+
+@media (max-width: 600px) {
+  :is(
+    .passenger-dashboard-header, .passenger-profile-header,
+    .ride-history-header, .saved-locations-header, .passenger-feedback-header,
+    .wallet-header, .dashboard-header, .terms-header,
+    .admin-dashboard-topbar, .admin-applications-topbar,
+    .admin-feedback-header, .admin-topups-topbar
+  ) {
+    padding: 14px 16px;
+  }
+
+  :is(
+    .passenger-location-card, .passenger-route-summary,
+    .passenger-profile-card, .ride-history-card, .add-location-card,
+    .saved-location-card, .fare-card, .passenger-feedback-card,
+    .passenger-active-card, .searching-card, .feedback-card,
+    .dashboard-card, .trips-card, .trip-item, .wallet-container,
+    .wallet-info-card, .driver-active-card, .driver-feedback-card,
+    .admin-dashboard-card, .admin-application-card, .admin-feedback-card,
+    .admin-topup-card, .terms-card
+  ) {
+    border-radius: 18px;
+  }
+}
+
+/* Passenger and driver are two modes of the same dashboard shell. */
+.passenger-dashboard-header,
+.driver-dashboard-shell .dashboard-header {
+  min-height: 82px;
+  padding: 16px max(24px, calc((100vw - 1200px) / 2));
+  background: #df91ad;
+  box-sizing: border-box;
+}
+
+.driver-dashboard-shell .dashboard-page {
+  padding: 0 0 60px;
+  align-items: stretch;
+}
+
+.driver-dashboard-shell .dashboard-header {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  justify-content: space-between;
+}
+
+.driver-dashboard-shell .menu-btn {
+  position: static;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, .62);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--velocity-app-navy);
+  box-shadow: 0 6px 18px rgba(120, 63, 84, .14);
+}
+
+.driver-dashboard-shell .driver-dashboard-content {
+  width: min(1200px, calc(100% - 34px));
+  max-width: 1200px;
+  margin: 34px auto 0;
+  grid-template-columns: minmax(340px, .78fr) minmax(0, 1.22fr);
+  grid-template-areas:
+    "welcome welcome"
+    "profile map"
+    "requests requests";
+  gap: 22px;
+}
+
+.driver-dashboard-welcome {
+  margin: 0;
+}
+
+.driver-dashboard-welcome p {
+  margin: 0 0 5px;
+  color: var(--velocity-app-pink-strong);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.driver-dashboard-welcome h1 {
+  margin: 0;
+  color: var(--velocity-app-blue);
+  font-size: 38px;
+  line-height: 1.15;
+}
+
+.driver-dashboard-shell .dashboard-card,
+.driver-dashboard-shell .driver-map-card {
+  min-height: 430px;
+  height: 430px;
+  border-radius: 20px;
+}
+
+.driver-dashboard-shell .dashboard-card {
+  padding: 28px;
+}
+
+.driver-dashboard-shell .driver-status-copy {
+  margin: 0;
+  color: var(--velocity-app-blue);
+  line-height: 1.6;
+}
+
+.driver-dashboard-shell .status-label,
+.driver-dashboard-shell .status-label.on,
+.driver-dashboard-shell .status-label.off {
+  color: var(--velocity-app-navy);
+}
+
+.driver-dashboard-shell .toggle-switch.on,
+.driver-dashboard-shell .location-button {
+  background: var(--velocity-app-navy);
+}
+
+.driver-dashboard-shell .driver-location-info {
+  background: #fff;
+  border: 1px solid var(--velocity-app-border);
+}
+
+.driver-dashboard-shell .driver-location-info span {
+  color: var(--velocity-app-pink-strong);
+}
+
+.driver-dashboard-shell .driver-location-info strong {
+  color: var(--velocity-app-blue);
+}
+
+@media (max-width: 850px) {
+  .driver-dashboard-shell .driver-dashboard-content {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "welcome"
+      "profile"
+      "map"
+      "requests";
+  }
+}
+
+@media (max-width: 600px) {
+  .passenger-dashboard-header,
+  .driver-dashboard-shell .dashboard-header {
+    min-height: 74px;
+    padding: 13px 16px;
+  }
+
+  .driver-dashboard-shell .driver-dashboard-content {
+    width: min(100% - 24px, 1200px);
+    margin-top: 24px;
+  }
+
+  .driver-dashboard-welcome h1 {
+    font-size: 30px;
+  }
+
+  .driver-dashboard-shell .dashboard-card,
+  .driver-dashboard-shell .driver-map-card {
+    min-height: 0;
+    height: 350px;
+  }
+
+.driver-dashboard-shell .dashboard-card {
+  height: auto;
+  }
+}
+
+/* Passenger booking: the decision field comes first, and actions stay reachable. */
+.passenger-booking-layout {
+  grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.passenger-booking-panel {
+  max-height: calc(100vh - 230px);
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 5px 4px 0;
+  scrollbar-gutter: stable;
+}
+
+.passenger-location-card {
+  display: flex;
+  min-height: 430px;
+  flex-direction: column;
+}
+
+.passenger-location-fields {
+  min-height: 0;
+}
+
+.passenger-dashboard-page .pickup-field .location-autocomplete-input-wrapper input {
+  border-color: #dce3e6;
+  background: #fafbfa;
+  color: rgba(62, 107, 150, .72);
+}
+
+.passenger-dashboard-page .destination-field .location-autocomplete-input-wrapper input {
+  border: 2px solid var(--velocity-app-pink-strong);
+  background: #fff;
+  color: var(--velocity-app-blue);
+  font-weight: 700;
+}
+
+.passenger-dashboard-page .destination-field .location-autocomplete-input-wrapper input:focus {
+  border-color: var(--velocity-app-pink-strong);
+  box-shadow: 0 0 0 4px rgba(161, 60, 98, .16);
+}
+
+.passenger-dashboard-page .location-autocomplete-label-row {
+  margin-bottom: 7px;
+}
+
+.passenger-dashboard-page .current-location-button {
+  padding: 5px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--velocity-app-pink-strong);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.passenger-dashboard-page .current-location-button:hover:not(:disabled) {
+  background: transparent;
+  color: #7e2d4b;
+  text-decoration: underline;
+}
+
+.passenger-dashboard-page .calculate-route-button {
+  position: sticky;
+  z-index: 2;
+  bottom: 0;
+  margin-top: auto;
+  background: var(--velocity-app-pink-strong);
+  box-shadow: 0 -8px 18px rgba(255, 253, 251, .96), 0 8px 18px rgba(161, 60, 98, .18);
+}
+
+.passenger-dashboard-page .calculate-route-button:hover:not(:disabled) {
+  background: #842e50;
+}
+
+.passenger-dashboard-page .passenger-dashboard-map-card {
+  min-height: 0;
+  height: auto;
+}
+
+.passenger-dashboard-page .passenger-dashboard-map {
+  height: 100%;
+  min-height: 520px;
+}
+
+@media (max-width: 900px) {
+  .passenger-booking-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .passenger-booking-panel {
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .passenger-dashboard-page .passenger-dashboard-map {
+    min-height: 430px;
+  }
+}
+
+@media (max-width: 600px) {
+  .passenger-dashboard-page .current-location-button {
+    width: auto;
+    min-height: 0;
+  }
+
+  .passenger-dashboard-page .passenger-dashboard-map {
+    min-height: 350px;
+  }
+}

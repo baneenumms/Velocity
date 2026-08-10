@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -10,6 +11,7 @@ import {
 
 import { Mail } from "lucide-react";
 import "./OTP.css";
+import VelocityMark from "../components/VelocityMark";
 
 const SESSION_KEYS_TO_CLEAR = [
   "userId",
@@ -70,6 +72,8 @@ function PassengerOTP() {
 
   const inputs = useRef([]);
 
+  useEffect(() => { inputs.current[0]?.focus(); }, []);
+
   const handleChange = (value, index) => {
     if (!/^\d?$/.test(value)) {
       return;
@@ -86,6 +90,10 @@ function PassengerOTP() {
   };
 
   const handleKeyDown = (event, index) => {
+    if (event.key === "Enter") {
+      handleVerify();
+      return;
+    }
     if (
       event.key === "Backspace" &&
       otp[index] === "" &&
@@ -196,16 +204,8 @@ function PassengerOTP() {
   };
 
   return (
-    <div className="page">
-      <div className="velocity-title">
-        <span className="velo">VEL</span>
-
-        <span className="wheel">
-          <span className="hub" />
-        </span>
-
-        <span className="city">CITY</span>
-      </div>
+    <div className="page auth-page">
+      <VelocityMark className="auth-logo" />
 
       <div className="card">
         <div className="icon-circle">
@@ -239,6 +239,12 @@ function PassengerOTP() {
               className="otp-box"
               type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete={
+                index === 0
+                  ? "one-time-code"
+                  : "off"
+              }
               maxLength={1}
               value={digit}
               disabled={

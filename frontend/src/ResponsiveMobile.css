@@ -1,0 +1,118 @@
+/* Cross-screen mobile safeguards. Dashboard colors are intentionally unchanged. */
+@media (max-width: 600px) {
+  .driver-dashboard-shell,
+  .dashboard-page,
+  .passenger-dashboard-page,
+  .admin-dashboard-page,
+  .terms-page,
+  .driver-wallet-page,
+  .driver-profile-page,
+  .passenger-profile-page,
+  .driver-trip-history-page,
+  .passenger-ride-history-page,
+  .driver-active-ride-page,
+  .passenger-active-ride-page,
+  .searching-ride-page,
+  .admin-driver-applications-page,
+  .admin-feedback-page,
+  .admin-wallet-top-ups-page {
+    min-width: 0;
+  }
+
+  .dashboard-header,
+  .passenger-dashboard-header,
+  .admin-dashboard-topbar,
+  .terms-header {
+    gap: 12px;
+  }
+
+  .dashboard-header,
+  .admin-dashboard-topbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .driver-dashboard-content,
+  .passenger-dashboard-content,
+  .admin-dashboard-container,
+  .terms-content {
+    width: min(100% - 24px, 1100px);
+  }
+
+  .driver-map,
+  .passenger-map,
+  .passenger-dashboard-map,
+  .leaflet-container {
+    min-height: 280px;
+  }
+
+  .passenger-map,
+  .passenger-dashboard-map,
+  .driver-map {
+    height: min(58vw, 320px);
+  }
+
+  .location-autocomplete-input-wrapper input {
+    min-height: 50px;
+    padding-right: 86px;
+  }
+
+  .location-autocomplete-results {
+    max-height: min(48dvh, 330px);
+  }
+
+  .location-autocomplete-option {
+    min-height: 48px;
+    padding: 12px 10px;
+  }
+
+  .terms-title h1 {
+    font-size: clamp(29px, 9vw, 38px);
+  }
+
+  .terms-card article {
+    padding: 18px 0;
+  }
+
+  .terms-card h2 {
+    font-size: 18px;
+  }
+
+  .admin-dashboard-grid,
+  .driver-dashboard-content,
+  .passenger-dashboard-content {
+    min-width: 0;
+  }
+
+  /* Tables remain readable instead of forcing the viewport wider. */
+  .table-wrapper,
+  .table-container,
+  .table-scroll,
+  .admin-table-wrapper,
+  .history-table-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  th,
+  td {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 380px) {
+  .velocity-home-button span {
+    font-size: 12px;
+  }
+
+  .dashboard-card,
+  .passenger-dashboard-welcome,
+  .admin-dashboard-card {
+    border-radius: 18px;
+  }
+}
