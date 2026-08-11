@@ -8,6 +8,7 @@ import com.beni.entity.Wallet;
 import com.beni.repository.DriverRepository;
 import com.beni.repository.VehicleRepository;
 import com.beni.repository.WalletRepository;
+import com.beni.repository.PassengerRepository;
 import com.beni.service.ActiveRidePolicyService;
 import com.beni.service.RideService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -56,6 +57,9 @@ public class DriverOfferService {
     WalletRepository walletRepository;
 
     @Inject
+    PassengerRepository passengerRepository;
+
+    @Inject
     RideService rideService;
 
     @Inject
@@ -95,6 +99,8 @@ public class DriverOfferService {
                 driver(
                         input.driverId
                 );
+
+        requireNotOwnRide(request, driver);
 
         require(
                 driver.driverStatus ==
@@ -306,6 +312,8 @@ public class DriverOfferService {
                         offer.driverId
                 );
 
+        requireNotOwnRide(request, driver);
+
         require(
                 driver.driverStatus ==
                         DriverStatus.Online,
@@ -465,6 +473,13 @@ public class DriverOfferService {
                             }
                         }
                 );
+    }
+
+    private void requireNotOwnRide(RideRequest request, Driver driver) {
+        var passenger = passengerRepository.findById(request.passengerId.longValue());
+        require(passenger != null, "Passenger not found", 404);
+        require(!passenger.user.userId.equals(driver.user.userId),
+                "You cannot send or accept an offer for your own ride.", 403);
     }
 
     private AcceptDriverOfferResponse response(

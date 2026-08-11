@@ -98,7 +98,7 @@
 }
 
 .plate-value {
-  color: #3e6b96;
+  color: #1f3655;
   font-weight: 800;
   letter-spacing: 0.5px;
 }
@@ -129,7 +129,7 @@
 
 .vehicle-heading {
   margin-bottom: 8px;
-  color: #3e6b96;
+  color: #1f3655;
 
   display: flex;
   align-items: center;

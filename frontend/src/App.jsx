@@ -55,7 +55,6 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminDriverApplications from "./pages/AdminDriverApplications";
 import AdminFeedback from "./pages/AdminFeedback";
 import AdminWalletTopUps from "./pages/AdminWalletTopUps";
-import GlobalHomeButton from "./components/GlobalHomeButton";
 
 function readStoredValue(key) {
   return (
@@ -243,7 +242,6 @@ function AuthenticatedRoute({
 function App() {
   return (
     <BrowserRouter>
-      <GlobalHomeButton />
 
       <Routes>
         {/* Public authentication pages */}

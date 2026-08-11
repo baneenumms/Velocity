@@ -187,7 +187,7 @@ input:not(
 ):focus,
 textarea:focus,
 select:focus {
-  border-color: #3e6b96;
+  border-color: #1f3655;
 
   box-shadow:
     0 0 0 3px
@@ -223,7 +223,7 @@ button {
   border: none;
   border-radius: 15px;
 
-  background: #3e6b96;
+  background: #1f3655;
   color: #ffffff;
 
   font-size: 16px;

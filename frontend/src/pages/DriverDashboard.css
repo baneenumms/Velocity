@@ -175,7 +175,7 @@
 }
 
 .status-label.on {
-  color: #3e6b96;
+  color: #1f3655;
 }
 
 .toggle-switch {
@@ -200,7 +200,7 @@
 }
 
 .toggle-switch.on {
-  background: #3e6b96;
+  background: #1f3655;
 }
 
 .toggle-switch:disabled {
@@ -782,7 +782,7 @@
     padding: 18px;
   }
   /* Prevent global page styling from shifting the dashboard upward */
-.driver-dashboard-shell
+  .driver-dashboard-shell
   .dashboard-page {
   position: relative !important;
   inset: auto !important;
@@ -795,4 +795,111 @@
   overflow-x: hidden !important;
   overflow-y: auto !important;
 }
+}
+
+/* Final shared Velocity dashboard shell — same structure and palette as Passenger. */
+.driver-dashboard-shell {
+  background: #f2efe9 !important;
+}
+
+.driver-dashboard-shell .dashboard-page {
+  padding: 0 0 60px !important;
+  align-items: stretch;
+}
+
+.driver-dashboard-shell .dashboard-header {
+  width: 100%;
+  max-width: none;
+  min-height: 82px;
+  margin: 0;
+  padding: 16px max(24px, calc((100vw - 1200px) / 2));
+  justify-content: space-between;
+  background: #1f3655 !important;
+  box-sizing: border-box;
+  box-shadow: 0 5px 18px rgba(45, 77, 108, .2);
+}
+
+.driver-dashboard-shell .menu-btn {
+  position: static;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, .55);
+  border-radius: 14px;
+  background: #fffdfb !important;
+  color: #1f3655 !important;
+  box-shadow: none;
+}
+
+.driver-dashboard-shell .driver-dashboard-content {
+  width: min(1200px, calc(100% - 34px));
+  max-width: 1200px;
+  margin: 34px auto 0;
+  grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
+  grid-template-areas:
+    "welcome welcome"
+    "profile map"
+    "requests requests";
+  gap: 24px;
+}
+
+.driver-dashboard-shell .driver-dashboard-welcome p {
+  color: #a13c62 !important;
+  font-weight: 800;
+}
+
+.driver-dashboard-shell .driver-dashboard-welcome h1,
+.driver-dashboard-shell .dashboard-card h1,
+.driver-dashboard-shell .requests-heading-row h2 {
+  color: #1f3655 !important;
+}
+
+.driver-dashboard-shell .dashboard-card,
+.driver-dashboard-shell .driver-map-card,
+.driver-dashboard-shell .requests-placeholder {
+  border: 1px solid rgba(62, 107, 150, .15);
+  background: #fffdfb !important;
+  box-shadow: 0 14px 36px rgba(62, 83, 111, .13);
+}
+
+.driver-dashboard-shell .dashboard-card,
+.driver-dashboard-shell .driver-map-card {
+  min-height: 430px;
+  height: 430px;
+  border-radius: 20px;
+}
+
+.driver-dashboard-shell .driver-status-copy,
+.driver-dashboard-shell .status-label,
+.driver-dashboard-shell .status-label.on {
+  color: #1f3655 !important;
+}
+
+.driver-dashboard-shell .toggle-switch.on {
+  background: #1f3655 !important;
+}
+
+.driver-dashboard-shell .location-button {
+  background: #a13c62 !important;
+}
+
+.driver-dashboard-shell .driver-location-info {
+  border: 1px solid #d7e0e4;
+  background: #f7f8f7;
+}
+
+.driver-dashboard-shell .driver-location-info span { color: #a13c62 !important; }
+.driver-dashboard-shell .driver-location-info strong { color: #1f3655 !important; }
+
+@media (max-width: 850px) {
+  .driver-dashboard-shell .driver-dashboard-content {
+    grid-template-columns: 1fr;
+    grid-template-areas: "welcome" "profile" "map" "requests";
+  }
+}
+
+@media (max-width: 600px) {
+  .driver-dashboard-shell .dashboard-header { min-height: 74px; padding: 13px 16px; }
+  .driver-dashboard-shell .driver-dashboard-content { width: min(100% - 24px, 1200px); margin-top: 24px; }
+  .driver-dashboard-shell .dashboard-card { min-height: 0; height: auto; }
+  .driver-dashboard-shell .driver-map-card { min-height: 350px; height: 350px; }
 }

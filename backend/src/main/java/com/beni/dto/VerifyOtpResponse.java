@@ -12,4 +12,8 @@ public class VerifyOtpResponse {
     public String fullName;
     public String phoneNumber;
     public String email;
+
+    public String sessionToken;
+    public String activeMode;
+    public String sessionExpiresAt;
 }

@@ -98,7 +98,7 @@
   display: block;
   margin-bottom: 4px;
 
-  color: #3e6b96;
+  color: #1f3655;
 
   font-size: 11px;
   font-weight: 900;
@@ -169,7 +169,7 @@
 .dashboard-ride-route svg {
   flex-shrink: 0;
   margin-top: 2px;
-  color: #3e6b96;
+  color: #1f3655;
 }
 
 .dashboard-ride-route span {
@@ -219,7 +219,7 @@
   border: none;
   border-radius: 13px;
 
-  background: #3e6b96;
+  background: #1f3655;
   color: #ffffff;
 
   font-size: 14px;

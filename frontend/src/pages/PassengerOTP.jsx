@@ -155,8 +155,24 @@ function PassengerOTP() {
       clearPreviousTabSession();
 
       sessionStorage.setItem(
+        "velocitySession",
+        JSON.stringify({
+          token: data.sessionToken,
+          userId: data.userId,
+          activeMode: data.activeMode,
+          passengerId: data.passengerId,
+          expiresAt: data.sessionExpiresAt,
+        })
+      );
+
+      sessionStorage.setItem(
         "userId",
         String(data.userId)
+      );
+
+      sessionStorage.setItem(
+        "activeMode",
+        data.activeMode || "PASSENGER"
       );
 
       sessionStorage.setItem(

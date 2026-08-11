@@ -52,6 +52,12 @@ public class DriverAuthService {
     @Inject
     DriverApplicantSessionService applicantSessionService;
 
+    @Inject
+    UserRoleService userRoleService;
+
+    @Inject
+    SessionService sessionService;
+
     @Transactional
     public DriverAuth createDriverAuth(
             DriverAuthRequest request
@@ -74,7 +80,7 @@ public class DriverAuthService {
             );
         }
 
-        if (!"driver".equalsIgnoreCase(user.role)) {
+        if (!userRoleService.hasRole(user, "DRIVER")) {
             throw new WebApplicationException(
                     "User is not a driver",
                     400
@@ -180,6 +186,7 @@ public class DriverAuthService {
         return driverRepository.findByUser(user) != null;
     }
 
+    @Transactional
     public VerifyOtpResponse verifyOtpAndCheckDriver(
             String phoneNumber,
             String enteredOtp
@@ -316,6 +323,11 @@ public class DriverAuthService {
 
             response.isAdmin =
                     Boolean.TRUE.equals(user.isAdmin);
+
+            var session = sessionService.replaceSession(user, "DRIVER");
+            response.sessionToken = session.sessionToken;
+            response.activeMode = session.activeMode;
+            response.sessionExpiresAt = session.expiresAt;
 
             if (response.isAdmin) {
                 response.adminToken =

@@ -48,6 +48,7 @@ function clearPreviousSession() {
         sessionStorage.removeItem(key);
         localStorage.removeItem(key);
     });
+    sessionStorage.removeItem("velocitySession");
 }
 
 function saveSessionValue(key, value) {
@@ -58,7 +59,6 @@ function saveSessionValue(key, value) {
     const storedValue = String(value);
 
     sessionStorage.setItem(key, storedValue);
-    localStorage.setItem(key, storedValue);
 }
 
 function DriverPassword() {
@@ -203,6 +203,17 @@ function DriverPassword() {
                 );
                 return;
             }
+
+            sessionStorage.setItem(
+                "velocitySession",
+                JSON.stringify({
+                    token: data.sessionToken,
+                    userId: data.userId,
+                    activeMode: data.activeMode,
+                    driverId: data.driverId,
+                    expiresAt: data.sessionExpiresAt,
+                })
+            );
 
             saveSessionValue(
                 "activeMode",

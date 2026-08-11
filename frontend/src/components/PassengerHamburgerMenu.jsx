@@ -83,6 +83,11 @@ function PassengerHamburgerMenu() {
   };
 
   const logout = () => {
+    fetch("http://localhost:8080/auth-sessions/current", {
+      method: "DELETE",
+    }).catch(() => {});
+
+    sessionStorage.removeItem("velocitySession");
     AUTHENTICATED_SESSION_KEYS
       .forEach((key) => {
         sessionStorage.removeItem(

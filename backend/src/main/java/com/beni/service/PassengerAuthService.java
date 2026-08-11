@@ -8,6 +8,7 @@ import com.beni.repository.PassengerRepository;
 import com.beni.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class PassengerAuthService {
@@ -26,6 +27,9 @@ public class PassengerAuthService {
 
     @Inject
     EmailService emailService;
+
+    @Inject
+    SessionService sessionService;
 
     public PhoneCheckResponse checkPhone(
             String phoneNumber
@@ -124,6 +128,7 @@ public class PassengerAuthService {
         return response;
     }
 
+    @Transactional
     public VerifyOtpResponse verifyOtp(
             String phoneNumber,
             String otp
@@ -234,6 +239,11 @@ public class PassengerAuthService {
 
         response.email =
                 user.email;
+
+        var session = sessionService.replaceSession(user, "PASSENGER");
+        response.sessionToken = session.sessionToken;
+        response.activeMode = session.activeMode;
+        response.sessionExpiresAt = session.expiresAt;
 
         return response;
     }

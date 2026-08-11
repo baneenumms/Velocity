@@ -3,6 +3,7 @@ package com.beni.riderequest;
 import com.beni.dto.CreateRideRequest;
 import com.beni.entity.Passenger;
 import com.beni.repository.PassengerRepository;
+import com.beni.repository.DriverRepository;
 import com.beni.service.ActiveRidePolicyService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -39,6 +40,9 @@ public class RideRequestService {
 
     @Inject
     PassengerRepository passengerRepository;
+
+    @Inject
+    DriverRepository driverRepository;
 
     @Inject
     ActiveRidePolicyService
@@ -172,8 +176,11 @@ public class RideRequestService {
     }
 
     public List<RideRequest>
-    getAvailableRideRequests() {
+    getAvailableRideRequests(Integer driverId) {
         expireRequests();
+
+        var driver = driverRepository.findById(driverId.longValue());
+        require(driver != null, "Driver not found", 404);
 
         return requests.values()
                 .stream()
@@ -181,7 +188,8 @@ public class RideRequestService {
                         request ->
                                 request.status ==
                                         RideRequestStatus
-                                                .SEARCHING
+                                                .SEARCHING &&
+                                        isNotDriversOwnRequest(request, driver.user.userId)
                 )
                 .sorted(
                         Comparator.comparing(
@@ -189,6 +197,12 @@ public class RideRequestService {
                         ).reversed()
                 )
                 .toList();
+    }
+
+    private boolean isNotDriversOwnRequest(RideRequest request, Integer driverUserId) {
+        Passenger passenger = passengerRepository.findById(request.passengerId.longValue());
+        return passenger != null && passenger.user != null &&
+                !passenger.user.userId.equals(driverUserId);
     }
 
     public RideRequest getRideRequest(

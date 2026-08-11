@@ -19,6 +19,9 @@ import java.util.Set;
 @ApplicationScoped
 public class AdminDriverApplicationService {
 
+    @Inject
+    UserRoleService userRoleService;
+
     private static final Set<String> CORRECTABLE_FIELDS =
             Set.of(
                     "full_name",
@@ -194,6 +197,7 @@ public class AdminDriverApplicationService {
 
         driverRepository.persist(driver);
         driverRepository.flush();
+        userRoleService.grantRole(applicant, "DRIVER");
 
         Vehicle vehicle = new Vehicle();
         vehicle.driver = driver;

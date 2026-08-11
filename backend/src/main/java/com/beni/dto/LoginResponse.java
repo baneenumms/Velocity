@@ -19,4 +19,8 @@ public class LoginResponse {
     public boolean canGoOnline;
     public boolean walletEnabled;
     public boolean canViewRideOffers;
+
+    public String sessionToken;
+    public String activeMode;
+    public String sessionExpiresAt;
 }

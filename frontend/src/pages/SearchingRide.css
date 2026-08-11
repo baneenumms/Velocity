@@ -161,7 +161,7 @@
 
   border-radius: 50%;
 
-  background: #3e6b96;
+  background: #1f3655;
 
   animation:
     searchingPulse
@@ -325,7 +325,7 @@
 }
 
 .request-detail strong {
-  color: #3e6b96;
+  color: #1f3655;
 
   font-size:
     clamp(16px, 3vw, 19px);
@@ -417,7 +417,7 @@
 .increase-fare-button {
   border: none;
 
-  background: #3e6b96;
+  background: #1f3655;
   color: #ffffff;
 }
 
@@ -427,7 +427,7 @@
     #b9c8d6;
 
   background: #ffffff;
-  color: #3e6b96;
+  color: #1f3655;
 }
 
 .persistent-fare-reminder {
@@ -482,7 +482,7 @@
   border: none;
   border-radius: 11px;
 
-  background: #3e6b96;
+  background: #1f3655;
   color: #ffffff;
 
   font-size: 12px;
@@ -547,7 +547,7 @@
 
   border-radius: 999px;
 
-  background: #3e6b96;
+  background: #1f3655;
   color: #ffffff;
 
   font-size: 13px;
@@ -607,7 +607,7 @@
     4px solid
     #d9d2c7;
 
-  border-top-color: #3e6b96;
+  border-top-color: #1f3655;
   border-radius: 50%;
 
   animation:
@@ -678,7 +678,7 @@
 
   border-radius: 50%;
 
-  background: #3e6b96;
+  background: #1f3655;
   color: #ffffff;
 
   font-size: 19px;
@@ -738,7 +738,7 @@
 }
 
 .offer-action > strong {
-  color: #3e6b96;
+  color: #1f3655;
 
   font-size: 20px;
   line-height: 1.3;
@@ -754,7 +754,7 @@
   border: none;
   border-radius: 11px;
 
-  background: #3e6b96;
+  background: #1f3655;
   color: #ffffff;
 
   font-size: 13px;
@@ -824,7 +824,7 @@
 }
 
 .search-again-button {
-  background: #3e6b96;
+  background: #1f3655;
 }
 
 .cancel-search-button:disabled,
@@ -891,7 +891,7 @@
 }
 
 .timeout-summary strong {
-  color: #3e6b96;
+  color: #1f3655;
 
   font-size: 17px;
 

@@ -41,8 +41,8 @@
   background:
     linear-gradient(
       180deg,
-      #3e6b96,
-      #234a6b
+      #1f3655,
+      #172b45
     );
 
   -webkit-background-clip: text;
@@ -137,7 +137,7 @@
   width: 80px;
   height: 80px;
 
-  background: #3e6b96;
+  background: #1f3655;
   border-radius: 50%;
 
   margin: 0 auto 25px;
@@ -250,7 +250,7 @@
 }
 
 .signup-field input:focus {
-  border-color: #3e6b96;
+  border-color: #1f3655;
 
   box-shadow:
     0 0 0 3px
@@ -288,7 +288,7 @@
   border: 0;
   border-radius: 14px;
 
-  background: #3e6b96;
+  background: #1f3655;
   color: #ffffff;
 
   font: inherit;

@@ -3,7 +3,7 @@ import "./VelocityMark.css";
 function VelocityMark({ className = "" }) {
   return (
     <div className={`velocity-mark ${className}`.trim()} aria-label="Velocity">
-      VELOCITY
+      <span>VEL</span><span className="velocity-mark-tyre" aria-hidden="true" /><span>CITY</span>
     </div>
   );
 }

@@ -19,6 +19,9 @@ import java.util.Locale;
 public class PassengerRegistrationService {
 
     @Inject
+    UserRoleService userRoleService;
+
+    @Inject
     UserRepository userRepository;
 
     @Inject
@@ -149,6 +152,7 @@ public class PassengerRegistrationService {
         user.role = "passenger";
 
         userRepository.persist(user);
+        userRoleService.grantRole(user, "PASSENGER");
         userRepository.flush();
 
         otpStorageService.linkLatestOtpToUser(

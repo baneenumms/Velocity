@@ -32,6 +32,9 @@ import java.util.Map;
 public class DriverRegistrationService {
 
     @Inject
+    UserRoleService userRoleService;
+
+    @Inject
     UserRepository userRepository;
 
     @Inject
@@ -415,6 +418,7 @@ public class DriverRegistrationService {
             user.accountStatus = "ACTIVE";
 
             userRepository.persist(user);
+            userRoleService.grantRole(user, "DRIVER");
 
             return user;
         }

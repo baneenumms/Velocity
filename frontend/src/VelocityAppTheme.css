@@ -1,14 +1,91 @@
 /* One visual language for every signed-in Velocity screen. */
 :root {
-  --velocity-app-navy: #3e6b96;
-  --velocity-app-blue: #3e6b96;
-  --velocity-app-blue-soft: #e8eef3;
-  --velocity-app-pink: #b65b7e;
-  --velocity-app-pink-strong: #a13c62;
-  --velocity-app-pink-soft: #f8e9ee;
-  --velocity-app-surface: #fffdfb;
-  --velocity-app-border: #d8e0e5;
-  --velocity-app-shadow: 0 14px 38px rgba(62, 83, 111, .13);
+  --velocity-app-navy: #17263b;
+  --velocity-app-blue: #1f3655;
+  --velocity-app-blue-soft: #edf7ff;
+  --velocity-app-pink: #e55f91;
+  --velocity-app-pink-strong: #ce477d;
+  --velocity-app-pink-soft: #fff0f5;
+  --velocity-app-surface: #ffffff;
+  --velocity-app-border: #e2e7ec;
+  --velocity-app-shadow: 0 10px 28px rgba(23, 38, 59, .10);
+}
+
+/* Daylight-readable foundation: function screens stay neutral; brand appears in controls. */
+body, #root { background: #f7f8fa; color: var(--velocity-app-navy); }
+:is(.passenger-dashboard-page,.driver-dashboard-shell,.profile-page,.passenger-profile-page,.ride-history-page,.trips-page,.wallet-page,.wallet-info-page,.passenger-active-page,.driver-active-page,.searching-page,.feedback-page,.passenger-feedback-page,.driver-feedback-page,.admin-dashboard-page,.admin-applications-page,.admin-feedback-page,.admin-topups-page,.terms-page) {
+  background: #f7f8fa !important;
+  color: var(--velocity-app-navy) !important;
+}
+:is(.passenger-dashboard-header,.dashboard-header,.wallet-header,.ride-history-header,.passenger-profile-header,.terms-header,.admin-dashboard-topbar,.admin-applications-topbar,.admin-feedback-header,.admin-topups-topbar) {
+  background: linear-gradient(90deg,#1f3655,#294866 72%,#f4c6d7) !important;
+  min-height: 76px;
+  box-shadow: none !important;
+}
+:is(.passenger-location-card,.passenger-dashboard-map-card,.dashboard-card,.passenger-profile-card,.ride-history-card,.trip-item,.wallet-container,.wallet-info-card,.passenger-active-card,.driver-active-card,.feedback-card,.passenger-feedback-card,.driver-feedback-card,.admin-dashboard-card,.admin-application-card,.admin-feedback-card,.admin-topup-card,.terms-card) {
+  background:#fff !important; border:1px solid var(--velocity-app-border) !important; border-radius:24px !important; box-shadow:var(--velocity-app-shadow) !important;
+}
+:is(button,.calculate-route-button,.choose-fare-button,.fare-continue-button,.feedback-submit,.saved-location-submit,.passenger-active-primary-button,.driver-active-primary-button,.wallet-topup-button,.wallet-confirm-button):not(:disabled) {
+  border-radius:14px;
+}
+:is(.calculate-route-button,.choose-fare-button,.fare-continue-button,.feedback-submit,.saved-location-submit,.passenger-active-primary-button,.driver-active-primary-button,.wallet-topup-button,.wallet-confirm-button):not(:disabled) {
+  background:linear-gradient(105deg,var(--velocity-app-pink),var(--velocity-app-blue)) !important;
+  box-shadow:0 9px 18px rgba(83,143,194,.22) !important;
+  transform:scale(1.01);
+}
+input, textarea, select { color:var(--velocity-app-navy) !important; background:#fff !important; border-color:#d7dee6 !important; }
+input:focus, textarea:focus, select:focus { outline:none !important; border-color:transparent !important; box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(229,95,145,.68),0 0 0 7px rgba(52,134,195,.48) !important; }
+:is(.passenger-dashboard-map-card,.map-container,.driver-dashboard-map) { border:2px solid transparent !important; background:linear-gradient(#fff,#fff) padding-box,linear-gradient(120deg,#ef9fba,#294866) border-box !important; overflow:hidden; }
+@media (max-width: 760px) {
+  :is(.passenger-dashboard-page,.driver-dashboard-shell) { padding:16px !important; }
+  :is(.passenger-dashboard-header,.dashboard-header) { margin:-16px -16px 20px !important; padding:14px 16px !important; }
+  :is(.passenger-dashboard-content,.driver-dashboard-content,.passenger-dashboard-main) { grid-template-columns:1fr !important; display:block !important; }
+  :is(.passenger-location-card,.dashboard-card) { margin-bottom:16px !important; }
+}
+
+/* Ride-history is the app-wide card contract. */
+:is(.passenger-profile-card,.ride-history-card,.saved-location-card,.add-location-card,.wallet-container,.wallet-info-card,.feedback-card,.passenger-feedback-card,.driver-feedback-card,.dashboard-card,.trip-item,.terms-card,.admin-dashboard-card,.admin-application-card,.admin-feedback-card,.admin-topup-card,.passenger-location-card,.passenger-active-card,.driver-active-card) {
+  padding:24px !important;
+  border-radius:24px !important;
+}
+:is(.passenger-profile-card,.ride-history-card,.saved-location-card,.add-location-card,.wallet-container,.wallet-info-card,.feedback-card,.passenger-feedback-card,.driver-feedback-card,.dashboard-card,.trip-item,.terms-card,.admin-dashboard-card,.admin-application-card,.admin-feedback-card,.admin-topup-card,.passenger-location-card,.passenger-active-card,.driver-active-card) :is([class*="label"],[class*="eyebrow"],[class*="meta"] ) {
+  color:var(--velocity-app-pink-strong) !important;
+  font-size:.72rem !important;
+  font-weight:800 !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+}
+:is(.passenger-profile-card,.ride-history-card,.saved-location-card,.add-location-card,.wallet-container,.wallet-info-card,.feedback-card,.passenger-feedback-card,.driver-feedback-card,.dashboard-card,.trip-item,.terms-card,.admin-dashboard-card,.admin-application-card,.admin-feedback-card,.admin-topup-card,.passenger-location-card,.passenger-active-card,.driver-active-card) :is(strong,h2,h3,[class*="value"]) {
+  color:var(--velocity-app-navy) !important;
+}
+:is(.ride-status-completed,.ride-status-accepted,.ride-status-ontrip,.trip-status,[class*="badge"],[class*="status-pill"]) {
+  border-radius:999px !important;
+  padding:6px 10px !important;
+  font-weight:800 !important;
+}
+:is(.passenger-summary-grid > div,.ride-history-details div,.trip-meta,.wallet-example,.wallet-help-section,[class*="stat-chip"],[class*="stats"] > div) {
+  background:#f1f6fa !important;
+  border:1px solid #e0eaf1 !important;
+  border-radius:14px !important;
+}
+
+/* Authentication uses the same quiet card, labels, and primary-action language. */
+:is(.phone-container,.otp-container,.signup-container,.driver-signup-container,.role-container,.password-container) {
+  background:#f7f8fa !important;
+  color:var(--velocity-app-navy) !important;
+}
+:is(.phone-card,.otp-card,.signup-card,.driver-signup-card,.role-card,.password-card) {
+  background:#fff !important;
+  border:1px solid var(--velocity-app-border) !important;
+  border-radius:24px !important;
+  box-shadow:var(--velocity-app-shadow) !important;
+}
+:is(.phone-card,.otp-card,.signup-card,.driver-signup-card,.role-card,.password-card) label {
+  color:var(--velocity-app-pink-strong) !important;
+  font-size:.72rem !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+  font-weight:800 !important;
 }
 
 /* Typography is deliberately soft; reserve dark navy for icons only. */
