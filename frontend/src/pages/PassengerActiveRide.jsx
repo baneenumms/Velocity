@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useRef,
@@ -23,7 +24,7 @@ import {
 
 import "./PassengerActiveRide.css";
 
-const API = "http://localhost:8080";
+const API = apiBaseUrl;
 const POLL_MS = 3000;
 
 async function readResponse(response) {

@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
     useEffect,
     useMemo,
@@ -13,7 +14,7 @@ import "./DriverSignUP.css";
 import "./DriverSignupCorrections.css";
 import VelocityMark from "../components/VelocityMark";
 
-const API = "http://localhost:8080";
+const API = apiBaseUrl;
 
 const CORRECTION_FIELD_MAP = {
     full_name: "fullName",

@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useState,
@@ -18,7 +19,7 @@ import PassengerHamburgerMenu from
 import "./PassengerRideHistory.css";
 
 const API =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 async function readResponse(response) {
   const text =

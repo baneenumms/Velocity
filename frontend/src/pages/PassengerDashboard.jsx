@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useState,
@@ -42,7 +43,7 @@ import "leaflet/dist/leaflet.css";
 import "./PassengerDashboard.css";
 
 const API =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 const GEOAPIFY_URL =
   "https://api.geoapify.com/v1/geocode/reverse";

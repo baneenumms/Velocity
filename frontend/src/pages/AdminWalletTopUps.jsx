@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useCallback,
   useEffect,
@@ -21,7 +22,7 @@ import {
 import "./AdminWalletTopUps.css";
 
 const API =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 const FILTERS = [
   "PENDING",

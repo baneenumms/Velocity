@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import { useEffect, useRef, useState } from "react";
 import {
     useLocation,
@@ -7,7 +8,7 @@ import { Mail } from "lucide-react";
 import "./OTP.css";
 import VelocityMark from "../components/VelocityMark";
 
-const API = "http://localhost:8080";
+const API = apiBaseUrl;
 
 function DriverSignupOTP() {
 

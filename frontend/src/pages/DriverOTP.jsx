@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail } from "lucide-react";
@@ -62,7 +63,7 @@ function DriverOTP() {
         try {
 
             const response = await fetch(
-                "http://localhost:8080/driver-auth/verify-otp",
+                `${apiBaseUrl}/driver-auth/verify-otp`,
                 {
                     method: "POST",
                     headers: {

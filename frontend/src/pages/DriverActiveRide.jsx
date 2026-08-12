@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useState,
@@ -20,7 +21,7 @@ import {
 import "./DriverActiveRide.css";
 
 const API =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 async function getData(response) {
   const text =

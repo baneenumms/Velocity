@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useState,
 } from "react";
@@ -83,7 +84,7 @@ function PassengerHamburgerMenu() {
   };
 
   const logout = () => {
-    fetch("http://localhost:8080/auth-sessions/current", {
+    fetch(`${apiBaseUrl}/auth-sessions/current`, {
       method: "DELETE",
     }).catch(() => {});
 

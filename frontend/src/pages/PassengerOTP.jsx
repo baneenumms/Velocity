@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useRef,
@@ -126,7 +127,7 @@ function PassengerOTP() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/passenger-auth/verify-otp",
+        `${apiBaseUrl}/passenger-auth/verify-otp`,
         {
           method: "POST",
           headers: {

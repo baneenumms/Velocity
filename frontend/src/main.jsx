@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "./config/api.js";
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
@@ -5,7 +6,7 @@ import App from './App.jsx'
 import './ResponsiveMobile.css'
 import './VelocityAppTheme.css'
 
-const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = apiBaseUrl;
 const nativeFetch = window.fetch.bind(window);
 
 function isPublicAuthRequest(url) {

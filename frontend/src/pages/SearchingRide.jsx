@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useState,
@@ -10,7 +11,7 @@ import {
 import "./SearchingRide.css";
 
 const BACKEND_URL =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 const POLL_MS = 3000;
 const FIVE_MINUTES =

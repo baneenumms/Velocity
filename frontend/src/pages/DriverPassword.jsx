@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import { useState } from "react";
 import {
     useLocation,
@@ -11,7 +12,7 @@ import {
 import "./DriverPassword.css";
 import VelocityMark from "../components/VelocityMark";
 
-const API = "http://localhost:8080";
+const API = apiBaseUrl;
 
 const SESSION_KEYS = [
     "activeMode",

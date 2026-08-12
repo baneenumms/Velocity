@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useState,
@@ -21,7 +22,7 @@ import VelocityMark from "../components/VelocityMark";
 import "./DriverProfile.css";
 
 const API =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 function DriverProfile() {
   const navigate = useNavigate();

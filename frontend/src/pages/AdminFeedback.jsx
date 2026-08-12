@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useCallback,
   useEffect,
@@ -17,7 +18,7 @@ import {
 import "./AdminFeedback.css";
 
 const API =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 async function readResponse(
   response

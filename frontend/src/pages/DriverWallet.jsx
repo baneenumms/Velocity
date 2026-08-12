@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useCallback,
   useEffect,
@@ -30,7 +31,7 @@ import VelocityMark from "../components/VelocityMark";
 import "./DriverWallet.css";
 
 const API =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 const getToday = () => {
   const date = new Date();

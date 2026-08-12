@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useState,
@@ -18,7 +19,7 @@ import {
 import "./DashboardRideState.css";
 
 const API =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 const POLL_MS = 3000;
 

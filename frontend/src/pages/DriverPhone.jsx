@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Phone } from "lucide-react";
@@ -26,7 +27,7 @@ function DriverPhone() {
 
             // Check if phone exists
             const checkResponse = await fetch(
-                "http://localhost:8080/driver-auth/check-phone",
+                `${apiBaseUrl}/driver-auth/check-phone`,
                 {
                     method: "POST",
                     headers: {
@@ -53,7 +54,7 @@ function DriverPhone() {
 
             // Send OTP
             const otpResponse = await fetch(
-                "http://localhost:8080/driver-auth/send-otp",
+                `${apiBaseUrl}/driver-auth/send-otp`,
                 {
                     method: "POST",
                     headers: {

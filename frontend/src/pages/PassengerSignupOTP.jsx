@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useRef,
@@ -17,7 +18,7 @@ import "./OTP.css";
 import VelocityMark from "../components/VelocityMark";
 
 const API =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 const SESSION_KEYS_TO_CLEAR = [
   "userId",

@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
     useEffect,
     useState,
@@ -11,7 +12,7 @@ import {
 } from "lucide-react";
 import "./AdminDriverApplications.css";
 
-const API = "http://localhost:8080";
+const API = apiBaseUrl;
 
 const FILTERS = [
     "PENDING_REVIEW",

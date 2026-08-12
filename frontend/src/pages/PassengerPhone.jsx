@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Phone } from "lucide-react";
@@ -28,7 +29,7 @@ function PassengerPhone() {
         try {
 
             const response = await fetch(
-                "http://localhost:8080/passenger-auth/check-phone",
+                `${apiBaseUrl}/passenger-auth/check-phone`,
                 {
                     method: "POST",
                     headers: {

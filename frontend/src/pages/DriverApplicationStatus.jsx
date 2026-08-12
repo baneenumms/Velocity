@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -13,7 +14,7 @@ import {
 import "./DriverApplicationStatus.css";
 import VelocityMark from "../components/VelocityMark";
 
-const API = "http://localhost:8080";
+const API = apiBaseUrl;
 
 function DriverApplicationStatus() {
 

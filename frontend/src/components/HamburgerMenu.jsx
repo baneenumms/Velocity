@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useNavigate,
 } from "react-router-dom";
@@ -93,7 +94,7 @@ function HamburgerMenu({
   };
 
   const handleLogout = () => {
-    fetch("http://localhost:8080/auth-sessions/current", {
+    fetch(`${apiBaseUrl}/auth-sessions/current`, {
       method: "DELETE",
     }).catch(() => {});
 

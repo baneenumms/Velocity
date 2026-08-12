@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useState,
@@ -11,7 +12,7 @@ import {
 import "./PassengerFare.css";
 
 const BACKEND_URL =
-  "http://localhost:8080";
+  apiBaseUrl;
 
 const MINIMUM_FARE_FACTOR = 0.9;
 const MAXIMUM_FARE_FACTOR = 2;

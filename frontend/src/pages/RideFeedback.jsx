@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useState,
@@ -15,7 +16,7 @@ import {
 
 import "./RideFeedback.css";
 
-const API = "http://localhost:8080";
+const API = apiBaseUrl;
 
 async function readResponse(response) {
   const text =

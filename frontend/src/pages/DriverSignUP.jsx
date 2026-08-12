@@ -1,3 +1,4 @@
+import { apiBaseUrl } from "../config/api.js";
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -8,7 +9,7 @@ import {
 import "./DriverSignUP.css";
 import VelocityMark from "../components/VelocityMark";
 
-const API = "http://localhost:8080";
+const API = apiBaseUrl;
 
 function DriverSignUP() {
 
