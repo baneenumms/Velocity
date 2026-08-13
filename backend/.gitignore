@@ -15,7 +15,6 @@ release.properties
 backup-cors/
 
 # Secrets
-src/main/resources/application.properties
 .env
 
 # IntelliJ
