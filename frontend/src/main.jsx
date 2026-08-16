@@ -36,14 +36,24 @@ window.fetch = async (input, init = {}) => {
 
   let requestInit = init;
   if (isVelocityBackend && session && !isPublicAuthRequest(url)) {
-    const parsed = JSON.parse(session);
-    requestInit = {
-      ...init,
-      headers: {
-        ...(init.headers || {}),
-        Authorization: `Bearer ${parsed.token}`,
-      },
-    };
+    try {
+      const parsed = JSON.parse(session);
+      const headers = new Headers(
+        init.headers ||
+        (input instanceof Request ? input.headers : undefined)
+      );
+
+      if (!headers.has("Authorization") && parsed?.token) {
+        headers.set("Authorization", `Bearer ${parsed.token}`);
+      }
+
+      requestInit = {
+        ...init,
+        headers,
+      };
+    } catch {
+      sessionStorage.removeItem("velocitySession");
+    }
   }
 
   const response = await nativeFetch(input, requestInit);
