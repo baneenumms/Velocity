@@ -5,10 +5,12 @@ import com.beni.dto.EstimateRideResponse;
 import com.beni.dto.PassengerTripResponse;
 import com.beni.dto.RideStatusResponse;
 import com.beni.dto.StartRideRequest;
+import com.beni.service.ResourceAuthorizationService;
 import com.beni.service.RideService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -26,6 +28,9 @@ public class RideResource {
     @Inject
     RideService rideService;
 
+    @Inject
+    ResourceAuthorizationService authorizationService;
+
     @POST
     @Path("/estimate")
     public EstimateRideResponse estimate(
@@ -37,8 +42,14 @@ public class RideResource {
     @GET
     @Path("/passenger/{passengerId}/history")
     public List<PassengerTripResponse> passengerHistory(
-            @PathParam("passengerId") Integer passengerId
+            @PathParam("passengerId") Integer passengerId,
+            @HeaderParam("Authorization") String authorization
     ) {
+        authorizationService.requirePassenger(
+                authorization,
+                passengerId
+        );
+
         return rideService.getPassengerTripHistory(
                 passengerId
         );
@@ -48,8 +59,14 @@ public class RideResource {
     @Path("/{rideId}/start")
     public RideStatusResponse start(
             @PathParam("rideId") Integer rideId,
-            StartRideRequest request
+            StartRideRequest request,
+            @HeaderParam("Authorization") String authorization
     ) {
+        authorizationService.requireDriverRide(
+                authorization,
+                rideId
+        );
+
         return rideService.startRide(
                 rideId,
                 request
@@ -59,8 +76,14 @@ public class RideResource {
     @POST
     @Path("/{rideId}/complete")
     public RideStatusResponse complete(
-            @PathParam("rideId") Integer rideId
+            @PathParam("rideId") Integer rideId,
+            @HeaderParam("Authorization") String authorization
     ) {
+        authorizationService.requireDriverRide(
+                authorization,
+                rideId
+        );
+
         return rideService.completeRide(rideId);
     }
 
@@ -68,12 +91,18 @@ public class RideResource {
     @Path("/{rideId}/cancel")
     public RideStatusResponse cancel(
             @PathParam("rideId") Integer rideId,
-            @QueryParam("cancelledBy") String cancelledBy,
-            @QueryParam("reason") String reason
+            @QueryParam("reason") String reason,
+            @HeaderParam("Authorization") String authorization
     ) {
+        var participant =
+                authorizationService.requireRideParticipant(
+                        authorization,
+                        rideId
+                );
+
         return rideService.cancelRide(
                 rideId,
-                cancelledBy,
+                participant.role(),
                 reason
         );
     }

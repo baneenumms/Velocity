@@ -30,6 +30,7 @@ public class VelocitySessionFilter implements ContainerRequestFilter {
     private boolean requiresVelocitySession(String path) {
         return path.startsWith("ride-requests") ||
                 path.startsWith("driver-offers") ||
+                path.startsWith("drivers") ||
                 path.startsWith("driver-rides") ||
                 path.startsWith("passenger-rides") ||
                 path.startsWith("driver-wallet") ||

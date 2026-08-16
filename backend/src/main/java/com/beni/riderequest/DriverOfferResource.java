@@ -11,11 +11,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
-import com.beni.entity.Driver;
-import com.beni.entity.Passenger;
-import com.beni.repository.DriverRepository;
-import com.beni.repository.PassengerRepository;
-import com.beni.service.SessionService;
+import com.beni.service.ResourceAuthorizationService;
 
 @Path("/driver-offers")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -27,20 +23,21 @@ public class DriverOfferResource {
             driverOfferService;
 
     @Inject
-    SessionService sessionService;
+    ResourceAuthorizationService authorizationService;
 
     @Inject
-    DriverRepository driverRepository;
-
-    @Inject
-    PassengerRepository passengerRepository;
+    RideRequestService rideRequestService;
 
     @POST
     public DriverOffer submitOffer(
             SubmitDriverOfferRequest request,
             @HeaderParam("Authorization") String authorization
     ) {
-        requireDriver(authorization, request.driverId);
+        authorizationService.requireDriver(
+                authorization,
+                request == null ? null : request.driverId
+        );
+
         return driverOfferService
                 .submitOffer(
                         request
@@ -52,8 +49,17 @@ public class DriverOfferResource {
     public List<DriverOffer>
     getOffersForRequest(
             @PathParam("requestId")
-            String requestId
+            String requestId,
+            @HeaderParam("Authorization") String authorization
     ) {
+        RideRequest rideRequest =
+                rideRequestService.getRideRequest(requestId);
+
+        authorizationService.requirePassenger(
+                authorization,
+                rideRequest.passengerId
+        );
+
         return driverOfferService
                 .getOffersForRequest(
                         requestId
@@ -70,7 +76,11 @@ public class DriverOfferResource {
             AcceptDriverOfferRequest request,
             @HeaderParam("Authorization") String authorization
     ) {
-        requirePassenger(authorization, request.passengerId);
+        authorizationService.requirePassenger(
+                authorization,
+                request == null ? null : request.passengerId
+        );
+
         return driverOfferService
                 .acceptOffer(
                         offerId,
@@ -78,19 +88,4 @@ public class DriverOfferResource {
                 );
     }
 
-    private void requireDriver(String authorization, Integer driverId) {
-        var session = sessionService.requireMode(authorization, "DRIVER");
-        Driver driver = driverRepository.findById(driverId.longValue());
-        if (driver == null || !driver.user.userId.equals(session.user.userId)) {
-            throw new jakarta.ws.rs.WebApplicationException("Driver session does not match this offer.", 403);
-        }
-    }
-
-    private void requirePassenger(String authorization, Integer passengerId) {
-        var session = sessionService.requireMode(authorization, "PASSENGER");
-        Passenger passenger = passengerRepository.findById(passengerId.longValue());
-        if (passenger == null || !passenger.user.userId.equals(session.user.userId)) {
-            throw new jakarta.ws.rs.WebApplicationException("Passenger session does not match this offer.", 403);
-        }
-    }
 }

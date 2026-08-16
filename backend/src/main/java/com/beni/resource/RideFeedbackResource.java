@@ -1,6 +1,7 @@
 package com.beni.resource;
 
 import com.beni.dto.*;
+import com.beni.service.ResourceAuthorizationService;
 import com.beni.service.RideFeedbackService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -14,10 +15,30 @@ public class RideFeedbackResource {
     @Inject
     RideFeedbackService feedbackService;
 
+    @Inject
+    ResourceAuthorizationService authorizationService;
+
     @POST
     public RideFeedbackResponse submit(
-            RideFeedbackRequest request
+            RideFeedbackRequest request,
+            @HeaderParam("Authorization") String authorization
     ) {
+        if (request == null) {
+            throw new BadRequestException(
+                    "Request body is required."
+            );
+        }
+
+        var participant =
+                authorizationService.requireRideParticipant(
+                        authorization,
+                        request.rideId
+                );
+
+        request.submittedBy = participant.role();
+        request.passengerId = participant.passengerId();
+        request.driverId = participant.driverId();
+
         return feedbackService.submit(request);
     }
 }

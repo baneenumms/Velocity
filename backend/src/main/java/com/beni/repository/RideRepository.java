@@ -33,6 +33,42 @@ public class RideRepository
         ).list();
     }
 
+    public Ride findByIdAndDriverId(
+            Integer rideId,
+            Integer driverId
+    ) {
+        if (
+                rideId == null || rideId <= 0 ||
+                        driverId == null || driverId <= 0
+        ) {
+            return null;
+        }
+
+        return find(
+                "rideId = ?1 and driver.driverId = ?2",
+                rideId,
+                driverId
+        ).firstResult();
+    }
+
+    public Ride findByIdAndPassengerId(
+            Integer rideId,
+            Integer passengerId
+    ) {
+        if (
+                rideId == null || rideId <= 0 ||
+                        passengerId == null || passengerId <= 0
+        ) {
+            return null;
+        }
+
+        return find(
+                "rideId = ?1 and passenger.passengerId = ?2",
+                rideId,
+                passengerId
+        ).firstResult();
+    }
+
     /*
      * ACCEPTED and IN_PROGRESS are the
      * only persisted active ride statuses.

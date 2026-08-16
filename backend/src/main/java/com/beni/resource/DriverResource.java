@@ -1,16 +1,16 @@
 package com.beni.resource;
 
 import com.beni.dto.DriverProfileResponse;
-import com.beni.dto.DriverRequest;
 import com.beni.dto.DriverStatusRequest;
 import com.beni.dto.DriverStatusResponse;
 import com.beni.dto.RideResponse;
 import com.beni.dto.WalletResponse;
-import com.beni.entity.Driver;
 import com.beni.service.DriverService;
+import com.beni.service.ResourceAuthorizationService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -27,17 +27,8 @@ public class DriverResource {
     @Inject
     DriverService driverService;
 
-    @POST
-    public Driver createDriver(
-            DriverRequest request
-    ) {
-        return driverService.createDriver(request);
-    }
-
-    @GET
-    public List<Driver> getAllDrivers() {
-        return driverService.getAllDrivers();
-    }
+    @Inject
+    ResourceAuthorizationService authorizationService;
 
     /*
      * This endpoint must be POST /drivers/status.
@@ -47,21 +38,16 @@ public class DriverResource {
     @POST
     @Path("/status")
     public DriverStatusResponse updateDriverStatus(
-            DriverStatusRequest request
+            DriverStatusRequest request,
+            @HeaderParam("Authorization") String authorization
     ) {
+        authorizationService.requireDriver(
+                authorization,
+                request == null ? null : request.driverId
+        );
+
         return driverService.updateDriverStatus(
                 request
-        );
-    }
-
-    @GET
-    @Path("/user/{userId}")
-    public Driver getDriverByUserId(
-            @PathParam("userId")
-            Integer userId
-    ) {
-        return driverService.getDriverByUserId(
-                userId
         );
     }
 
@@ -69,8 +55,14 @@ public class DriverResource {
     @Path("/{driverId}/profile")
     public DriverProfileResponse getDriverProfile(
             @PathParam("driverId")
-            Integer driverId
+            Integer driverId,
+            @HeaderParam("Authorization") String authorization
     ) {
+        authorizationService.requireDriver(
+                authorization,
+                driverId
+        );
+
         return driverService.getDriverProfile(
                 driverId
         );
@@ -80,8 +72,14 @@ public class DriverResource {
     @Path("/{driverId}/trips")
     public List<RideResponse> getTripHistory(
             @PathParam("driverId")
-            Integer driverId
+            Integer driverId,
+            @HeaderParam("Authorization") String authorization
     ) {
+        authorizationService.requireDriver(
+                authorization,
+                driverId
+        );
+
         return driverService.getTripHistory(
                 driverId
         );
@@ -91,8 +89,14 @@ public class DriverResource {
     @Path("/{driverId}/wallet")
     public WalletResponse getWallet(
             @PathParam("driverId")
-            Integer driverId
+            Integer driverId,
+            @HeaderParam("Authorization") String authorization
     ) {
+        authorizationService.requireDriver(
+                authorization,
+                driverId
+        );
+
         return driverService.getWallet(
                 driverId
         );

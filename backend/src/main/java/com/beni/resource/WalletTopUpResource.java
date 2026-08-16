@@ -4,10 +4,12 @@ import com.beni.dto.CreateWalletTopUpRequest;
 import com.beni.dto.DriverWalletSummaryResponse;
 import com.beni.dto.TopUpPaymentMethodResponse;
 import com.beni.dto.WalletTopUpResponse;
+import com.beni.service.ResourceAuthorizationService;
 import com.beni.service.WalletTopUpService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -25,13 +27,22 @@ public class WalletTopUpResource {
     @Inject
     WalletTopUpService walletTopUpService;
 
+    @Inject
+    ResourceAuthorizationService authorizationService;
+
     @GET
     @Path("/{driverId}")
     public DriverWalletSummaryResponse
     getWalletSummary(
             @PathParam("driverId")
-            Integer driverId
+            Integer driverId,
+            @HeaderParam("Authorization") String authorization
     ) {
+        authorizationService.requireDriver(
+                authorization,
+                driverId
+        );
+
         return walletTopUpService
                 .getWalletSummary(driverId);
     }
@@ -39,7 +50,11 @@ public class WalletTopUpResource {
     @GET
     @Path("/payment-methods")
     public List<TopUpPaymentMethodResponse>
-    getPaymentMethods() {
+    getPaymentMethods(
+            @HeaderParam("Authorization") String authorization
+    ) {
+        authorizationService.requireDriver(authorization);
+
         return walletTopUpService
                 .listPaymentMethods();
     }
@@ -49,8 +64,14 @@ public class WalletTopUpResource {
     public Response createTopUp(
             @PathParam("driverId")
             Integer driverId,
-            CreateWalletTopUpRequest request
+            CreateWalletTopUpRequest request,
+            @HeaderParam("Authorization") String authorization
     ) {
+        authorizationService.requireDriver(
+                authorization,
+                driverId
+        );
+
         WalletTopUpResponse response =
                 walletTopUpService.createTopUp(
                         driverId,
@@ -68,8 +89,14 @@ public class WalletTopUpResource {
     public List<WalletTopUpResponse>
     getDriverTopUps(
             @PathParam("driverId")
-            Integer driverId
+            Integer driverId,
+            @HeaderParam("Authorization") String authorization
     ) {
+        authorizationService.requireDriver(
+                authorization,
+                driverId
+        );
+
         return walletTopUpService
                 .listDriverTopUps(driverId);
     }
