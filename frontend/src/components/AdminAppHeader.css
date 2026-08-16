@@ -1,0 +1,83 @@
+.admin-authenticated-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #f7f8fa;
+}
+
+.admin-authenticated-content {
+  min-width: 0;
+}
+
+.admin-authenticated-content > * {
+  min-height: calc(100vh - 80px);
+  min-height: calc(100dvh - 80px);
+}
+
+.admin-app-header {
+  position: relative;
+  z-index: 5000;
+
+  width: 100%;
+  min-height: 80px;
+  box-sizing: border-box;
+  padding: 16px max(24px, calc((100vw - 1200px) / 2));
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #1f3655 0%,
+      #294866 72%,
+      #f4c6d7 100%
+    );
+  color: #ffffff;
+}
+
+.admin-app-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-app-header .velocity-home-button {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.admin-app-header .velocity-home-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.admin-mode-badge {
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+@media (max-width: 600px) {
+  .admin-authenticated-content > * {
+    min-height: calc(100vh - 72px);
+    min-height: calc(100dvh - 72px);
+  }
+
+  .admin-app-header {
+    min-height: 72px;
+    padding: 13px 16px;
+  }
+
+  .admin-mode-badge {
+    display: none;
+  }
+}

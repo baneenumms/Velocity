@@ -189,11 +189,6 @@ function SearchingRide() {
     setAcceptingOfferId,
   ] = useState("");
 
-  const [
-    cancelling,
-    setCancelling,
-  ] = useState(false);
-
   const [error, setError] =
     useState("");
 
@@ -570,17 +565,8 @@ function SearchingRide() {
   };
 
   const handleCancelRequest =
-    async () => {
+    () => {
       setError("");
-
-      const confirmed =
-        window.confirm(
-          "Cancel your ride search?\n\nNearby drivers will no longer be able to view or respond to this request."
-        );
-
-      if (!confirmed) {
-        return;
-      }
 
       if (
         !Number.isInteger(
@@ -601,42 +587,27 @@ function SearchingRide() {
         return;
       }
 
-      try {
-        setCancelling(true);
+      const cancellationContext = {
+        kind: "PASSENGER_SEARCH",
+        passengerId,
+        requestId,
+        request: {
+          ...initialSavedRide,
+          ...rideRequest,
+        },
+      };
 
-        const response =
-          await fetch(
-            `${BACKEND_URL}/ride-requests/${requestId}/cancel?passengerId=${passengerId}`,
-            {
-              method: "POST",
-            }
-          );
+      sessionStorage.setItem(
+        "velocityCancellationContext",
+        JSON.stringify(cancellationContext)
+      );
 
-        await readResponse(
-          response
-        );
-
-        clearRideStorage();
-
-        navigate(
-          "/passenger-dashboard",
-          {
-            replace: true,
-          }
-        );
-      } catch (cancelError) {
-        console.error(
-          "Cancel ride request error:",
-          cancelError
-        );
-
-        setError(
-          cancelError.message ||
-            "Unable to cancel your ride search."
-        );
-      } finally {
-        setCancelling(false);
-      }
+      navigate(
+        "/passenger-cancel-search",
+        {
+          state: cancellationContext,
+        }
+      );
     };
 
   const handleSearchAgain =
@@ -1084,8 +1055,7 @@ function SearchingRide() {
                         disabled={
                           Boolean(
                             acceptingOfferId
-                          ) ||
-                          cancelling
+                          )
                         }
                       >
                         {acceptingOfferId ===
@@ -1114,15 +1084,12 @@ function SearchingRide() {
             handleCancelRequest
           }
           disabled={
-            cancelling ||
             Boolean(
               acceptingOfferId
             )
           }
         >
-          {cancelling
-            ? "Cancelling Ride Search..."
-            : "Cancel Ride Search"}
+          Cancel Ride Search
         </button>
       </main>
     </div>

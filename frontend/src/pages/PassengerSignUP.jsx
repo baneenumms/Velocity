@@ -7,6 +7,7 @@ import {
 import { UserRoundPlus } from "lucide-react";
 import "./Signup.css";
 import VelocityMark from "../components/VelocityMark";
+import { normalizePersonName } from "../utils/inputNormalization";
 
 const API = apiBaseUrl;
 
@@ -45,7 +46,7 @@ function PassengerSignUP() {
     setError("");
 
     const cleanName =
-      fullName.trim();
+      normalizePersonName(fullName);
 
     const cleanEmail =
       email.trim().toLowerCase();
@@ -134,7 +135,7 @@ function PassengerSignUP() {
 
   if (!phone) {
     return (
-      <div className="page">
+      <div className="page auth-page">
         <div className="card">
           <h1 className="title">
             Passenger Registration
@@ -213,6 +214,11 @@ function PassengerSignUP() {
               onChange={(event) =>
                 setFullName(
                   event.target.value
+                )
+              }
+              onBlur={() =>
+                setFullName(
+                  normalizePersonName(fullName)
                 )
               }
             />

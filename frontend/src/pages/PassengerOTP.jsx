@@ -1,7 +1,5 @@
 import { apiBaseUrl } from "../config/api.js";
 import {
-  useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -13,6 +11,7 @@ import {
 import { Mail } from "lucide-react";
 import "./OTP.css";
 import VelocityMark from "../components/VelocityMark";
+import OtpInputGroup from "../components/OtpInputGroup";
 
 const SESSION_KEYS_TO_CLEAR = [
   "userId",
@@ -70,39 +69,6 @@ function PassengerOTP() {
     useState(false);
   const [loading, setLoading] =
     useState(false);
-
-  const inputs = useRef([]);
-
-  useEffect(() => { inputs.current[0]?.focus(); }, []);
-
-  const handleChange = (value, index) => {
-    if (!/^\d?$/.test(value)) {
-      return;
-    }
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-
-    setOtp(newOtp);
-
-    if (value && index < 5) {
-      inputs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (event, index) => {
-    if (event.key === "Enter") {
-      handleVerify();
-      return;
-    }
-    if (
-      event.key === "Backspace" &&
-      otp[index] === "" &&
-      index > 0
-    ) {
-      inputs.current[index - 1]?.focus();
-    }
-  };
 
   const handleVerify = async () => {
     setError("");
@@ -245,43 +211,15 @@ function PassengerOTP() {
             "your registered email"}
         </p>
 
-        <div className="otp-container">
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              ref={(element) => {
-                inputs.current[index] =
-                  element;
-              }}
-              className="otp-box"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              autoComplete={
-                index === 0
-                  ? "one-time-code"
-                  : "off"
-              }
-              maxLength={1}
-              value={digit}
-              disabled={
-                otpFailed || loading
-              }
-              onChange={(event) =>
-                handleChange(
-                  event.target.value,
-                  index
-                )
-              }
-              onKeyDown={(event) =>
-                handleKeyDown(
-                  event,
-                  index
-                )
-              }
-            />
-          ))}
-        </div>
+        <OtpInputGroup
+          value={otp}
+          onChange={(nextOtp) => {
+            setOtp(nextOtp);
+            setError("");
+          }}
+          onSubmit={handleVerify}
+          disabled={otpFailed || loading}
+        />
 
         {error && (
           <p className="error">

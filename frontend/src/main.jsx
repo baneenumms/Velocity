@@ -5,6 +5,9 @@ import './index.css'
 import App from './App.jsx'
 import './ResponsiveMobile.css'
 import './VelocityAppTheme.css'
+import './AdminPanelTheme.css'
+import './Phase2EUnifiedPages.css'
+import './AuthFlowTheme.css'
 
 const BACKEND_URL = apiBaseUrl;
 const nativeFetch = window.fetch.bind(window);

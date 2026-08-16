@@ -1,0 +1,82 @@
+/* High-contrast actions for every pre-dashboard authentication screen. */
+.auth-page .primary-btn:not(:disabled),
+.driver-signup-page .driver-signup-submit:not(:disabled) {
+  background: linear-gradient(
+    105deg,
+    var(--velocity-app-pink),
+    var(--velocity-app-blue)
+  ) !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  box-shadow: 0 9px 20px rgba(31, 54, 85, 0.23) !important;
+}
+
+.auth-page .primary-btn:hover:not(:disabled),
+.driver-signup-page .driver-signup-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: saturate(1.08) brightness(0.97);
+  box-shadow: 0 12px 24px rgba(31, 54, 85, 0.29) !important;
+}
+
+.auth-page .primary-btn:focus-visible,
+.driver-signup-page .driver-signup-submit:focus-visible,
+.auth-page .change-phone-button:focus-visible {
+  outline: 3px solid #ffffff;
+  box-shadow:
+    0 0 0 5px rgba(229, 95, 145, 0.72),
+    0 0 0 8px rgba(31, 54, 85, 0.48) !important;
+}
+
+.auth-page .primary-btn:disabled,
+.driver-signup-page .driver-signup-submit:disabled {
+  background: #d8dee5 !important;
+  color: #5f6b78 !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+}
+
+.auth-page .change-phone-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 7px 13px;
+  border: 1px solid #d797b1;
+  border-radius: 999px;
+  background: #fff0f5;
+  color: #8f3156;
+  text-decoration: none;
+}
+
+.auth-page .change-phone-button:hover:not(:disabled) {
+  background: #fbe0ea;
+  text-decoration: none;
+}
+
+.role-page .role-option {
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 9px 20px rgba(31, 54, 85, 0.2);
+}
+
+.role-page .driver-option {
+  background: #4f82b1 !important;
+}
+
+.role-page .passenger-option {
+  background: #d97b9e !important;
+}
+
+.role-page .role-option :is(strong, small, .role-arrow) {
+  color: #ffffff !important;
+}
+
+.role-page .role-option .role-icon {
+  background: rgba(23, 38, 59, 0.24) !important;
+  box-shadow: none;
+}
+
+.role-page .role-option:hover {
+  filter: saturate(1.08) brightness(0.96);
+  box-shadow: 0 12px 24px rgba(31, 54, 85, 0.27);
+}

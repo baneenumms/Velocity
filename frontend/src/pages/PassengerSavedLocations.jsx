@@ -1,57 +1,53 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PassengerHamburgerMenu from "../components/PassengerHamburgerMenu";
+import {
+  Bookmark,
+  Briefcase,
+  GraduationCap,
+  House,
+  MapPin,
+  Navigation,
+  Route,
+  Search,
+  Trash2,
+} from "lucide-react";
 import "./PassengerSavedLocations.css";
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org";
 
+function SavedLocationIcon({ label }) {
+  if (label === "Home") return <House size={23} />;
+  if (label === "Work") return <Briefcase size={23} />;
+  if (label === "University") return <GraduationCap size={23} />;
+  return <Bookmark size={23} />;
+}
+
 function PassengerSavedLocations() {
   const navigate = useNavigate();
-
   const [savedLocations, setSavedLocations] = useState([]);
   const [label, setLabel] = useState("Home");
   const [customLabel, setCustomLabel] = useState("");
-
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
-
   const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     try {
-      const savedData = localStorage.getItem(
-        "passengerSavedLocations"
-      );
-
-      const parsedLocations = savedData
-        ? JSON.parse(savedData)
-        : [];
-
-      setSavedLocations(
-        Array.isArray(parsedLocations)
-          ? parsedLocations
-          : []
-      );
+      const savedData = localStorage.getItem("passengerSavedLocations");
+      const parsedLocations = savedData ? JSON.parse(savedData) : [];
+      setSavedLocations(Array.isArray(parsedLocations) ? parsedLocations : []);
     } catch (storageError) {
-      console.error(
-        "Could not read saved locations:",
-        storageError
-      );
-
+      console.error("Could not read saved locations:", storageError);
       setSavedLocations([]);
     }
   }, []);
 
   const saveLocationsToStorage = (locations) => {
     setSavedLocations(locations);
-
-    localStorage.setItem(
-      "passengerSavedLocations",
-      JSON.stringify(locations)
-    );
+    localStorage.setItem("passengerSavedLocations", JSON.stringify(locations));
   };
 
   const searchLocation = async () => {
@@ -77,14 +73,10 @@ function PassengerSavedLocations() {
         addressdetails: "1",
       });
 
-      const response = await fetch(
-        `${NOMINATIM_URL}/search?${params.toString()}`
-      );
+      const response = await fetch(`${NOMINATIM_URL}/search?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error(
-          "Location search failed. Please try again."
-        );
+        throw new Error("Location search failed. Please try again.");
       }
 
       const results = await response.json();
@@ -95,23 +87,18 @@ function PassengerSavedLocations() {
         );
       }
 
-      const formattedResults = results.map((result) => ({
-        placeId: result.place_id,
-        lat: Number(result.lat),
-        lng: Number(result.lon),
-        address: result.display_name,
-      }));
-
-      setSearchResults(formattedResults);
+      setSearchResults(
+        results.map((result) => ({
+          placeId: result.place_id,
+          lat: Number(result.lat),
+          lng: Number(result.lon),
+          address: result.display_name,
+        }))
+      );
       setMessage("Select one of the locations below.");
     } catch (searchError) {
       console.error("Location search error:", searchError);
-
-      setError(
-        searchError.message ||
-          "Could not search for the location."
-      );
-
+      setError(searchError.message || "Could not search for the location.");
       setSearchResults([]);
     } finally {
       setSearching(false);
@@ -121,9 +108,7 @@ function PassengerSavedLocations() {
   const handleSelectLocation = (location) => {
     setSelectedLocation(location);
     setSearchText(location.address);
-    setMessage(
-      "Location selected. You can now save it."
-    );
+    setMessage("Location selected. You can now save it.");
     setError("");
   };
 
@@ -132,16 +117,11 @@ function PassengerSavedLocations() {
     setMessage("");
 
     if (!selectedLocation) {
-      setError(
-        "Search for a location and select one of the results first."
-      );
+      setError("Search for a location and select one of the results first.");
       return;
     }
 
-    const finalLabel =
-      label === "Other"
-        ? customLabel.trim()
-        : label;
+    const finalLabel = label === "Other" ? customLabel.trim() : label;
 
     if (!finalLabel) {
       setError("Enter a label for this location.");
@@ -157,13 +137,7 @@ function PassengerSavedLocations() {
       address: selectedLocation.address,
     };
 
-    const updatedLocations = [
-      ...savedLocations,
-      newLocation,
-    ];
-
-    saveLocationsToStorage(updatedLocations);
-
+    saveLocationsToStorage([...savedLocations, newLocation]);
     setLabel("Home");
     setCustomLabel("");
     setSearchText("");
@@ -173,42 +147,29 @@ function PassengerSavedLocations() {
   };
 
   const handleDeleteLocation = (locationId) => {
-    const updatedLocations = savedLocations.filter(
-      (location) => location.id !== locationId
+    saveLocationsToStorage(
+      savedLocations.filter((location) => location.id !== locationId)
     );
-
-    saveLocationsToStorage(updatedLocations);
   };
 
   const useLocationForRide = (location, type) => {
     let rideDraft = {};
 
     try {
-      const savedDraft = sessionStorage.getItem(
-        "passengerRideDraft"
-      );
-
-      rideDraft = savedDraft
-        ? JSON.parse(savedDraft)
-        : {};
+      const savedDraft = sessionStorage.getItem("passengerRideDraft");
+      rideDraft = savedDraft ? JSON.parse(savedDraft) : {};
     } catch (storageError) {
-      console.error(
-        "Could not read ride draft:",
-        storageError
-      );
-
+      console.error("Could not read ride draft:", storageError);
       rideDraft = {};
     }
 
     const updatedDraft = {
       ...rideDraft,
-
       [type]: {
         lat: Number(location.lat),
         lng: Number(location.lng),
         address: location.address,
       },
-
       routeCoordinates: [],
       distanceKm: null,
       estimatedMinutes: null,
@@ -216,129 +177,95 @@ function PassengerSavedLocations() {
       selectedFare: null,
     };
 
-    sessionStorage.setItem(
-      "passengerRideDraft",
-      JSON.stringify(updatedDraft)
-    );
-
+    sessionStorage.setItem("passengerRideDraft", JSON.stringify(updatedDraft));
     navigate("/passenger-dashboard");
   };
 
   return (
     <div className="saved-locations-page">
-      <header className="saved-locations-header">
-        <h2>VELOCITY</h2>
-
-        <PassengerHamburgerMenu />
-      </header>
-
       <main className="saved-locations-content">
-        <button
-          type="button"
-          className="saved-locations-back"
-          onClick={() =>
-            navigate("/passenger-dashboard")
-          }
-        >
-          ← Back to dashboard
-        </button>
-
         <section className="saved-locations-title">
           <p>Your favourite places</p>
           <h1>Saved Locations</h1>
         </section>
 
         <section className="add-location-card">
-          <h2>Add a location</h2>
+          <header className="add-location-card-header">
+            <div className="add-location-header-icon" aria-hidden="true">
+              <MapPin size={27} />
+            </div>
+            <div>
+              <span>Create a shortcut</span>
+              <h2>Add a Location</h2>
+              <p>Search for a place, select the correct result, and give it a useful label.</p>
+            </div>
+          </header>
 
-          <label htmlFor="location-label">
-            Location label
-          </label>
+          <div className="add-location-form-grid">
+            <label className="saved-location-field">
+              <span>Location label</span>
+              <select
+                value={label}
+                onChange={(event) => {
+                  setLabel(event.target.value);
+                  setMessage("");
+                  setError("");
+                }}
+              >
+                <option value="Home">Home</option>
+                <option value="Work">Work</option>
+                <option value="University">University</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
 
-          <select
-            id="location-label"
-            value={label}
-            onChange={(event) => {
-              setLabel(event.target.value);
-              setMessage("");
-              setError("");
-            }}
-          >
-            <option value="Home">Home</option>
-            <option value="Work">Work</option>
-            <option value="University">
-              University
-            </option>
-            <option value="Other">Other</option>
-          </select>
-
-          {label === "Other" && (
-            <>
-              <label htmlFor="custom-label">
-                Custom label
+            {label === "Other" && (
+              <label className="saved-location-field">
+                <span>Custom label</span>
+                <input
+                  type="text"
+                  placeholder="For example: Gym"
+                  value={customLabel}
+                  onChange={(event) => setCustomLabel(event.target.value)}
+                />
               </label>
+            )}
 
-              <input
-                id="custom-label"
-                type="text"
-                placeholder="For example: Gym"
-                value={customLabel}
-                onChange={(event) =>
-                  setCustomLabel(event.target.value)
-                }
-              />
-            </>
-          )}
-
-          <label htmlFor="saved-location-search">
-            Search address
-          </label>
-
-          <div className="saved-location-search-row">
-            <input
-              id="saved-location-search"
-              type="text"
-              placeholder="Enter an address or place"
-              value={searchText}
-              onChange={(event) => {
-                setSearchText(event.target.value);
-                setSelectedLocation(null);
-                setSearchResults([]);
-                setMessage("");
-                setError("");
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  searchLocation();
-                }
-              }}
-            />
-
-            <button
-              type="button"
-              onClick={searchLocation}
-              disabled={
-                searching || !searchText.trim()
-              }
-            >
-              {searching
-                ? "Searching..."
-                : "Search"}
-            </button>
+            <label className="saved-location-field saved-location-search-field">
+              <span>Search address</span>
+              <div className="saved-location-search-row">
+                <input
+                  type="text"
+                  placeholder="Enter an address or place"
+                  value={searchText}
+                  onChange={(event) => {
+                    setSearchText(event.target.value);
+                    setSelectedLocation(null);
+                    setSearchResults([]);
+                    setMessage("");
+                    setError("");
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      searchLocation();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={searchLocation}
+                  disabled={searching || !searchText.trim()}
+                >
+                  <Search size={19} />
+                  {searching ? "Searching..." : "Search"}
+                </button>
+              </div>
+            </label>
           </div>
 
-          {error && (
-            <p className="saved-location-error">
-              {error}
-            </p>
-          )}
-
-          {message && (
-            <p className="saved-location-message">
-              {message}
-            </p>
-          )}
+          {error && <p className="saved-location-error">{error}</p>}
+          {message && <p className="saved-location-message">{message}</p>}
 
           {searchResults.length > 0 && (
             <div className="saved-location-results">
@@ -347,16 +274,14 @@ function PassengerSavedLocations() {
                   key={location.placeId}
                   type="button"
                   className={
-                    selectedLocation?.placeId ===
-                    location.placeId
+                    selectedLocation?.placeId === location.placeId
                       ? "saved-location-result selected"
                       : "saved-location-result"
                   }
-                  onClick={() =>
-                    handleSelectLocation(location)
-                  }
+                  onClick={() => handleSelectLocation(location)}
                 >
-                  {location.address}
+                  <MapPin size={18} />
+                  <span>{location.address}</span>
                 </button>
               ))}
             </div>
@@ -365,10 +290,7 @@ function PassengerSavedLocations() {
           {selectedLocation && (
             <div className="selected-location-preview">
               <span>Selected location</span>
-
-              <strong>
-                {selectedLocation.address}
-              </strong>
+              <strong>{selectedLocation.address}</strong>
             </div>
           )}
 
@@ -383,33 +305,28 @@ function PassengerSavedLocations() {
         </section>
 
         <section className="saved-location-list-section">
-          <h2>Your saved locations</h2>
+          <header>
+            <div>
+              <span>Ready for your next ride</span>
+              <h2>Your Saved Locations</h2>
+            </div>
+            <strong>{savedLocations.length}</strong>
+          </header>
 
           {savedLocations.length === 0 ? (
             <div className="no-saved-locations">
-              <p>
-                You have not saved any locations yet.
-              </p>
+              <MapPin size={34} />
+              <h3>No saved locations yet</h3>
+              <p>Your saved shortcuts will appear here.</p>
             </div>
           ) : (
             <div className="saved-location-list">
               {savedLocations.map((location) => (
-                <article
-                  className="saved-location-card"
-                  key={location.id}
-                >
+                <article className="saved-location-card" key={location.id}>
                   <div className="saved-location-information">
-                    <div className="saved-location-icon">
-                      {location.label === "Home"
-                        ? "⌂"
-                        : location.label === "Work"
-                        ? "▣"
-                        : location.label ===
-                          "University"
-                        ? "U"
-                        : "●"}
+                    <div className="saved-location-icon" aria-hidden="true">
+                      <SavedLocationIcon label={location.label} />
                     </div>
-
                     <div>
                       <h3>{location.label}</h3>
                       <p>{location.address}</p>
@@ -419,37 +336,27 @@ function PassengerSavedLocations() {
                   <div className="saved-location-actions">
                     <button
                       type="button"
-                      onClick={() =>
-                        useLocationForRide(
-                          location,
-                          "pickup"
-                        )
-                      }
+                      className="saved-location-pickup"
+                      onClick={() => useLocationForRide(location, "pickup")}
                     >
-                      Use as pickup
+                      <Navigation size={18} />
+                      Use as Pickup
                     </button>
-
                     <button
                       type="button"
-                      onClick={() =>
-                        useLocationForRide(
-                          location,
-                          "destination"
-                        )
-                      }
+                      className="saved-location-destination"
+                      onClick={() => useLocationForRide(location, "destination")}
                     >
-                      Use as destination
+                      <Route size={18} />
+                      Use as Destination
                     </button>
-
                     <button
                       type="button"
                       className="delete-saved-location"
-                      onClick={() =>
-                        handleDeleteLocation(
-                          location.id
-                        )
-                      }
+                      onClick={() => handleDeleteLocation(location.id)}
+                      aria-label={`Delete ${location.label}`}
                     >
+                      <Trash2 size={18} />
                       Delete
                     </button>
                   </div>

@@ -11,6 +11,8 @@ import {
 
 import {
   AlertCircle,
+  MessageSquareText,
+  ShieldCheck,
   Star,
 } from "lucide-react";
 
@@ -278,122 +280,119 @@ function RideFeedback() {
   };
 
   return (
-    <div className="feedback-page">
-      <div className="feedback-card">
-        <h1>
-          How was your ride?
-        </h1>
+    <div className="ride-feedback-page">
+      <main className="ride-feedback-content">
+        <section className="ride-feedback-title">
+          <p>Your completed journey</p>
+          <h1>How Was Your Ride?</h1>
+        </section>
 
-        <p>
-          Feedback is optional.
-        </p>
+        <section className="ride-feedback-card">
+          <header className="ride-feedback-card-header">
+            <div className="ride-feedback-header-icon" aria-hidden="true">
+              <MessageSquareText size={27} />
+            </div>
+            <div>
+              <span>{rideId > 0 ? `Ride #${rideId}` : "Ride feedback"}</span>
+              <h2>Share as much or as little as you like</h2>
+              <p>
+                A rating, comment, or issue report is enough to submit. Feedback
+                stays private and is available to authorized administrators.
+              </p>
+            </div>
+          </header>
 
-        <div className="rating-row">
-          {[1, 2, 3, 4, 5].map(
-            (value) => (
-              <button
-                key={value}
-                type="button"
-                className={
-                  rating >= value
-                    ? "selected"
-                    : ""
-                }
-                onClick={() => {
-                  setRating(value);
+          <div className="ride-feedback-form-grid">
+            <fieldset className="ride-feedback-rating">
+              <legend>Rate this ride</legend>
+              <div>
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={rating >= value ? "selected" : ""}
+                    onClick={() => {
+                      setRating(value);
+                      setError("");
+                    }}
+                    aria-label={`Rate ${value} out of 5`}
+                    aria-pressed={rating >= value}
+                  >
+                    <Star
+                      size={31}
+                      fill={rating >= value ? "currentColor" : "none"}
+                    />
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <label className="ride-feedback-field">
+              <span>Report an issue</span>
+              <select
+                value={category}
+                onChange={(event) => {
+                  setCategory(event.target.value);
                   setError("");
                 }}
-                aria-label={`Rate ${value} out of 5`}
               >
-                <Star
-                  size={31}
-                  fill={
-                    rating >= value
-                      ? "currentColor"
-                      : "none"
-                  }
-                />
-              </button>
-            )
+                <option value="">No issue selected</option>
+                {reports.map((item) => (
+                  <option key={item} value={item}>
+                    {item.replaceAll("_", " ")}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="ride-feedback-field ride-feedback-comment-field">
+              <span>Comment</span>
+              <textarea
+                maxLength={500}
+                placeholder="Add an optional comment about this ride..."
+                value={comment}
+                onChange={(event) => {
+                  setComment(event.target.value);
+                  setError("");
+                }}
+              />
+              <small>{comment.length}/500</small>
+            </label>
+          </div>
+
+          <div className="ride-feedback-privacy-note">
+            <ShieldCheck size={20} />
+            <span>Do not include passwords, PINs, or payment credentials.</span>
+          </div>
+
+          {error && (
+            <p className="ride-feedback-error">
+              <AlertCircle size={18} />
+              {error}
+            </p>
           )}
-        </div>
 
-        <textarea
-          maxLength={500}
-          placeholder="Optional comment"
-          value={comment}
-          onChange={(event) => {
-            setComment(
-              event.target.value
-            );
-
-            setError("");
-          }}
-        />
-
-        <select
-          value={category}
-          onChange={(event) => {
-            setCategory(
-              event.target.value
-            );
-
-            setError("");
-          }}
-        >
-          <option value="">
-            Report an issue (optional)
-          </option>
-
-          {reports.map((item) => (
-            <option
-              key={item}
-              value={item}
+          <div className="ride-feedback-actions">
+            <button
+              type="button"
+              className="ride-feedback-submit"
+              onClick={submit}
+              disabled={saving || (!rating && !comment.trim() && !category)}
             >
-              {item.replaceAll(
-                "_",
-                " "
-              )}
-            </option>
-          ))}
-        </select>
+              {saving ? "Submitting..." : "Submit Feedback"}
+            </button>
 
-        {error && (
-          <p className="feedback-error">
-            <AlertCircle size={18} />
-            {error}
-          </p>
-        )}
-
-        <button
-          type="button"
-          className="feedback-submit"
-          onClick={submit}
-          disabled={
-            saving ||
-            (
-              !rating &&
-              !comment.trim() &&
-              !category
-            )
-          }
-        >
-          {saving
-            ? "Submitting..."
-            : "Submit Feedback"}
-        </button>
-
-        <button
-          type="button"
-          className="feedback-skip"
-          onClick={
-            goToDashboard
-          }
-          disabled={saving}
-        >
-          Skip
-        </button>
-      </div>
+            <button
+              type="button"
+              className="ride-feedback-skip"
+              onClick={goToDashboard}
+              disabled={saving}
+            >
+              Skip for Now
+            </button>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { apiBaseUrl } from "../config/api.js";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail } from "lucide-react";
 import "./OTP.css";
 import VelocityMark from "../components/VelocityMark";
+import OtpInputGroup from "../components/OtpInputGroup";
 
 function DriverOTP() {
 
@@ -15,39 +16,6 @@ function DriverOTP() {
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
     const [error, setError] = useState("");
     const [otpFailed, setOtpFailed] = useState(false);
-
-    const inputs = useRef([]);
-
-    useEffect(() => { inputs.current[0]?.focus(); }, []);
-
-    const handleChange = (value, index) => {
-
-        if (!/^\d?$/.test(value)) return;
-
-        const newOtp = [...otp];
-        newOtp[index] = value;
-        setOtp(newOtp);
-
-        if (value && index < 5) {
-            inputs.current[index + 1].focus();
-        }
-    };
-
-    const handleKeyDown = (e, index) => {
-
-        if (e.key === "Enter") {
-            handleVerify();
-            return;
-        }
-
-        if (
-            e.key === "Backspace" &&
-            otp[index] === "" &&
-            index > 0
-        ) {
-            inputs.current[index - 1].focus();
-        }
-    };
 
     const handleVerify = async () => {
 
@@ -125,36 +93,15 @@ function DriverOTP() {
                     {maskedEmail}
                 </p>
 
-                <div className="otp-container">
-
-                    {otp.map((digit, index) => (
-
-                        <input
-                            key={index}
-                            ref={(el) => (inputs.current[index] = el)}
-                            className="otp-box"
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            autoComplete={
-                                index === 0
-                                    ? "one-time-code"
-                                    : "off"
-                            }
-                            maxLength={1}
-                            value={digit}
-                            disabled={otpFailed}
-                            onChange={(e) =>
-                                handleChange(e.target.value, index)
-                            }
-                            onKeyDown={(e) =>
-                                handleKeyDown(e, index)
-                            }
-                        />
-
-                    ))}
-
-                </div>
+                <OtpInputGroup
+                    value={otp}
+                    onChange={(nextOtp) => {
+                        setOtp(nextOtp);
+                        setError("");
+                    }}
+                    onSubmit={handleVerify}
+                    disabled={otpFailed}
+                />
 
                 {error && (
                     <p className="error">

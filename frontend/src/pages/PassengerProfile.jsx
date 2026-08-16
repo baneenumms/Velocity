@@ -1,73 +1,65 @@
-import { useNavigate } from "react-router-dom";
-import PassengerHamburgerMenu from "../components/PassengerHamburgerMenu";
+import { ChevronDown } from "lucide-react";
 import "./PassengerProfile.css";
 
 function PassengerProfile() {
-  const navigate = useNavigate();
+  const passengerName = sessionStorage.getItem("passengerName") || "Passenger";
+  const passengerPhone = sessionStorage.getItem("passengerPhone") || "Not available";
+  const passengerEmail = sessionStorage.getItem("passengerEmail") || "Not available";
+  const passengerId = sessionStorage.getItem("passengerId") || "Not available";
 
-  const passengerName =
-    sessionStorage.getItem("passengerName") || "Passenger";
-
-  const passengerPhone =
-    sessionStorage.getItem("passengerPhone") || "Not available";
-
-  const passengerEmail =
-    sessionStorage.getItem("passengerEmail") || "Not available";
-
-  const passengerId =
-    sessionStorage.getItem("passengerId") || "Not available";
+  const initials = passengerName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <div className="passenger-profile-page">
-      <header className="passenger-profile-header">
-        <h2>VELOCITY</h2>
-
-        <PassengerHamburgerMenu />
-      </header>
-
       <main className="passenger-profile-content">
-        <button
-          type="button"
-          className="profile-back-button"
-          onClick={() =>
-            navigate("/passenger-dashboard")
-          }
-        >
-          ← Back to dashboard
-        </button>
+        <section className="passenger-profile-title">
+          <p>Your account</p>
+          <h1>My Profile</h1>
+        </section>
 
         <section className="passenger-profile-card">
-          <div className="profile-avatar">
-            {passengerName.charAt(0).toUpperCase()}
-          </div>
-
-          <h1>{passengerName}</h1>
-
-          <p className="profile-role">
-            Passenger Account
-          </p>
-
-          <div className="profile-information">
-            <div className="profile-information-row">
-              <span>Passenger ID</span>
-              <strong>{passengerId}</strong>
+          <header className="passenger-profile-identity">
+            <div className="passenger-profile-avatar" aria-hidden="true">
+              {initials}
             </div>
-
-            <div className="profile-information-row">
-              <span>Full name</span>
-              <strong>{passengerName}</strong>
+            <div>
+              <span>Passenger Account</span>
+              <h2>{passengerName}</h2>
+              <p>Passenger #{passengerId}</p>
             </div>
+          </header>
 
-            <div className="profile-information-row">
-              <span>Phone number</span>
-              <strong>{passengerPhone}</strong>
-            </div>
+          <details className="passenger-profile-section" open>
+            <summary>
+              <span>Personal Details</span>
+              <ChevronDown size={21} />
+            </summary>
 
-            <div className="profile-information-row">
-              <span>Email address</span>
-              <strong>{passengerEmail}</strong>
+            <div className="passenger-profile-information">
+              <div>
+                <span>Passenger ID</span>
+                <strong>{passengerId}</strong>
+              </div>
+              <div>
+                <span>Full name</span>
+                <strong>{passengerName}</strong>
+              </div>
+              <div>
+                <span>Phone number</span>
+                <strong>{passengerPhone}</strong>
+              </div>
+              <div>
+                <span>Email address</span>
+                <strong>{passengerEmail}</strong>
+              </div>
             </div>
-          </div>
+          </details>
         </section>
       </main>
     </div>

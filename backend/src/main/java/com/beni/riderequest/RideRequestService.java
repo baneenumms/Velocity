@@ -7,16 +7,16 @@ import com.beni.repository.DriverRepository;
 import com.beni.service.ActiveRidePolicyService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.PersistenceException;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.WebApplicationException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class RideRequestService {
@@ -32,12 +32,6 @@ public class RideRequestService {
             MAXIMUM_FARE_FACTOR =
             new BigDecimal("2.00");
 
-    private final Map<
-            String,
-            RideRequest
-            > requests =
-            new ConcurrentHashMap<>();
-
     @Inject
     PassengerRepository passengerRepository;
 
@@ -48,7 +42,14 @@ public class RideRequestService {
     ActiveRidePolicyService
             activeRidePolicyService;
 
-    public synchronized RideRequest
+    @Inject
+    RideRequestRepository rideRequestRepository;
+
+    @Inject
+    DriverOfferRepository driverOfferRepository;
+
+    @Transactional
+    public RideRequest
     createRideRequest(
             CreateRideRequest input
     ) {
@@ -83,18 +84,10 @@ public class RideRequestService {
          * it explicitly.
          */
         boolean alreadySearching =
-                requests.values()
-                        .stream()
-                        .anyMatch(
-                                request ->
-                                        request.passengerId
-                                                .equals(
-                                                        input.passengerId
-                                                ) &&
-                                                request.status ==
-                                                        RideRequestStatus
-                                                                .SEARCHING
-                        );
+                rideRequestRepository
+                        .findSearchingByPassenger(
+                                input.passengerId
+                        ) != null;
 
         require(
                 !alreadySearching,
@@ -167,14 +160,24 @@ public class RideRequestService {
                         REQUEST_LIFETIME_MINUTES
                 );
 
-        requests.put(
-                ride.requestId,
-                ride
-        );
+        try {
+            rideRequestRepository
+                    .persistAndFlush(ride);
+        } catch (PersistenceException error) {
+            if (isUniqueViolation(error)) {
+                throw new WebApplicationException(
+                        "You already have an active ride search. Cancel it before requesting another ride.",
+                        409
+                );
+            }
+
+            throw error;
+        }
 
         return ride;
     }
 
+    @Transactional
     public List<RideRequest>
     getAvailableRideRequests(Integer driverId) {
         expireRequests();
@@ -182,19 +185,15 @@ public class RideRequestService {
         var driver = driverRepository.findById(driverId.longValue());
         require(driver != null, "Driver not found", 404);
 
-        return requests.values()
+        return rideRequestRepository
+                .listSearching()
                 .stream()
                 .filter(
                         request ->
-                                request.status ==
-                                        RideRequestStatus
-                                                .SEARCHING &&
-                                        isNotDriversOwnRequest(request, driver.user.userId)
-                )
-                .sorted(
-                        Comparator.comparing(
-                                this::activityTime
-                        ).reversed()
+                                isNotDriversOwnRequest(
+                                        request,
+                                        driver.user.userId
+                                )
                 )
                 .toList();
     }
@@ -205,6 +204,7 @@ public class RideRequestService {
                 !passenger.user.userId.equals(driverUserId);
     }
 
+    @Transactional
     public RideRequest getRideRequest(
             String requestId
     ) {
@@ -218,9 +218,8 @@ public class RideRequestService {
         expireRequests();
 
         RideRequest ride =
-                requests.get(
-                        requestId.trim()
-                );
+                rideRequestRepository
+                        .findByRequestId(requestId);
 
         require(
                 ride != null,
@@ -231,6 +230,7 @@ public class RideRequestService {
         return ride;
     }
 
+    @Transactional
     public RideRequest
     getPassengerActiveRequest(
             Integer passengerId
@@ -244,26 +244,13 @@ public class RideRequestService {
 
         expireRequests();
 
-        return requests.values()
-                .stream()
-                .filter(
-                        request ->
-                                request.passengerId
-                                        .equals(
-                                                passengerId
-                                        ) &&
-                                        request.status ==
-                                                RideRequestStatus
-                                                        .SEARCHING
-                )
-                .max(
-                        Comparator.comparing(
-                                this::activityTime
-                        )
-                )
-                .orElse(null);
+        return rideRequestRepository
+                .findSearchingByPassenger(
+                        passengerId
+                );
     }
 
+    @Transactional
     public RideRequest updatePassengerFare(
             String requestId,
             UpdateRideFareRequest input
@@ -291,7 +278,7 @@ public class RideRequestService {
         );
 
         RideRequest ride =
-                getRideRequest(requestId);
+                getRideRequestForUpdate(requestId);
 
         require(
                 ride.passengerId.equals(
@@ -336,7 +323,8 @@ public class RideRequestService {
         return ride;
     }
 
-    public synchronized RideRequest
+    @Transactional
+    public RideRequest
     cancelRideRequest(
             String requestId,
             Integer passengerId
@@ -348,7 +336,7 @@ public class RideRequestService {
         );
 
         RideRequest ride =
-                getRideRequest(requestId);
+                getRideRequestForUpdate(requestId);
 
         require(
                 ride.passengerId.equals(
@@ -368,25 +356,11 @@ public class RideRequestService {
         ride.status =
                 RideRequestStatus.CANCELLED;
 
-        return ride;
-    }
-
-    public synchronized RideRequest
-    markAccepted(
-            String requestId
-    ) {
-        RideRequest ride =
-                getRideRequest(requestId);
-
-        require(
-                ride.status ==
-                        RideRequestStatus.SEARCHING,
-                "Ride request is no longer available",
-                409
-        );
-
-        ride.status =
-                RideRequestStatus.ACCEPTED;
+        driverOfferRepository
+                .withdrawPendingByRequest(
+                        ride.requestId,
+                        LocalDateTime.now()
+                );
 
         return ride;
     }
@@ -547,41 +521,81 @@ public class RideRequestService {
         );
     }
 
+    RideRequest getRideRequestForUpdate(
+            String requestId
+    ) {
+        require(
+                requestId != null &&
+                        !requestId.isBlank(),
+                "Request ID is required",
+                400
+        );
+
+        RideRequest ride =
+                rideRequestRepository
+                        .findByRequestIdForUpdate(
+                                requestId
+                        );
+
+        require(
+                ride != null,
+                "Ride request not found",
+                404
+        );
+
+        LocalDateTime now =
+                LocalDateTime.now();
+
+        if (
+                ride.status == RideRequestStatus.SEARCHING &&
+                        ride.expiresAt != null &&
+                        !ride.expiresAt.isAfter(
+                                now
+                        )
+        ) {
+            ride.status = RideRequestStatus.EXPIRED;
+
+            driverOfferRepository
+                    .withdrawPendingByRequest(
+                            ride.requestId,
+                            now
+                    );
+        }
+
+        return ride;
+    }
+
     private void expireRequests() {
         LocalDateTime now =
                 LocalDateTime.now();
 
-        requests.values()
-                .stream()
-                .filter(
-                        request ->
-                                request.status ==
-                                        RideRequestStatus
-                                                .SEARCHING &&
-                                        request.expiresAt !=
-                                                null &&
-                                        !now.isBefore(
-                                                request.expiresAt
-                                        )
-                )
-                .forEach(
-                        request ->
-                                request.status =
-                                        RideRequestStatus
-                                                .EXPIRED
+        rideRequestRepository.expireSearching(now);
+
+        driverOfferRepository
+                .withdrawPendingForInactiveRequests(
+                        now
                 );
     }
 
-    private LocalDateTime activityTime(
-            RideRequest request
+    private boolean isUniqueViolation(
+            Throwable error
     ) {
-        if (
-                request.fareUpdatedAt != null
-        ) {
-            return request.fareUpdatedAt;
+        Throwable cause = error;
+
+        while (cause != null) {
+            if (
+                    cause instanceof SQLException sqlError &&
+                            "23505".equals(
+                                    sqlError.getSQLState()
+                            )
+            ) {
+                return true;
+            }
+
+            cause = cause.getCause();
         }
 
-        return request.createdAt;
+        return false;
     }
 
     private String paymentMethod(

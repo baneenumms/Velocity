@@ -1,60 +1,30 @@
 import { apiBaseUrl } from "../config/api.js";
-import {
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  useNavigate,
-} from "react-router-dom";
-
-import {
-  ArrowLeft,
-  Car,
-  Menu,
-  User,
-} from "lucide-react";
-
-import HamburgerMenu from
-  "../components/HamburgerMenu";
-import VelocityMark from "../components/VelocityMark";
+import { useEffect, useState } from "react";
+import { Car, ChevronDown, UserRound } from "lucide-react";
 
 import "./DriverProfile.css";
 
-const API =
-  apiBaseUrl;
+const API = apiBaseUrl;
+
+function DetailRow({ label, value, valueClass = "" }) {
+  return (
+    <div className="driver-profile-detail-row">
+      <span>{label}</span>
+      <strong className={valueClass}>{value ?? "—"}</strong>
+    </div>
+  );
+}
 
 function DriverProfile() {
-  const navigate = useNavigate();
-
-  const driverId = Number(
-    sessionStorage.getItem(
-      "driverId"
-    )
-  );
-
-  const [profile, setProfile] =
-    useState(null);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
-
-  const [menuOpen, setMenuOpen] =
-    useState(false);
-
-  const validDriver =
-    Number.isInteger(driverId) &&
-    driverId > 0;
+  const driverId = Number(sessionStorage.getItem("driverId"));
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const validDriver = Number.isInteger(driverId) && driverId > 0;
 
   useEffect(() => {
     if (!validDriver) {
-      setError(
-        "No driver session found. Please log in again."
-      );
-
+      setError("No driver session found. Please log in again.");
       setLoading(false);
       return undefined;
     }
@@ -63,29 +33,18 @@ function DriverProfile() {
 
     const fetchProfile = async () => {
       try {
-        const response = await fetch(
-          `${API}/drivers/${driverId}/profile`
-        );
-
-        const text =
-          await response.text();
-
+        const response = await fetch(`${API}/drivers/${driverId}/profile`);
+        const text = await response.text();
         let data = null;
 
         try {
-          data = text
-            ? JSON.parse(text)
-            : null;
+          data = text ? JSON.parse(text) : null;
         } catch {
           data = null;
         }
 
         if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              text ||
-              "Unable to load profile."
-          );
+          throw new Error(data?.message || text || "Unable to load profile.");
         }
 
         if (!stopped) {
@@ -94,10 +53,7 @@ function DriverProfile() {
         }
       } catch (profileError) {
         if (!stopped) {
-          setError(
-            profileError.message ||
-              "Unable to connect to server."
-          );
+          setError(profileError.message || "Unable to connect to server.");
         }
       } finally {
         if (!stopped) {
@@ -107,316 +63,148 @@ function DriverProfile() {
     };
 
     fetchProfile();
-
     return () => {
       stopped = true;
     };
-  }, [
-    driverId,
-    validDriver,
-  ]);
+  }, [driverId, validDriver]);
 
-  const vehicles =
-    Array.isArray(
-      profile?.vehicles
-    )
-      ? profile.vehicles
-      : profile?.vehicle
-        ? [profile.vehicle]
-        : [];
+  const vehicles = Array.isArray(profile?.vehicles)
+    ? profile.vehicles
+    : profile?.vehicle
+      ? [profile.vehicle]
+      : [];
+
+  const initials = (profile?.fullName || "Driver")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   return (
-    <div className="page profile-page">
-      <HamburgerMenu
-        open={menuOpen}
-        onClose={() =>
-          setMenuOpen(false)
-        }
-      />
+    <div className="driver-profile-page">
+      <main className="driver-profile-content">
+        <section className="driver-profile-title">
+          <p>Your account</p>
+          <h1>My Profile</h1>
+        </section>
 
-      <div className="dashboard-header">
-        <button
-          type="button"
-          className="menu-btn"
-          onClick={() =>
-            setMenuOpen(true)
-          }
-          aria-label="Open menu"
-        >
-          <Menu size={25} />
-        </button>
+        {loading && (
+          <section className="driver-profile-state-card">
+            <p>Loading your profile...</p>
+          </section>
+        )}
 
-        <VelocityMark className="driver-header-mark" />
-      </div>
+        {!loading && error && (
+          <section className="driver-profile-state-card">
+            <UserRound size={46} />
+            <h2>Profile unavailable</h2>
+            <p>{error}</p>
+          </section>
+        )}
 
-      <div className="card profile-card">
-        <div className="profile-heading">
-          <div className="icon-circle">
-            <User
-              size={36}
-              color="white"
-            />
-          </div>
+        {!loading && !error && profile && (
+          <section className="driver-profile-card">
+            <header className="driver-profile-identity">
+              <div className="driver-profile-avatar" aria-hidden="true">
+                {initials}
+              </div>
+              <div>
+                <span>Driver Account</span>
+                <h2>{profile.fullName || "Driver"}</h2>
+                <p>Driver #{profile.driverId ?? driverId}</p>
+              </div>
+            </header>
 
-          <h1 className="title">
-            My Profile
-          </h1>
-        </div>
-
-        <div className="profile-scroll">
-          {loading && (
-            <p className="subtitle">
-              Loading profile...
-            </p>
-          )}
-
-          {!loading && error && (
-            <p className="error">
-              {error}
-            </p>
-          )}
-
-          {!loading &&
-            !error &&
-            profile && (
-              <>
-                <div className="profile-section first-section">
-                  <h2 className="section-label">
-                    Personal Details
-                  </h2>
-
-                  <div className="info-row">
-                    <span className="info-label">
-                      Full Name
-                    </span>
-
-                    <span className="info-value">
-                      {profile.fullName ||
-                        "—"}
-                    </span>
-                  </div>
-
-                  <div className="info-row">
-                    <span className="info-label">
-                      Phone
-                    </span>
-
-                    <span className="info-value">
-                      {profile.phoneNumber ||
-                        "—"}
-                    </span>
-                  </div>
-
-                  <div className="info-row">
-                    <span className="info-label">
-                      Email
-                    </span>
-
-                    <span className="info-value email-value">
-                      {profile.email ||
-                        "—"}
-                    </span>
-                  </div>
+            <div className="driver-profile-sections">
+              <details className="driver-profile-section" open>
+                <summary>
+                  <span>Personal Details</span>
+                  <ChevronDown size={21} />
+                </summary>
+                <div className="driver-profile-detail-grid">
+                  <DetailRow label="Full name" value={profile.fullName} />
+                  <DetailRow label="Phone number" value={profile.phoneNumber} />
+                  <DetailRow label="Email address" value={profile.email} />
                 </div>
+              </details>
 
-                <div className="profile-section">
-                  <h2 className="section-label">
-                    Account Details
-                  </h2>
-
-                  <div className="info-row">
-                    <span className="info-label">
-                      User ID
-                    </span>
-
-                    <span className="info-value">
-                      {profile.userId ??
-                        "—"}
-                    </span>
-                  </div>
-
-                  <div className="info-row">
-                    <span className="info-label">
-                      Driver ID
-                    </span>
-
-                    <span className="info-value">
-                      {profile.driverId ??
-                        driverId}
-                    </span>
-                  </div>
-
-                  <div className="info-row">
-                    <span className="info-label">
-                      Account Role
-                    </span>
-
-                    <span className="info-value role-value">
-                      {profile.role ||
-                        "Driver"}
-                    </span>
-                  </div>
+              <details className="driver-profile-section">
+                <summary>
+                  <span>Account Details</span>
+                  <ChevronDown size={21} />
+                </summary>
+                <div className="driver-profile-detail-grid">
+                  <DetailRow label="User ID" value={profile.userId} />
+                  <DetailRow label="Driver ID" value={profile.driverId ?? driverId} />
+                  <DetailRow label="Account role" value="Driver" />
                 </div>
+              </details>
 
-                <div className="profile-section">
-                  <h2 className="section-label">
-                    Driver Details
-                  </h2>
-
-                  <div className="info-row">
-                    <span className="info-label">
-                      License Number
-                    </span>
-
-                    <span className="info-value">
-                      {profile.licenseNumber ||
-                        "—"}
-                    </span>
-                  </div>
-
-                  <div className="info-row">
-                    <span className="info-label">
-                      Current Status
-                    </span>
-
-                    <span
-                      className={`status-pill ${
-                        profile.driverStatus ===
-                        "Online"
-                          ? "on"
-                          : "off"
-                      }`}
-                    >
-                      {profile.driverStatus ||
-                        "Offline"}
-                    </span>
-                  </div>
+              <details className="driver-profile-section">
+                <summary>
+                  <span>Driver Details</span>
+                  <ChevronDown size={21} />
+                </summary>
+                <div className="driver-profile-detail-grid">
+                  <DetailRow label="Licence number" value={profile.licenseNumber} />
+                  <DetailRow
+                    label="Current status"
+                    value={profile.driverStatus || "Offline"}
+                    valueClass={`driver-profile-status ${
+                      profile.driverStatus === "Online" ? "online" : "offline"
+                    }`}
+                  />
                 </div>
+              </details>
 
-                <div className="profile-section">
-                  <h2 className="section-label">
-                    Registered Vehicles
-                  </h2>
+              <details className="driver-profile-section">
+                <summary>
+                  <span>Registered Vehicles</span>
+                  <span className="driver-profile-summary-meta">
+                    {vehicles.length} {vehicles.length === 1 ? "vehicle" : "vehicles"}
+                    <ChevronDown size={21} />
+                  </span>
+                </summary>
 
-                  {vehicles.length ===
-                  0 ? (
-                    <p className="subtitle">
-                      No vehicle registered.
-                    </p>
-                  ) : (
-                    vehicles.map(
-                      (
-                        vehicle,
-                        index
-                      ) => (
-                        <div
-                          className="vehicle-card"
-                          key={
-                            vehicle.vehicleId ??
-                            index
-                          }
-                        >
-                          <div className="vehicle-heading">
-                            <Car
-                              size={20}
-                            />
-
+                {vehicles.length === 0 ? (
+                  <p className="driver-profile-empty">No vehicle registered.</p>
+                ) : (
+                  <div className="driver-profile-vehicles">
+                    {vehicles.map((vehicle, index) => (
+                      <article
+                        className="driver-profile-vehicle-card"
+                        key={vehicle.vehicleId ?? index}
+                      >
+                        <header>
+                          <Car size={22} />
+                          <div>
                             <strong>
-                              {vehicle.make ||
-                                "Vehicle"}{" "}
-                              {vehicle.model ||
-                                ""}
+                              {vehicle.make || "Vehicle"} {vehicle.model || ""}
                             </strong>
+                            <span>{vehicle.plateNumber || "Plate unavailable"}</span>
                           </div>
-
-                          <div className="info-row">
-                            <span className="info-label">
-                              Vehicle ID
-                            </span>
-
-                            <span className="info-value">
-                              {vehicle.vehicleId ??
-                                "—"}
-                            </span>
-                          </div>
-
-                          <div className="info-row">
-                            <span className="info-label">
-                              Year
-                            </span>
-
-                            <span className="info-value">
-                              {vehicle.vehicleYear ??
-                                "—"}
-                            </span>
-                          </div>
-
-                          <div className="info-row">
-                            <span className="info-label">
-                              Color
-                            </span>
-
-                            <span className="info-value">
-                              {vehicle.color ||
-                                "—"}
-                            </span>
-                          </div>
-
-                          <div className="info-row">
-                            <span className="info-label">
-                              Plate Number
-                            </span>
-
-                            <span className="info-value plate-value">
-                              {vehicle.plateNumber ||
-                                "—"}
-                            </span>
-                          </div>
-
-                          <div className="info-row">
-                            <span className="info-label">
-                              Vehicle Type
-                            </span>
-
-                            <span className="info-value">
-                              {vehicle.vehicleType ||
-                                "—"}
-                            </span>
-                          </div>
-
-                          <div className="info-row">
-                            <span className="info-label">
-                              Capacity
-                            </span>
-
-                            <span className="info-value">
-                              {vehicle.capacity
-                                ? `${vehicle.capacity} seats`
-                                : "—"}
-                            </span>
-                          </div>
+                        </header>
+                        <div className="driver-profile-detail-grid compact">
+                          <DetailRow label="Vehicle ID" value={vehicle.vehicleId} />
+                          <DetailRow label="Year" value={vehicle.vehicleYear} />
+                          <DetailRow label="Colour" value={vehicle.color} />
+                          <DetailRow label="Vehicle type" value={vehicle.vehicleType} />
+                          <DetailRow
+                            label="Capacity"
+                            value={vehicle.capacity ? `${vehicle.capacity} seats` : "—"}
+                          />
                         </div>
-                      )
-                    )
-                  )}
-                </div>
-              </>
-            )}
-        </div>
-
-        <button
-          type="button"
-          className="primary-btn back-btn"
-          onClick={() =>
-            navigate(
-              "/driver-dashboard"
-            )
-          }
-        >
-          <ArrowLeft size={18} />
-          Back to Home
-        </button>
-      </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </details>
+            </div>
+          </section>
+        )}
+      </main>
     </div>
   );
 }

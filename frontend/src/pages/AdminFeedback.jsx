@@ -10,7 +10,6 @@ import {
 } from "react-router-dom";
 
 import {
-  ArrowLeft,
   RefreshCw,
   ShieldCheck,
 } from "lucide-react";
@@ -45,16 +44,25 @@ function AdminFeedback() {
   const adminToken =
     sessionStorage.getItem(
       "adminToken"
+    ) ||
+    localStorage.getItem(
+      "adminToken"
     );
 
   const isAdmin =
     sessionStorage.getItem(
+      "isAdmin"
+    ) === "true" ||
+    localStorage.getItem(
       "isAdmin"
     ) === "true";
 
   const currentUserId =
     Number(
       sessionStorage.getItem(
+        "userId"
+      ) ||
+      localStorage.getItem(
         "userId"
       )
     );
@@ -65,14 +73,22 @@ function AdminFeedback() {
   const [loading, setLoading] =
     useState(true);
 
-  const [busy, setBusy] =
-    useState("");
-
   const [error, setError] =
     useState("");
 
-  const [message, setMessage] =
-    useState("");
+  const [message] =
+    useState(() => {
+      const notice =
+        sessionStorage.getItem(
+          "velocityAdminNotice"
+        );
+
+      sessionStorage.removeItem(
+        "velocityAdminNotice"
+      );
+
+      return notice || "";
+    });
 
   const adminFetch = useCallback(
     async (
@@ -159,142 +175,57 @@ function AdminFeedback() {
     loadFeedback();
   }, [loadFeedback]);
 
-  const suspendAccount =
-    async (
-      userId,
-      label
-    ) => {
-      if (!userId) {
-        return;
-      }
+  const openAccountAction = (
+    action,
+    userId,
+    name,
+    role,
+    feedbackId,
+    rideId
+  ) => {
+    if (!userId) {
+      return;
+    }
 
-      if (
-        userId === currentUserId
-      ) {
-        setError(
-          "You cannot suspend your own admin account."
-        );
-        return;
-      }
-
-      const enteredReason =
-        window.prompt(
-          `Why are you suspending ${label}?`
-        );
-
-      if (
-        enteredReason === null
-      ) {
-        return;
-      }
-
-      const reason =
-        enteredReason.trim();
-
-      if (!reason) {
-        setError(
-          "A suspension reason is required."
-        );
-        return;
-      }
-
-      const confirmed =
-        window.confirm(
-          `Suspend ${label}?`
-        );
-
-      if (!confirmed) {
-        return;
-      }
-
-      setBusy(
-        `suspend-${userId}`
+    if (
+      action === "SUSPEND" &&
+      userId === currentUserId
+    ) {
+      setError(
+        "You cannot suspend your own admin account."
       );
+      return;
+    }
 
-      setError("");
-      setMessage("");
-
-      try {
-        const data =
-          await adminFetch(
-            `/admin/users/${userId}/suspend`,
-            {
-              method: "POST",
-              body: JSON.stringify({
-                reason,
-              }),
-            }
-          );
-
-        setMessage(
-          data.message ||
-            `${label} was suspended.`
-        );
-
-        await loadFeedback();
-      } catch (actionError) {
-        setError(
-          actionError.message
-        );
-      } finally {
-        setBusy("");
-      }
+    const context = {
+      action,
+      userId,
+      name: name || "Unknown account",
+      role,
+      feedbackId,
+      rideId,
     };
 
-  const reactivateAccount =
-    async (
-      userId,
-      label
-    ) => {
-      if (!userId) {
-        return;
+    sessionStorage.setItem(
+      "velocityAdminActionContext",
+      JSON.stringify(context)
+    );
+
+    navigate(
+      "/admin/account-action",
+      {
+        state: context,
       }
-
-      const confirmed =
-        window.confirm(
-          `Reactivate ${label}?`
-        );
-
-      if (!confirmed) {
-        return;
-      }
-
-      setBusy(
-        `reactivate-${userId}`
-      );
-
-      setError("");
-      setMessage("");
-
-      try {
-        const data =
-          await adminFetch(
-            `/admin/users/${userId}/reactivate`,
-            {
-              method: "POST",
-            }
-          );
-
-        setMessage(
-          data.message ||
-            `${label} was reactivated.`
-        );
-
-        await loadFeedback();
-      } catch (actionError) {
-        setError(
-          actionError.message
-        );
-      } finally {
-        setBusy("");
-      }
-    };
+    );
+  };
 
   const accountButton = (
     userId,
     name,
     status,
-    role
+    role,
+    feedbackId,
+    rideId
   ) => {
     if (!userId) {
       return null;
@@ -310,10 +241,6 @@ function AdminFeedback() {
       );
     }
 
-    const label =
-      `${role} ${name || ""}`
-        .trim();
-
     const suspended =
       status === "SUSPENDED";
 
@@ -321,35 +248,35 @@ function AdminFeedback() {
       <button
         type="button"
         className="reactivate-button"
-        disabled={Boolean(busy)}
         onClick={() =>
-          reactivateAccount(
+          openAccountAction(
+            "REACTIVATE",
             userId,
-            label
+            name,
+            role,
+            feedbackId,
+            rideId
           )
         }
       >
-        {busy ===
-        `reactivate-${userId}`
-          ? "Reactivating..."
-          : `Reactivate ${role}`}
+        Reactivate {role}
       </button>
     ) : (
       <button
         type="button"
         className="suspend-button"
-        disabled={Boolean(busy)}
         onClick={() =>
-          suspendAccount(
+          openAccountAction(
+            "SUSPEND",
             userId,
-            label
+            name,
+            role,
+            feedbackId,
+            rideId
           )
         }
       >
-        {busy ===
-        `suspend-${userId}`
-          ? "Suspending..."
-          : `Suspend ${role}`}
+        Suspend {role}
       </button>
     );
   };
@@ -401,21 +328,12 @@ function AdminFeedback() {
 
   return (
     <div className="admin-feedback-page">
-      <header className="admin-feedback-header">
-        <button
-          type="button"
-          className="admin-back-button"
-          onClick={() =>
-            navigate(
-              "/driver-dashboard"
-            )
-          }
-        >
-          <ArrowLeft size={20} />
-          Driver Mode
-        </button>
-
+      <header className="admin-page-heading-row admin-feedback-header">
         <div>
+          <span className="admin-page-eyebrow">
+            Trust and safety
+          </span>
+
           <h1>
             Admin Feedback
           </h1>
@@ -428,11 +346,18 @@ function AdminFeedback() {
 
         <button
           type="button"
-          className="admin-refresh-button"
+          className="admin-page-refresh-button admin-refresh-button"
           onClick={loadFeedback}
           disabled={loading}
         >
-          <RefreshCw size={18} />
+          <RefreshCw
+            size={18}
+            className={
+              loading
+                ? "spinning"
+                : ""
+            }
+          />
           Refresh
         </button>
       </header>
@@ -548,7 +473,9 @@ function AdminFeedback() {
                       item.passengerUserId,
                       item.passengerName,
                       item.passengerAccountStatus,
-                      "Passenger"
+                      "Passenger",
+                      item.feedbackId,
+                      item.rideId
                     )}
                   </section>
 
@@ -578,7 +505,9 @@ function AdminFeedback() {
                       item.driverUserId,
                       item.driverName,
                       item.driverAccountStatus,
-                      "Driver"
+                      "Driver",
+                      item.feedbackId,
+                      item.rideId
                     )}
                   </section>
                 </div>

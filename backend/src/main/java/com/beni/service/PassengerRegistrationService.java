@@ -36,6 +36,9 @@ public class PassengerRegistrationService {
     @Inject
     EmailService emailService;
 
+    @Inject
+    SessionService sessionService;
+
     public SendOtpResponse sendSignupOtp(
             PassengerSignupRequest request
     ) {
@@ -190,6 +193,15 @@ public class PassengerRegistrationService {
 
         response.email = user.email;
 
+        var session = sessionService.replaceSession(
+                user,
+                "PASSENGER"
+        );
+
+        response.sessionToken = session.sessionToken;
+        response.activeMode = session.activeMode;
+        response.sessionExpiresAt = session.expiresAt;
+
         return response;
     }
 
@@ -232,7 +244,27 @@ public class PassengerRegistrationService {
                 400
         );
 
-        return name;
+        return normalizePersonName(name);
+    }
+
+    private String normalizePersonName(String value) {
+        String[] words = value
+                .replaceAll("\\s+", " ")
+                .toLowerCase(Locale.ROOT)
+                .split(" ");
+
+        StringBuilder result = new StringBuilder();
+
+        for (String word : words) {
+            if (!result.isEmpty()) {
+                result.append(' ');
+            }
+
+            result.append(Character.toUpperCase(word.charAt(0)))
+                    .append(word.substring(1));
+        }
+
+        return result.toString();
     }
 
     private String normalizePhone(

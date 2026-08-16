@@ -11,22 +11,16 @@ import {
 
 import {
   AlertTriangle,
-  ArrowLeft,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
   CircleHelp,
   Clock3,
-  Menu,
   PlusCircle,
   RefreshCw,
   Wallet,
   XCircle,
 } from "lucide-react";
-
-import HamburgerMenu from
-  "../components/HamburgerMenu";
-import VelocityMark from "../components/VelocityMark";
 
 import "./DriverWallet.css";
 
@@ -118,11 +112,6 @@ function DriverWallet() {
     formError,
     setFormError,
   ] = useState("");
-
-  const [
-    menuOpen,
-    setMenuOpen,
-  ] = useState(false);
 
   const [
     topUpOpen,
@@ -592,13 +581,6 @@ function DriverWallet() {
 
   return (
     <div className="driver-wallet-shell">
-      <HamburgerMenu
-        open={menuOpen}
-        onClose={() =>
-          setMenuOpen(false)
-        }
-      />
-
       {actionMessage && (
         <div
           className="wallet-message-overlay"
@@ -636,46 +618,6 @@ function DriverWallet() {
       )}
 
       <main className="wallet-page">
-        <header className="wallet-header">
-          <button
-            type="button"
-            className="wallet-menu-button"
-            onClick={() =>
-              setMenuOpen(true)
-            }
-            aria-label="Open menu"
-          >
-            <Menu size={25} />
-          </button>
-
-          <VelocityMark className="driver-header-mark" />
-
-          <button
-            type="button"
-            className="wallet-refresh-button"
-            onClick={() =>
-              loadWalletData(
-                false
-              )
-            }
-            disabled={
-              loading ||
-              refreshing
-            }
-            aria-label="Refresh wallet"
-            title="Refresh wallet"
-          >
-            <RefreshCw
-              size={21}
-              className={
-                refreshing
-                  ? "spinning"
-                  : ""
-              }
-            />
-          </button>
-        </header>
-
         <div className="wallet-container">
           <section className="wallet-title-row">
             <div>
@@ -692,21 +634,30 @@ function DriverWallet() {
               </p>
             </div>
 
-            <button
-              type="button"
-              className="wallet-help-button"
-              onClick={() =>
-                navigate(
-                  "/driver-wallet-info"
-                )
-              }
-            >
-              <CircleHelp
-                size={20}
-              />
+            <div className="wallet-title-actions">
+              <button
+                type="button"
+                className="wallet-refresh-button"
+                onClick={() => loadWalletData(false)}
+                disabled={loading || refreshing}
+                aria-label="Refresh wallet"
+                title="Refresh wallet"
+              >
+                <RefreshCw
+                  size={21}
+                  className={refreshing ? "spinning" : ""}
+                />
+              </button>
 
-              How it works
-            </button>
+              <button
+                type="button"
+                className="wallet-help-button"
+                onClick={() => navigate("/driver-wallet-info")}
+              >
+                <CircleHelp size={20} />
+                How it works
+              </button>
+            </div>
           </section>
 
           {loading && (
@@ -748,7 +699,7 @@ function DriverWallet() {
                     </span>
 
                     <strong className="wallet-balance-amount">
-                      Rs{" "}
+                      PKR{" "}
                       {formatMoney(
                         availableBalance
                       )}
@@ -809,7 +760,7 @@ function DriverWallet() {
                       </span>
 
                       <strong>
-                        Rs{" "}
+                        PKR{" "}
                         {formatMoney(
                           totalBalance
                         )}
@@ -822,7 +773,7 @@ function DriverWallet() {
                       </span>
 
                       <strong className="reserved">
-                        Rs{" "}
+                        PKR{" "}
                         {formatMoney(
                           reservedBalance
                         )}
@@ -835,7 +786,7 @@ function DriverWallet() {
                       </span>
 
                       <strong className="available">
-                        Rs{" "}
+                        PKR{" "}
                         {formatMoney(
                           availableBalance
                         )}
@@ -923,7 +874,7 @@ function DriverWallet() {
                       <div className="wallet-form-grid">
                         <label className="wallet-form-field">
                           <span>
-                            Amount (Rs)
+                            Amount (PKR)
                           </span>
 
                           <input
@@ -1182,7 +1133,7 @@ function DriverWallet() {
                               <div className="wallet-history-main">
                                 <div>
                                   <strong className="wallet-history-amount">
-                                    Rs{" "}
+                                    PKR{" "}
                                     {formatMoney(
                                       request.amount
                                     )}
@@ -1266,18 +1217,6 @@ function DriverWallet() {
               </>
             )}
 
-          <button
-            type="button"
-            className="wallet-back-button"
-            onClick={() =>
-              navigate(
-                "/driver-dashboard"
-              )
-            }
-          >
-            <ArrowLeft size={18} />
-            Back to Dashboard
-          </button>
         </div>
       </main>
     </div>

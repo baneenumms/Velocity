@@ -158,114 +158,94 @@ function DriverFeedback() {
 
   return (
     <div className="driver-feedback-page">
-      <main className="driver-feedback-card">
-        <div className="driver-feedback-complete-icon">
-          <CheckCircle2 size={38} />
-        </div>
-
-        <p className="driver-feedback-eyebrow">
-          Ride completed
-        </p>
-
-        <h1>
-          Do you have any concerns?
-        </h1>
-
-        <p className="driver-feedback-description">
-          Tell us about passenger
-          behaviour, the ride environment,
-          app performance, payment
-          receiving, or anything else.
-          Velocity will acknowledge and
-          address your concerns.
-        </p>
-
-        <div className="driver-feedback-assurance">
-          <ShieldCheck size={22} />
-
-          <span>
-            Your concern will be connected
-            to this completed ride.
-          </span>
-        </div>
-
-        <section className="driver-feedback-categories">
-          {CATEGORIES.map(
-            (option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={
-                  category ===
-                  option.value
-                    ? "selected"
-                    : ""
-                }
-                onClick={() => {
-                  setCategory(
-                    option.value
-                  );
-
-                  setError("");
-                }}
-              >
-                {option.label}
-              </button>
-            )
-          )}
+      <main className="driver-feedback-content">
+        <section className="driver-feedback-title">
+          <p>Ride completed</p>
+          <h1>Driver Feedback</h1>
         </section>
 
-        <label className="driver-feedback-label">
-          <span>
-            Describe your concern
-          </span>
+        <section className="driver-feedback-card">
+          <header className="driver-feedback-card-header">
+            <div className="driver-feedback-complete-icon" aria-hidden="true">
+              <CheckCircle2 size={28} />
+            </div>
+            <div>
+              <span>{rideId > 0 ? `Ride #${rideId}` : "Completed ride"}</span>
+              <h2>Do you have any concerns?</h2>
+              <p>
+                Tell us about passenger behaviour, the ride environment, app
+                performance, payment receiving, or anything else that needs review.
+              </p>
+            </div>
+          </header>
 
-          <div className="driver-feedback-textarea">
-            <MessageSquareText
-              size={22}
-            />
-
-            <textarea
-              value={details}
-              maxLength={1000}
-              placeholder="Provide any useful details..."
-              onChange={(event) =>
-                setDetails(
-                  event.target.value
-                )
-              }
-            />
+          <div className="driver-feedback-assurance">
+            <ShieldCheck size={21} />
+            <span>
+              Your concern is private and will be connected to this completed ride.
+            </span>
           </div>
 
-          <small>
-            {details.length}/1000
-          </small>
-        </label>
+          <section className="driver-feedback-form-section">
+            <div className="driver-feedback-category-block">
+              <h3>Choose a concern</h3>
+              <div className="driver-feedback-categories">
+                {CATEGORIES.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={category === option.value ? "selected" : ""}
+                    onClick={() => {
+                      setCategory(option.value);
+                      setError("");
+                    }}
+                    aria-pressed={category === option.value}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {error && (
-          <p className="driver-feedback-error">
-            <AlertCircle size={18} />
-            {error}
-          </p>
-        )}
+            <label className="driver-feedback-label">
+              <span>Describe your concern</span>
+              <div className="driver-feedback-textarea">
+                <MessageSquareText size={22} />
+                <textarea
+                  value={details}
+                  maxLength={1000}
+                  placeholder="Provide any useful details..."
+                  onChange={(event) => setDetails(event.target.value)}
+                />
+              </div>
+              <small>{details.length}/1000</small>
+            </label>
+          </section>
 
-        <button
-          type="button"
-          className="driver-feedback-submit"
-          onClick={submitFeedback}
-        >
-          Submit Concern
-        </button>
+          {error && (
+            <p className="driver-feedback-error">
+              <AlertCircle size={18} />
+              {error}
+            </p>
+          )}
 
-        <button
-          type="button"
-          className="driver-feedback-continue"
-          onClick={
-            continueToRequests
-          }
-        >
-          Continue to Ride Requests
-        </button>
+          <div className="driver-feedback-actions">
+            <button
+              type="button"
+              className="driver-feedback-submit"
+              onClick={submitFeedback}
+            >
+              Submit Concern
+            </button>
+            <button
+              type="button"
+              className="driver-feedback-continue"
+              onClick={continueToRequests}
+            >
+              Continue Without Feedback
+            </button>
+          </div>
+        </section>
       </main>
     </div>
   );

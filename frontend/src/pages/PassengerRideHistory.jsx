@@ -13,9 +13,6 @@ import {
   CarFront,
 } from "lucide-react";
 
-import PassengerHamburgerMenu from
-  "../components/PassengerHamburgerMenu";
-
 import "./PassengerRideHistory.css";
 
 const API =
@@ -200,12 +197,6 @@ function PassengerRideHistory() {
 
   return (
     <div className="ride-history-page">
-      <header className="ride-history-header">
-        <h2>VELOCITY</h2>
-
-        <PassengerHamburgerMenu />
-      </header>
-
       <main className="ride-history-content">
         <button
           type="button"

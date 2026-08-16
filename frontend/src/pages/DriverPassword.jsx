@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import "./DriverPassword.css";
 import VelocityMark from "../components/VelocityMark";
+import { saveApplicantSession } from "../utils/driverApplicantSession";
 
 const API = apiBaseUrl;
 
@@ -158,35 +159,7 @@ function DriverPassword() {
                     return;
                 }
 
-                saveSessionValue(
-                    "activeMode",
-                    "DRIVER_APPLICANT"
-                );
-
-                saveSessionValue(
-                    "applicantToken",
-                    data.applicantToken
-                );
-
-                saveSessionValue(
-                    "applicationStatus",
-                    data.applicationStatus
-                );
-
-                saveSessionValue(
-                    "canGoOnline",
-                    data.canGoOnline
-                );
-
-                saveSessionValue(
-                    "walletEnabled",
-                    data.walletEnabled
-                );
-
-                saveSessionValue(
-                    "canViewRideOffers",
-                    data.canViewRideOffers
-                );
+                saveApplicantSession(data);
 
                 navigate(
                     "/driver-application-status",

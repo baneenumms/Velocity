@@ -16,7 +16,6 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.WebApplicationException;
 
-import java.time.Year;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,6 +33,9 @@ public class DriverApplicationResubmissionService {
 
     @Inject
     DriverRepository driverRepository;
+
+    @Inject
+    VehicleCatalogService vehicleCatalogService;
 
     @Transactional
     public DriverApplicationCorrectionFormResponse getCorrectionForm(
@@ -385,10 +387,10 @@ public class DriverApplicationResubmissionService {
             );
         }
 
-        request.fullName = required(
+        request.fullName = normalizePersonName(required(
                 request.fullName,
                 "Full name"
-        ).replaceAll("\\s+", " ");
+        ));
 
         if (request.fullName.length() > 100) {
             throw new WebApplicationException(
@@ -455,70 +457,58 @@ public class DriverApplicationResubmissionService {
                 "Licence number"
         ).toUpperCase(Locale.ROOT);
 
-        if (
-                request.licenseNumber.length() > 50
-        ) {
+        if (!request.licenseNumber.matches("^[A-Z0-9]{3,30}$")) {
             throw new WebApplicationException(
-                    "Licence number is too long",
+                    "Licence number must contain 3 to 30 letters and numbers without spaces or dashes",
                     400
             );
         }
-
-        request.vehicleMake = required(
-                request.vehicleMake,
-                "Vehicle make"
-        );
-
-        request.vehicleModel = required(
-                request.vehicleModel,
-                "Vehicle model"
-        );
-
-        request.vehicleColor = required(
-                request.vehicleColor,
-                "Vehicle color"
-        );
 
         request.vehiclePlateNumber = required(
                 request.vehiclePlateNumber,
                 "Vehicle plate number"
         ).toUpperCase(Locale.ROOT);
 
-        if (
-                request.vehicleMake.length() > 50 ||
-                        request.vehicleModel.length() > 50 ||
-                        request.vehicleColor.length() > 30 ||
-                        request.vehiclePlateNumber.length() > 20
-        ) {
+        if (request.vehiclePlateNumber.length() > 20) {
             throw new WebApplicationException(
-                    "One or more vehicle fields are too long",
+                    "Vehicle plate number is too long",
                     400
             );
         }
 
-        int maximumYear =
-                Year.now().getValue() + 1;
+        var selection = vehicleCatalogService.requireValidSelection(
+                request.vehicleMake,
+                request.vehicleModel,
+                request.vehicleYear,
+                request.vehicleColor,
+                request.vehicleCapacity
+        );
 
-        if (
-                request.vehicleYear == null ||
-                        request.vehicleYear < 2000 ||
-                        request.vehicleYear > maximumYear
-        ) {
-            throw new WebApplicationException(
-                    "Vehicle year is invalid",
-                    400
-            );
+        request.vehicleMake = selection.make();
+        request.vehicleModel = selection.model();
+        request.vehicleYear = selection.year();
+        request.vehicleColor = selection.color();
+        request.vehicleCapacity = selection.capacity();
+    }
+
+    private String normalizePersonName(String value) {
+        String[] words = value
+                .replaceAll("\\s+", " ")
+                .toLowerCase(Locale.ROOT)
+                .split(" ");
+
+        StringBuilder result = new StringBuilder();
+
+        for (String word : words) {
+            if (!result.isEmpty()) {
+                result.append(' ');
+            }
+
+            result.append(Character.toUpperCase(word.charAt(0)))
+                    .append(word.substring(1));
         }
 
-        if (
-                request.vehicleCapacity == null ||
-                        request.vehicleCapacity <= 0
-        ) {
-            throw new WebApplicationException(
-                    "Vehicle capacity must be greater than zero",
-                    400
-            );
-        }
+        return result.toString();
     }
 
     private DriverApplicationStatusResponse

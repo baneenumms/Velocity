@@ -5,7 +5,6 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-    ArrowLeft,
     CheckCircle2,
     RefreshCw,
     X,
@@ -535,46 +534,44 @@ function AdminDriverApplications() {
             )}
 
             <div className="admin-applications-container">
-                <div className="admin-applications-topbar">
-                    <button
-                        className="admin-applications-button"
-                        onClick={() =>
-                            navigate(
-                                "/admin",
-                                {
-                                    replace: true,
-                                }
-                            )
-                        }
-                    >
-                        <ArrowLeft size={18} />
-                        Admin Dashboard
-                    </button>
+                <header className="admin-page-heading-row">
+                    <div className="admin-applications-heading">
+                        <span className="admin-page-eyebrow">
+                            Driver onboarding
+                        </span>
+
+                        <h1>
+                            Driver Applications
+                        </h1>
+
+                        <p>
+                            Review submitted CNIC,
+                            licence and vehicle
+                            information without viewing
+                            passwords or OTP values.
+                        </p>
+                    </div>
 
                     <button
-                        className="admin-applications-button"
+                        type="button"
+                        className="admin-page-refresh-button"
                         onClick={() =>
                             loadApplications(
                                 filter
                             )
                         }
+                        disabled={loading}
                     >
-                        <RefreshCw size={18} />
+                        <RefreshCw
+                            size={18}
+                            className={
+                                loading
+                                    ? "spinning"
+                                    : ""
+                            }
+                        />
                         Refresh
                     </button>
-                </div>
-
-                <header className="admin-applications-heading">
-                    <h1>
-                        Driver Applications
-                    </h1>
-
-                    <p>
-                        Review submitted CNIC,
-                        licence and vehicle
-                        information without viewing
-                        passwords or OTP values.
-                    </p>
                 </header>
 
                 <div className="admin-application-tabs">

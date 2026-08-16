@@ -1,0 +1,462 @@
+/* Admin-only extension of the signed-in Velocity visual language. */
+.admin-authenticated-layout {
+  --admin-navy: #17263b;
+  --admin-blue: #1f3655;
+  --admin-blue-mid: #315f88;
+  --admin-blue-soft: #edf7ff;
+  --admin-pink: #e55f91;
+  --admin-pink-strong: #ce477d;
+  --admin-pink-soft: #fff0f5;
+  --admin-border: #e2e7ec;
+  --admin-muted: #64748b;
+  --admin-shadow: 0 10px 28px rgba(23, 38, 59, 0.1);
+
+  background: #f7f8fa;
+  color: var(--admin-navy);
+}
+
+.admin-authenticated-content >
+:is(
+  .admin-dashboard-page,
+  .admin-applications-page,
+  .admin-feedback-page,
+  .admin-topups-page,
+  .admin-account-action-page
+) {
+  box-sizing: border-box;
+  padding: 42px 24px 72px;
+  background:
+    radial-gradient(
+      circle at 10% 2%,
+      rgba(229, 95, 145, 0.1),
+      transparent 27%
+    ),
+    linear-gradient(
+      145deg,
+      #f8fafc 0%,
+      #f7f8fa 58%,
+      #eef4f8 100%
+    ) !important;
+  color: var(--admin-navy) !important;
+  font-family: Poppins, sans-serif;
+}
+
+.admin-dashboard-container,
+.admin-applications-container,
+.admin-topups-container,
+.admin-feedback-page >
+:is(
+  .admin-page-heading-row,
+  .admin-error,
+  .admin-success,
+  .admin-loading,
+  .admin-empty-card,
+  .feedback-list
+) {
+  width: 100%;
+  max-width: 1180px;
+  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.admin-page-heading-row {
+  margin: 0 0 30px;
+  padding: 0;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+
+  min-height: 0 !important;
+  background: transparent !important;
+  color: var(--admin-navy) !important;
+  box-shadow: none !important;
+}
+
+.admin-page-heading-row > div {
+  min-width: 0;
+}
+
+.admin-page-eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--admin-pink-strong) !important;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-page-heading-row h1,
+.admin-dashboard-heading h1 {
+  margin: 0 0 9px;
+  color: var(--admin-blue) !important;
+  font-size: clamp(32px, 5vw, 48px);
+  line-height: 1.08;
+}
+
+.admin-page-heading-row p,
+.admin-dashboard-heading p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(49, 95, 136, 0.76) !important;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.admin-page-refresh-button {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 0 18px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border: none;
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      105deg,
+      var(--admin-pink),
+      var(--admin-blue)
+    ) !important;
+  color: #ffffff;
+  box-shadow: 0 9px 18px rgba(83, 143, 194, 0.2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-page-refresh-button:hover:not(:disabled) {
+  filter: brightness(1.04);
+}
+
+.admin-page-refresh-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.admin-page-refresh-button .spinning {
+  animation: admin-panel-spin 0.8s linear infinite;
+}
+
+@keyframes admin-panel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dashboard */
+.admin-dashboard-heading {
+  max-width: 800px;
+  margin: 0 0 34px;
+  text-align: left;
+}
+
+.admin-dashboard-grid {
+  gap: 22px;
+}
+
+.admin-dashboard-card,
+.admin-application-card,
+.admin-feedback-card,
+.admin-topup-card,
+.admin-application-detail,
+.admin-topup-detail,
+.admin-empty-card,
+.admin-applications-loading,
+.admin-applications-empty,
+.admin-topups-loading,
+.admin-topups-empty {
+  border: 1px solid var(--admin-border) !important;
+  background: #ffffff !important;
+  box-shadow: var(--admin-shadow) !important;
+}
+
+.admin-dashboard-card {
+  min-height: 318px;
+  padding: 27px !important;
+}
+
+.admin-dashboard-card-icon,
+.admin-topups-heading-icon {
+  background:
+    linear-gradient(
+      145deg,
+      var(--admin-pink-soft),
+      var(--admin-blue-soft)
+    ) !important;
+  color: var(--admin-blue-mid) !important;
+}
+
+.admin-dashboard-card h2,
+.admin-dashboard-card h3,
+.admin-application-card h2,
+.admin-feedback-card h2,
+.admin-feedback-card h3,
+.admin-topup-card h2 {
+  color: var(--admin-blue) !important;
+}
+
+.admin-dashboard-card p,
+.admin-application-card p,
+.admin-feedback-card p,
+.admin-topup-card p {
+  color: rgba(49, 95, 136, 0.76);
+}
+
+.admin-dashboard-card button:not(:disabled),
+.admin-application-view,
+.admin-topup-review-button,
+.admin-action-message-card button,
+.admin-topup-message-card button {
+  background:
+    linear-gradient(
+      105deg,
+      var(--admin-pink),
+      var(--admin-blue)
+    ) !important;
+  color: #ffffff !important;
+  box-shadow: 0 9px 18px rgba(83, 143, 194, 0.2);
+}
+
+.admin-dashboard-coming {
+  border: 1px solid #e3d4ae;
+  background: #fff8e8 !important;
+  color: #8a6418 !important;
+}
+
+/* Filters and review cards */
+.admin-applications-heading,
+.admin-topups-heading {
+  margin: 0;
+}
+
+.admin-applications-heading h1,
+.admin-topups-heading h1 {
+  margin-top: 0;
+}
+
+.admin-application-tabs,
+.admin-topup-tabs {
+  gap: 9px;
+  margin-bottom: 25px;
+}
+
+.admin-application-tab,
+.admin-topup-tabs button {
+  min-height: 45px;
+  border-color: #cfdae5;
+  background: #ffffff;
+  color: var(--admin-blue);
+}
+
+.admin-application-tab.active,
+.admin-topup-tabs button.active {
+  border-color: transparent;
+  background:
+    linear-gradient(
+      105deg,
+      var(--admin-pink),
+      var(--admin-blue)
+    ) !important;
+  color: #ffffff !important;
+  box-shadow: 0 7px 16px rgba(83, 143, 194, 0.18);
+}
+
+.admin-application-list,
+.admin-topup-list {
+  gap: 20px;
+}
+
+.admin-application-card,
+.admin-topup-card,
+.admin-feedback-card {
+  padding: 24px !important;
+  border-radius: 24px !important;
+}
+
+.admin-application-field,
+.admin-topup-detail-field,
+.feedback-account {
+  border: 1px solid #e0eaf1;
+  background: #f1f6fa !important;
+}
+
+.admin-application-detail-close,
+.admin-topup-close {
+  background: #eef3f7 !important;
+  color: var(--admin-blue) !important;
+}
+
+.admin-application-status,
+.admin-topup-status,
+.feedback-role-badge,
+.account-status {
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+}
+
+.feedback-role-badge {
+  background: var(--admin-pink-soft) !important;
+  color: var(--admin-pink-strong) !important;
+}
+
+.admin-topup-card-amount {
+  color: var(--admin-pink-strong) !important;
+}
+
+.admin-application-detail-header,
+.admin-topup-detail-header,
+.feedback-card-heading {
+  border-bottom-color: var(--admin-border) !important;
+}
+
+/* Feedback */
+.admin-feedback-header {
+  grid-template-columns: 1fr auto;
+  align-items: flex-start;
+}
+
+.admin-feedback-header h1,
+.admin-feedback-header p {
+  text-align: left;
+}
+
+.admin-error,
+.admin-success,
+.admin-loading {
+  text-align: left;
+}
+
+.admin-success {
+  border: 1px solid #afe8c4;
+  background: #ecfdf3;
+  color: #067647;
+}
+
+.admin-error,
+.admin-applications-error,
+.admin-topups-error {
+  border: 1px solid #f5bfd2;
+  background: #fff1f6;
+  color: #9d2855;
+}
+
+.suspend-button {
+  background: #c63d71 !important;
+}
+
+.reactivate-button {
+  background: #13764b !important;
+}
+
+.suspend-button,
+.reactivate-button {
+  min-height: 44px;
+  border-radius: 13px;
+  color: #ffffff !important;
+}
+
+.admin-self-label {
+  background: var(--admin-blue-soft) !important;
+  color: var(--admin-blue-mid) !important;
+}
+
+/* Existing admin result dialogs use the same card language. */
+.admin-action-message-card,
+.admin-topup-message-card {
+  border: 1px solid var(--admin-border);
+  background: #ffffff !important;
+}
+
+@media (max-width: 760px) {
+  .admin-authenticated-content >
+  :is(
+    .admin-dashboard-page,
+    .admin-applications-page,
+    .admin-feedback-page,
+    .admin-topups-page,
+    .admin-account-action-page
+  ) {
+    padding: 26px 14px 52px;
+  }
+
+  .admin-page-heading-row,
+  .admin-feedback-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 17px;
+    margin-bottom: 24px;
+  }
+
+  .admin-page-refresh-button {
+    width: 100%;
+  }
+
+  .admin-dashboard-heading {
+    margin-bottom: 26px;
+  }
+
+  .admin-dashboard-grid,
+  .admin-application-list,
+  .admin-topup-list,
+  .feedback-accounts {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-topups-heading {
+    align-items: flex-start;
+  }
+
+  .admin-topups-heading-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .admin-application-card-top,
+  .admin-topup-card-header,
+  .feedback-card-heading {
+    flex-direction: column;
+  }
+
+  .feedback-ride {
+    text-align: left;
+  }
+}
+
+@media (max-width: 460px) {
+  .admin-applications-heading h1,
+  .admin-topups-heading h1,
+  .admin-feedback-header h1,
+  .admin-dashboard-heading h1 {
+    font-size: 31px;
+  }
+
+  .admin-topups-heading {
+    display: block;
+  }
+
+  .admin-topups-heading-icon {
+    margin-bottom: 14px;
+  }
+
+  .admin-application-tabs,
+  .admin-topup-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-application-tab,
+  .admin-topup-tabs button {
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}

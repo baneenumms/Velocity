@@ -8,14 +8,3 @@
   letter-spacing: 0.11em;
   line-height: 1;
 }
-
-.velocity-mark-tyre {
-  width: .96em;
-  height: .96em;
-  margin: 0 .045em;
-  border-radius: 50%;
-  background: repeating-conic-gradient(from 0deg, #ec6e9c 0 9deg, #1f3655 9deg 18deg);
-  box-shadow: inset 0 0 0 .15em #fff, inset 0 0 0 .28em #243651, 0 2px 8px rgba(53, 88, 125, .23);
-  animation: velocity-spin 4s linear infinite;
-}
-@keyframes velocity-spin { to { transform: rotate(360deg); } }

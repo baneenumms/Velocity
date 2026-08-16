@@ -1,130 +1,172 @@
-.menu-overlay {
+.driver-menu {
+  position: relative;
+  z-index: 4100;
+}
+
+.driver-menu-button {
+  position: relative;
+  z-index: 4200;
+
+  width: 48px;
+  height: 48px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.16);
+  border-radius: 13px;
+
+  background: #ffffff;
+  color: #12233a;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.driver-menu-button:hover {
+  background: #f0f2f5;
+  transform: none;
+}
+
+.driver-menu-backdrop {
   position: fixed;
   inset: 0;
+  z-index: 4000;
+
+  width: 100%;
+  height: 100%;
+
+  padding: 0;
+  border: none;
 
   background:
-    rgba(18, 35, 58, 0.35);
+    rgba(18, 35, 58, 0.38);
 
-  opacity: 0;
-  pointer-events: none;
-
-  transition: 0.25s;
-  z-index: 10;
+  cursor: default;
 }
 
-.menu-overlay.open {
-  opacity: 1;
-  pointer-events: auto;
-}
+.driver-menu-dropdown {
+  position: absolute;
+  top: 58px;
+  right: 0;
+  z-index: 4300;
 
-.menu-panel {
-  position: fixed;
-  top: 0;
-  left: 0;
-
-  height: 100vh;
-  width: 280px;
-  max-width: 80vw;
-
+  width: 240px;
   box-sizing: border-box;
+  padding: 9px;
 
-  background: #f7f4ee;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  border:
+    1px solid
+    rgba(18, 35, 58, 0.08);
+  border-radius: 16px;
+
+  background: #ffffff;
 
   box-shadow:
-    10px 0 40px
-    rgba(40, 30, 15, 0.12);
-
-  transform: translateX(-100%);
-  transition: 0.28s ease;
-
-  z-index: 11;
-  padding: 30px 24px;
-
-  display: flex;
-  flex-direction: column;
+    0 18px 45px
+    rgba(18, 35, 58, 0.2);
 }
 
-.menu-panel.open {
-  transform: translateX(0);
-}
-
-.menu-close {
-  align-self: flex-end;
-
-  width: 40px;
-  height: 40px;
-
-  border-radius: 12px;
-  border: none;
-
-  background: #eee8dd;
-  color: #12233a;
-
-  cursor: pointer;
-  margin-bottom: 24px;
-}
-
-.menu-close:hover {
-  transform: none;
-  background: #e2dcd0;
-}
-
-.menu-nav {
-  min-height: 0;
-  flex: 1;
-
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.menu-nav button {
+.driver-menu-dropdown button {
   width: 100%;
-  min-height: 52px;
+  min-height: 46px;
+  padding: 0 13px;
 
-  border-radius: 14px;
-  border: none;
-
-  background: transparent;
-  color: #12233a;
-
-  font-size: 16px;
-  font-weight: 600;
-  text-align: left;
-
-  padding: 0 16px;
-
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.menu-nav button:hover {
-  background: #eee8dd;
-  transform: none;
-}
-
-.menu-nav .admin-menu-button {
   display: flex;
   align-items: center;
   gap: 10px;
 
-  background: #dbeafe;
+  border: none;
+  border-radius: 11px;
+
+  background: #ffffff;
+  color: #12233a;
+
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.driver-menu-dropdown button:hover {
+  background: #f2f5f8;
+  transform: none;
+}
+
+.driver-menu-dropdown button svg {
+  flex-shrink: 0;
+  color: #315f88;
+}
+
+.driver-menu-dropdown
+  .driver-admin-menu-button {
+  background: #eaf3ff;
   color: #24527a;
-
-  border:
-    1px solid
-    rgba(62, 107, 150, 0.18);
 }
 
-.menu-nav .admin-menu-button:hover {
-  background: #c9def5;
+.driver-menu-dropdown
+  .driver-admin-menu-button:hover {
+  background: #dcecff;
 }
 
-.menu-logout {
-  margin-top: auto;
-  color: #ef4444 !important;
+.driver-menu-dropdown
+  .driver-menu-logout {
+  margin-top: 4px;
+
+  border-top:
+    1px solid #e0e5ec;
+  border-radius:
+    0 0 11px 11px;
+
+  color: #c23232;
 }
 
-.menu-logout:hover {
-  background: #fdecea !important;
+.driver-menu-dropdown
+  .driver-menu-logout svg {
+  color: #c23232;
+}
+
+.driver-menu-dropdown
+  .driver-menu-logout:hover {
+  background: #fdecec;
+}
+
+@media (max-width: 520px) {
+  .driver-menu-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .driver-menu-dropdown {
+    position: fixed;
+    top: 70px;
+    left: 12px;
+    right: 12px;
+
+    width: auto;
+    max-height:
+      calc(100dvh - 84px);
+
+    overflow-y: auto;
+  }
+
+  .driver-menu-dropdown button {
+    min-height: 50px;
+  }
 }

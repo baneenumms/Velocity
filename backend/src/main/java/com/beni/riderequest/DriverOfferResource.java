@@ -66,6 +66,45 @@ public class DriverOfferResource {
                 );
     }
 
+    @GET
+    @Path("/driver/{driverId}/pending")
+    public List<DriverOffer>
+    getPendingOffersForDriver(
+            @PathParam("driverId")
+            Integer driverId,
+            @HeaderParam("Authorization") String authorization
+    ) {
+        authorizationService.requireDriver(
+                authorization,
+                driverId
+        );
+
+        return driverOfferService
+                .getPendingOffersForDriver(
+                        driverId
+                );
+    }
+
+    @POST
+    @Path("/{offerId}/cancel")
+    public DriverOffer cancelPendingOffer(
+            @PathParam("offerId")
+            String offerId,
+            @HeaderParam("Authorization") String authorization
+    ) {
+        var driver =
+                authorizationService
+                        .requireDriver(
+                                authorization
+                        );
+
+        return driverOfferService
+                .cancelPendingOffer(
+                        offerId,
+                        driver.driverId
+                );
+    }
+
     @POST
     @Path("/{offerId}/accept")
     public AcceptDriverOfferResponse

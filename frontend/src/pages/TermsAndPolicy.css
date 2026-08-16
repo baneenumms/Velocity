@@ -1,104 +1,171 @@
 .terms-page {
   min-height: 100vh;
-  background: #f4f6f9;
-  color: #162033;
-}
-
-.terms-header {
-  position: relative;
-  z-index: 2000;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 18px 24px;
-  background: #12233a;
-  color: white;
-}
-
-.terms-header h2 {
-  margin: 0;
-  font-size: 22px;
-  letter-spacing: 2px;
+  background: #f4f7fa;
+  color: #102746;
 }
 
 .terms-content {
-  width: min(850px, calc(100% - 32px));
+  width: min(1260px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 35px 0 60px;
-}
-
-.terms-back-button {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: #1677ff;
-
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
+  padding: 42px 0 72px;
 }
 
 .terms-title {
-  margin: 22px 0;
+  margin-bottom: 30px;
 }
 
 .terms-title p {
-  margin: 0 0 5px;
-  color: #718096;
+  margin: 0 0 8px;
+  color: #6486a8;
+  font-size: 1.05rem;
+  font-weight: 800;
 }
 
 .terms-title h1 {
   margin: 0;
-  font-size: 38px;
+  color: #203b5f;
+  font-size: clamp(2.65rem, 5vw, 4.35rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
 }
 
-.terms-card {
-  padding: 28px;
-
-  border-radius: 20px;
-  background: white;
-
-  box-shadow: 0 14px 40px rgba(25, 42, 70, 0.1);
+.terms-intro-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 28px 30px;
+  border: 1px solid #dce4ec;
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: 0 16px 38px rgba(29, 52, 79, 0.09);
 }
 
-.terms-card article {
-  padding: 21px 0;
-  border-bottom: 1px solid #e1e6ed;
+.terms-intro-icon {
+  display: grid;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border-radius: 17px;
+  background: linear-gradient(145deg, #f6d9e5, #e8f2f9);
+  color: #c93d73;
 }
 
-.terms-card article:first-child {
-  padding-top: 0;
+.terms-intro-card span {
+  color: #df83a6;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
-.terms-card article:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
+.terms-intro-card h2 {
+  margin: 5px 0 8px;
+  color: #203b5f;
+  font-size: clamp(1.3rem, 2.5vw, 1.9rem);
 }
 
-.terms-card h2 {
-  margin: 0 0 9px;
-  font-size: 20px;
-}
-
-.terms-card p {
+.terms-intro-card p {
+  max-width: 900px;
   margin: 0;
-  color: #56657a;
-  line-height: 1.7;
+  color: #607d9b;
+  line-height: 1.65;
 }
 
-@media (max-width: 600px) {
-  .terms-header {
-    padding: 15px 16px;
-  }
+.terms-policy-list {
+  display: grid;
+  gap: 15px;
+}
 
+.terms-policy-card {
+  overflow: hidden;
+  border: 1px solid #dce4ec;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(29, 52, 79, 0.06);
+}
+
+.terms-policy-card summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 76px;
+  padding: 17px 22px;
+  color: #203b5f;
+  cursor: pointer;
+  list-style: none;
+}
+
+.terms-policy-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.terms-policy-card summary > svg {
+  transition: transform 180ms ease;
+}
+
+.terms-policy-card[open] summary > svg {
+  transform: rotate(180deg);
+}
+
+.terms-policy-number {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 70px;
+  color: #d1457a;
+  font-weight: 900;
+}
+
+.terms-policy-card summary strong {
+  font-size: 1.05rem;
+}
+
+.terms-policy-copy {
+  display: grid;
+  gap: 12px;
+  padding: 2px 24px 24px 108px;
+  border-top: 1px solid #edf1f5;
+}
+
+.terms-policy-copy p {
+  margin: 0;
+  color: #587794;
+  line-height: 1.72;
+}
+
+.terms-policy-copy p:first-child {
+  padding-top: 20px;
+}
+
+.terms-version-note {
+  margin: 26px 0 0;
+  color: #7a90a7;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+@media (max-width: 650px) {
   .terms-content {
-    width: min(100% - 20px, 850px);
-    padding-top: 24px;
+    width: min(100% - 24px, 1260px);
+    padding: 28px 0 50px;
   }
 
-  .terms-card {
-    padding: 20px;
+  .terms-intro-card {
+    padding: 22px 20px;
+  }
+
+  .terms-policy-card summary {
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+  }
+
+  .terms-policy-number {
+    grid-column: 1 / -1;
+  }
+
+  .terms-policy-copy {
+    padding: 2px 20px 22px;
   }
 }

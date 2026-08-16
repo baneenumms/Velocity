@@ -1,10 +1,21 @@
 import { apiBaseUrl } from "../config/api.js";
 import {
+  useState,
+} from "react";
+
+import {
   useNavigate,
 } from "react-router-dom";
 
 import {
+  History,
+  Home,
+  LogOut,
+  Menu,
+  ScrollText,
   ShieldCheck,
+  UserRound,
+  WalletCards,
   X,
 } from "lucide-react";
 
@@ -54,10 +65,12 @@ function readStoredValue(key) {
   );
 }
 
-function HamburgerMenu({
-  open,
-  onClose,
-}) {
+function HamburgerMenu() {
+  const [
+    open,
+    setOpen,
+  ] = useState(false);
+
   const navigate = useNavigate();
 
   const isAdmin =
@@ -88,7 +101,7 @@ function HamburgerMenu({
       mode
     );
 
-    onClose();
+    setOpen(false);
 
     navigate(path);
   };
@@ -99,6 +112,7 @@ function HamburgerMenu({
     }).catch(() => {});
 
     sessionStorage.removeItem("velocitySession");
+
     AUTHENTICATED_SESSION_KEYS
       .forEach((key) => {
         sessionStorage.removeItem(
@@ -110,7 +124,7 @@ function HamburgerMenu({
         );
       });
 
-    onClose();
+    setOpen(false);
 
     navigate(
       "/role",
@@ -121,120 +135,132 @@ function HamburgerMenu({
   };
 
   return (
-    <>
-      <div
-        className={
-          `menu-overlay ${
-            open ? "open" : ""
-          }`
+    <div className="driver-menu">
+      <button
+        type="button"
+        className="driver-menu-button"
+        aria-label={
+          open
+            ? "Close driver menu"
+            : "Open driver menu"
         }
-        onClick={onClose}
-      />
-
-      <aside
-        className={
-          `menu-panel ${
-            open ? "open" : ""
-          }`
+        aria-expanded={open}
+        onClick={() =>
+          setOpen(
+            (current) =>
+              !current
+          )
         }
-        aria-hidden={!open}
       >
-        <button
-          type="button"
-          className="menu-close"
-          onClick={onClose}
-          aria-label="Close menu"
-        >
+        {open ? (
           <X size={25} />
-        </button>
+        ) : (
+          <Menu size={25} />
+        )}
+      </button>
 
-        <nav className="menu-nav">
+      {open && (
+        <>
           <button
             type="button"
+            className="driver-menu-backdrop"
+            aria-label="Close driver menu"
             onClick={() =>
-              goTo(
-                "/driver-dashboard"
-              )
+              setOpen(false)
             }
-          >
-            Home
-          </button>
+          />
 
-          <button
-            type="button"
-            onClick={() =>
-              goTo(
-                "/driver-profile"
-              )
-            }
-          >
-            Profile
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              goTo(
-                "/driver-wallet"
-              )
-            }
-          >
-            My Wallet
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              goTo(
-                "/driver-trips"
-              )
-            }
-          >
-            Trip History
-          </button>
-
-          {hasAdminAccess && (
+          <nav className="driver-menu-dropdown">
             <button
               type="button"
-              className="admin-menu-button"
               onClick={() =>
                 goTo(
-                  "/admin",
-                  "ADMIN"
+                  "/driver-dashboard"
                 )
               }
             >
-              <ShieldCheck
-                size={19}
-              />
-
-              Admin Panel
+              <Home size={18} />
+              Home
             </button>
-          )}
 
-          <button
-            type="button"
-            onClick={() =>
-              goTo(
-                "/terms-and-policy"
-              )
-            }
-          >
-            Terms &amp; Policy
-          </button>
+            <button
+              type="button"
+              onClick={() =>
+                goTo(
+                  "/driver-profile"
+                )
+              }
+            >
+              <UserRound size={18} />
+              My Profile
+            </button>
 
-          <button
-            type="button"
-            className="menu-logout"
-            onClick={
-              handleLogout
-            }
-          >
-            Logout
-          </button>
-        </nav>
-      </aside>
-    </>
+            <button
+              type="button"
+              onClick={() =>
+                goTo(
+                  "/driver-wallet"
+                )
+              }
+            >
+              <WalletCards size={18} />
+              My Wallet
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                goTo(
+                  "/driver-trips"
+                )
+              }
+            >
+              <History size={18} />
+              Trip History
+            </button>
+
+            {hasAdminAccess && (
+              <button
+                type="button"
+                className="driver-admin-menu-button"
+                onClick={() =>
+                  goTo(
+                    "/admin",
+                    "ADMIN"
+                  )
+                }
+              >
+                <ShieldCheck
+                  size={18}
+                />
+                Admin Panel
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() =>
+                goTo(
+                  "/terms-and-policy"
+                )
+              }
+            >
+              <ScrollText size={18} />
+              Terms and Policy
+            </button>
+
+            <button
+              type="button"
+              className="driver-menu-logout"
+              onClick={handleLogout}
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
+          </nav>
+        </>
+      )}
+    </div>
   );
 }
 

@@ -18,14 +18,11 @@ import {
 
 import L from "leaflet";
 
-import PassengerHamburgerMenu from
-  "../components/PassengerHamburgerMenu";
-
-import VelocityHomeButton from
-  "../components/VelocityHomeButton";
-
 import DashboardRideState from
   "../components/DashboardRideState";
+
+import DashboardNotice from
+  "../components/DashboardNotice";
 
 import LocationAutocomplete from
   "./LocationAutocomplete";
@@ -790,12 +787,6 @@ function PassengerDashboard() {
   if (!validPassenger) {
     return (
       <div className="passenger-dashboard-page">
-        <header className="passenger-dashboard-header">
-          <VelocityHomeButton
-            mode="PASSENGER"
-          />
-        </header>
-
         <main className="passenger-dashboard-content">
           <section className="passenger-dashboard-error">
             Passenger login
@@ -824,16 +815,6 @@ function PassengerDashboard() {
 
   return (
     <div className="passenger-dashboard-page">
-      <header className="passenger-dashboard-header">
-        <div>
-          <VelocityHomeButton
-            mode="PASSENGER"
-          />
-        </div>
-
-        <PassengerHamburgerMenu />
-      </header>
-
       <main className="passenger-dashboard-content">
         <section className="passenger-dashboard-welcome">
           <p>
@@ -847,6 +828,8 @@ function PassengerDashboard() {
             {passengerName}
           </h1>
         </section>
+
+        <DashboardNotice mode="PASSENGER" />
 
         <DashboardRideState
           mode="PASSENGER"
@@ -937,34 +920,36 @@ function PassengerDashboard() {
                   />
                 </div>
 
-                {message && (
-                  <p className="passenger-location-message">
-                    {message}
-                  </p>
-                )}
+                <div className="passenger-location-actions">
+                  {message && (
+                    <p className="passenger-location-message">
+                      {message}
+                    </p>
+                  )}
 
-                {error && (
-                  <p className="passenger-dashboard-error">
-                    {error}
-                  </p>
-                )}
+                  {error && (
+                    <p className="passenger-dashboard-error">
+                      {error}
+                    </p>
+                  )}
 
-                <button
-                  type="button"
-                  className="calculate-route-button"
-                  onClick={
-                    calculateRoute
-                  }
-                  disabled={
-                    calculating ||
-                    !pickup ||
-                    !destination
-                  }
-                >
-                  {calculating
-                    ? "Calculating..."
-                    : "Show Route"}
-                </button>
+                  <button
+                    type="button"
+                    className="calculate-route-button"
+                    onClick={
+                      calculateRoute
+                    }
+                    disabled={
+                      calculating ||
+                      !pickup ||
+                      !destination
+                    }
+                  >
+                    {calculating
+                      ? "Calculating..."
+                      : "Show Route"}
+                  </button>
+                </div>
               </section>
 
               {distanceKm &&

@@ -13,7 +13,7 @@
 
   padding:
     calc(
-      76px +
+      34px +
       env(
         safe-area-inset-top
       )
@@ -296,6 +296,7 @@
 .driver-arrived-button,
 .driver-start-ride-button,
 .driver-not-arrived-button,
+.driver-cancel-ride-button,
 .driver-complete-ride-button {
   width: 100%;
   min-height: 52px;
@@ -329,8 +330,17 @@
 
   border: none;
 
-  background: #112544;
+  background:
+    linear-gradient(
+      105deg,
+      #e55f91,
+      #1f3655
+    );
   color: #ffffff;
+
+  box-shadow:
+    0 9px 18px
+    rgba(83, 143, 194, 0.22);
 }
 
 .driver-arrived-button {
@@ -338,8 +348,17 @@
 
   border: none;
 
-  background: #c23d6c;
+  background:
+    linear-gradient(
+      105deg,
+      #e55f91,
+      #1f3655
+    );
   color: #ffffff;
+
+  box-shadow:
+    0 9px 18px
+    rgba(83, 143, 194, 0.22);
 }
 
 .driver-start-ride-button {
@@ -347,8 +366,17 @@
 
   border: none;
 
-  background: #c23d6c;
+  background:
+    linear-gradient(
+      105deg,
+      #e55f91,
+      #1f3655
+    );
   color: #ffffff;
+
+  box-shadow:
+    0 9px 18px
+    rgba(83, 143, 194, 0.22);
 }
 
 .driver-not-arrived-button {
@@ -367,14 +395,44 @@
 
   border: none;
 
-  background: #16834a;
+  background:
+    linear-gradient(
+      105deg,
+      #e55f91,
+      #1f3655
+    );
   color: #ffffff;
+
+  box-shadow:
+    0 9px 18px
+    rgba(83, 143, 194, 0.22);
+}
+
+.driver-cancellation-notice {
+  margin-top: 14px;
+  padding: 13px 15px;
+  border: 1px solid rgba(194, 61, 108, 0.2);
+  border-radius: 13px;
+  background: #fcebf1;
+  color: #79324e;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.driver-cancel-ride-button {
+  margin-top: 10px;
+  border: 1px solid #c23d6c;
+  background: #ffffff;
+  color: #a9325c;
 }
 
 .driver-active-primary:disabled,
 .driver-arrived-button:disabled,
 .driver-start-ride-button:disabled,
 .driver-not-arrived-button:disabled,
+.driver-cancel-ride-button:disabled,
 .driver-complete-ride-button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
@@ -634,6 +692,13 @@
     background: #f7f4ee;
     transform: translateY(-1px);
   }
+
+  .driver-cancel-ride-button:hover:not(
+    :disabled
+  ) {
+    background: #fcebf1;
+    transform: translateY(-1px);
+  }
 }
 
 /* Mobile */
@@ -642,7 +707,7 @@
   .driver-active-page {
     padding:
       calc(
-        70px +
+        24px +
         env(
           safe-area-inset-top
         )
@@ -724,6 +789,7 @@
   .driver-arrived-button,
   .driver-start-ride-button,
   .driver-not-arrived-button,
+  .driver-cancel-ride-button,
   .driver-complete-ride-button {
     transition: none;
   }

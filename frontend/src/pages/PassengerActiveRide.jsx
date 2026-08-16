@@ -140,9 +140,6 @@ function PassengerActiveRide() {
   const [loading, setLoading] =
     useState(true);
 
-  const [cancelling, setCancelling] =
-    useState(false);
-
   const [error, setError] =
     useState("");
 
@@ -312,7 +309,7 @@ function PassengerActiveRide() {
   };
 
   const handleCancelRide =
-    async () => {
+    () => {
       setError("");
 
       if (!ride?.rideId) {
@@ -322,53 +319,22 @@ function PassengerActiveRide() {
         return;
       }
 
-      const confirmed =
-        window.confirm(
-          "Cancel this ride?\n\nThe driver will be notified and the reserved platform fee will be released."
-        );
+      const cancellationContext = {
+        kind: "PASSENGER_RIDE",
+        ride,
+      };
 
-      if (!confirmed) {
-        return;
-      }
+      sessionStorage.setItem(
+        "velocityCancellationContext",
+        JSON.stringify(cancellationContext)
+      );
 
-      try {
-        setCancelling(true);
-
-        const reason =
-          encodeURIComponent(
-            "Passenger cancelled the ride"
-          );
-
-        const response = await fetch(
-          `${API}/rides/${ride.rideId}/cancel?cancelledBy=PASSENGER&reason=${reason}`,
-          {
-            method: "POST",
-          }
-        );
-
-        await readResponse(response);
-
-        clearActiveRideStorage();
-
-        navigate(
-          "/passenger-dashboard",
-          {
-            replace: true,
-          }
-        );
-      } catch (cancelError) {
-        console.error(
-          "Passenger cancellation error:",
-          cancelError
-        );
-
-        setError(
-          cancelError.message ||
-            "Unable to cancel the ride."
-        );
-      } finally {
-        setCancelling(false);
-      }
+      navigate(
+        "/passenger-cancel-ride",
+        {
+          state: cancellationContext,
+        }
+      );
     };
 
   const handleCompletedRide = () => {
@@ -763,13 +729,9 @@ function PassengerActiveRide() {
             onClick={
               handleCancelRide
             }
-            disabled={cancelling}
           >
             <XCircle size={19} />
-
-            {cancelling
-              ? "Cancelling Ride..."
-              : "Cancel Ride"}
+            Cancel Ride
           </button>
         )}
 

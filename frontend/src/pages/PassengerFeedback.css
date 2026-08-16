@@ -1,179 +1,219 @@
 .passenger-feedback-page {
   min-height: 100vh;
-  background: #f4f6f9;
-  color: #162033;
-}
-
-.passenger-feedback-header {
-  position: relative;
-  z-index: 2000;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 18px 24px;
-  background: #12233a;
-  color: white;
-}
-
-.passenger-feedback-header h2 {
-  margin: 0;
-  font-size: 22px;
-  letter-spacing: 2px;
+  background: #f4f7fa;
+  color: #102746;
 }
 
 .passenger-feedback-content {
-  width: min(700px, calc(100% - 32px));
+  width: min(1260px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 35px 0 60px;
+  padding: 42px 0 72px;
 }
 
-.feedback-back-button {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: #1677ff;
-
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
+.passenger-feedback-title {
+  margin-bottom: 30px;
 }
 
-.feedback-title {
-  margin: 22px 0;
+.passenger-feedback-title p {
+  margin: 0 0 8px;
+  color: #6486a8;
+  font-size: 1.05rem;
+  font-weight: 800;
 }
 
-.feedback-title p {
-  margin: 0 0 5px;
-  color: #718096;
-}
-
-.feedback-title h1 {
+.passenger-feedback-title h1 {
   margin: 0;
-  font-size: 38px;
+  color: #203b5f;
+  font-size: clamp(2.65rem, 5vw, 4.35rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
 }
 
 .passenger-feedback-card {
+  padding: 34px 38px 38px;
+  border: 1px solid #dce4ec;
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: 0 16px 38px rgba(29, 52, 79, 0.09);
+}
+
+.passenger-feedback-card-header {
   display: flex;
-  flex-direction: column;
-  gap: 22px;
-
-  padding: 26px;
-  border-radius: 20px;
-  background: white;
-
-  box-shadow: 0 14px 40px rgba(25, 42, 70, 0.1);
+  align-items: flex-start;
+  gap: 18px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid #e1e8ef;
 }
 
-.passenger-feedback-card label {
-  display: block;
-  margin-bottom: 9px;
-
-  color: #34445c;
-  font-size: 14px;
-  font-weight: 800;
+.passenger-feedback-header-icon {
+  display: grid;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: 17px;
+  background: linear-gradient(145deg, #f7dce7, #eaf3fa);
+  color: #c93d73;
 }
 
-.feedback-stars {
-  display: flex;
-  gap: 8px;
+.passenger-feedback-card-header span {
+  color: #df83a6;
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
-.feedback-star {
+.passenger-feedback-card-header h2 {
+  margin: 5px 0 7px;
+  color: #203b5f;
+  font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+}
+
+.passenger-feedback-card-header p {
+  max-width: 760px;
+  margin: 0;
+  color: #6483a1;
+  line-height: 1.6;
+}
+
+.passenger-feedback-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.passenger-feedback-rating,
+.passenger-feedback-field {
+  min-width: 0;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid #d9e4ed;
+  border-radius: 17px;
+  background: #eff6fb;
+}
+
+.passenger-feedback-rating legend,
+.passenger-feedback-field > span {
   padding: 0;
+  color: #df83a6;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
 
-  border: none;
+.passenger-feedback-stars {
+  display: flex;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.passenger-feedback-stars button {
+  padding: 0;
+  border: 0;
   background: transparent;
-  color: #cfd5de;
-
-  font-size: 40px;
+  color: #cbd6e0;
+  font-size: clamp(2rem, 4vw, 2.65rem);
+  line-height: 1;
   cursor: pointer;
 }
 
-.feedback-star.selected {
-  color: #ffb400;
+.passenger-feedback-stars button.selected {
+  color: #e55f91;
 }
 
-.feedback-field {
+.passenger-feedback-field {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
-.feedback-field select,
-.feedback-field textarea {
-  padding: 14px;
-
-  border: 1px solid #ced5df;
-  border-radius: 12px;
-
-  background: white;
+.passenger-feedback-field select,
+.passenger-feedback-field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #d3dee8;
+  border-radius: 13px;
+  background: #fff;
+  color: #102746;
   font: inherit;
-  outline: none;
 }
 
-.feedback-field textarea {
+.passenger-feedback-field textarea {
+  min-height: 145px;
   resize: vertical;
+  line-height: 1.55;
 }
 
-.feedback-field select:focus,
-.feedback-field textarea:focus {
-  border-color: #1677ff;
-  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
-}
-
-.feedback-field small {
-  margin-top: 6px;
-  color: #718096;
+.passenger-feedback-field small {
+  color: #7590a9;
   text-align: right;
 }
 
-.feedback-error,
-.feedback-success {
-  margin: 0;
-  padding: 12px 14px;
-  border-radius: 10px;
+.passenger-feedback-message-field {
+  grid-column: 1 / -1;
 }
 
-.feedback-error {
-  background: #fff0f0;
-  color: #b42318;
+.passenger-feedback-privacy-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #eff6fb;
+  color: #315f88;
+  font-size: 0.9rem;
 }
 
-.feedback-success {
-  background: #eaf8ef;
-  color: #18794e;
+.passenger-feedback-error,
+.passenger-feedback-success {
+  margin: 16px 0 0;
+  padding: 13px 15px;
+  border-radius: 13px;
 }
 
-.submit-feedback-button {
-  padding: 15px;
+.passenger-feedback-error {
+  border: 1px solid #f2bfd0;
+  background: #fff1f5;
+  color: #a92958;
+}
 
-  border: none;
-  border-radius: 12px;
+.passenger-feedback-success {
+  border: 1px solid #c8e9d7;
+  background: #eaf8f0;
+  color: #23794f;
+}
 
-  background: #1677ff;
-  color: white;
-
-  font-size: 16px;
-  font-weight: 800;
+.passenger-feedback-submit {
+  width: 100%;
+  min-height: 54px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 15px;
+  background: linear-gradient(105deg, #e55f91, #294866);
+  color: #fff;
+  font-size: 0.98rem;
+  font-weight: 900;
   cursor: pointer;
+  box-shadow: 0 9px 18px rgba(83, 143, 194, 0.2);
 }
 
-@media (max-width: 600px) {
-  .passenger-feedback-header {
-    padding: 15px 16px;
-  }
-
+@media (max-width: 650px) {
   .passenger-feedback-content {
-    width: min(100% - 20px, 700px);
-    padding-top: 24px;
+    width: min(100% - 24px, 1260px);
+    padding: 28px 0 50px;
   }
 
   .passenger-feedback-card {
-    padding: 19px;
+    padding: 24px 18px;
   }
 
-  .feedback-star {
-    font-size: 35px;
+  .passenger-feedback-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .passenger-feedback-message-field {
+    grid-column: auto;
   }
 }

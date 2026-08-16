@@ -1,0 +1,91 @@
+.searchable-select {
+  position: relative;
+}
+
+.searchable-select-input-wrap {
+  position: relative;
+}
+
+.searchable-select-input-wrap > svg {
+  position: absolute;
+  z-index: 1;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #55708d;
+  pointer-events: none;
+}
+
+.driver-signup-field .searchable-select-input-wrap input {
+  padding-left: 42px;
+}
+
+.searchable-select-options {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 7px);
+  left: 0;
+  right: 0;
+  max-height: 230px;
+  overflow-y: auto;
+  padding: 7px;
+  border: 1px solid #d7dee6;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(23, 38, 59, 0.16);
+}
+
+.searchable-select-options button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  background: transparent;
+  color: #1f3655;
+  font: inherit;
+  font-weight: 650;
+  text-align: left;
+}
+
+.searchable-select-swatch {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border: 1px solid rgba(23, 38, 59, 0.22);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.38);
+}
+
+.searchable-select-options button:hover,
+.searchable-select-options button.active,
+.searchable-select-options button[aria-selected="true"] {
+  background: #edf7ff;
+  color: #a13c62;
+}
+
+.searchable-select-options p {
+  margin: 0;
+  padding: 12px;
+  color: #6b7f94;
+  text-align: center;
+}
+
+.vehicle-select-hint {
+  margin: 2px 0 0;
+  color: #6b7f94;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.vehicle-catalog-error {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff0f2;
+  color: #a92737;
+  font-size: 13px;
+  font-weight: 700;
+}

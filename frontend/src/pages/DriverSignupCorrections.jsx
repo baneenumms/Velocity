@@ -1,7 +1,6 @@
 import { apiBaseUrl } from "../config/api.js";
 import {
     useEffect,
-    useMemo,
     useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +12,14 @@ import {
 import "./DriverSignUP.css";
 import "./DriverSignupCorrections.css";
 import VelocityMark from "../components/VelocityMark";
+import SearchableSelect from "../components/SearchableSelect";
+import useVehicleOptions from "../hooks/useVehicleOptions";
+import {
+    isApprovedOption,
+    normalizeLicenceNumber,
+    normalizePersonName,
+    normalizePlateNumber,
+} from "../utils/inputNormalization";
 
 const API = apiBaseUrl;
 
@@ -49,12 +56,6 @@ const EMPTY_FORM = {
 function DriverSignupCorrections() {
     const navigate = useNavigate();
 
-    const maximumVehicleYear = useMemo(
-        () =>
-            new Date().getFullYear() + 1,
-        []
-    );
-
     const applicantToken =
         sessionStorage.getItem(
             "applicantToken"
@@ -86,6 +87,16 @@ function DriverSignupCorrections() {
 
     const [successMessage, setSuccessMessage] =
         useState("");
+
+    const {
+        loading: catalogLoading,
+        error: catalogError,
+        makeOptions,
+        modelOptions,
+        yearOptions,
+        colorOptions,
+        capacityOptions,
+    } = useVehicleOptions(form.vehicleMake);
 
     const readResponse = async (
         response
@@ -178,6 +189,22 @@ function DriverSignupCorrections() {
                         401
                     ) {
                         handleExpiredSession();
+                        return;
+                    }
+
+                    /*
+                     * An old browser tab can still point to this
+                     * route after an admin approves the application.
+                     * The backend correctly rejects correction access
+                     * for both pending and approved applications.
+                     * Return to status so an approved applicant is
+                     * promoted to the normal driver session.
+                     */
+                    if (response.status === 409) {
+                        navigate(
+                            "/driver-application-status",
+                            { replace: true }
+                        );
                         return;
                     }
 
@@ -365,7 +392,35 @@ function DriverSignupCorrections() {
         }));
     };
 
+    const updateSelection = (
+        name,
+        value
+    ) => {
+        setForm((current) => ({
+            ...current,
+            [name]: value,
+        }));
+    };
+
+    const updateVehicleMake = (
+        value
+    ) => {
+        setForm((current) => ({
+            ...current,
+            vehicleMake: value,
+            vehicleModel: "",
+        }));
+    };
+
     const validateForm = () => {
+        if (catalogLoading) {
+            return "Approved vehicle options are still loading.";
+        }
+
+        if (catalogError) {
+            return catalogError;
+        }
+
         if (
             !form.fullName.trim() ||
             !form.phoneNumber.trim() ||
@@ -406,25 +461,28 @@ function DriverSignupCorrections() {
             return "CNIC must contain exactly 13 digits.";
         }
 
-        const vehicleYear =
-            Number(
-                form.vehicleYear
-            );
-
-        if (
-            vehicleYear < 2000 ||
-            vehicleYear >
-                maximumVehicleYear
-        ) {
-            return `Vehicle year must be between 2000 and ${maximumVehicleYear}.`;
+        if (!/^[A-Z0-9]{3,30}$/.test(form.licenseNumber)) {
+            return "Licence number must contain 3 to 30 letters and numbers without spaces or dashes.";
         }
 
-        if (
-            Number(
-                form.vehicleCapacity
-            ) <= 0
-        ) {
-            return "Vehicle capacity must be greater than zero.";
+        if (!isApprovedOption(form.vehicleMake, makeOptions)) {
+            return "Please select an approved vehicle make.";
+        }
+
+        if (!isApprovedOption(form.vehicleModel, modelOptions)) {
+            return "Please select an approved model for the selected make.";
+        }
+
+        if (!yearOptions.includes(form.vehicleYear)) {
+            return "Please select an approved vehicle year.";
+        }
+
+        if (!isApprovedOption(form.vehicleColor, colorOptions)) {
+            return "Please select an approved vehicle color.";
+        }
+
+        if (!capacityOptions.includes(form.vehicleCapacity)) {
+            return "Please select the passenger capacity.";
         }
 
         return "";
@@ -464,7 +522,7 @@ function DriverSignupCorrections() {
                         body: JSON.stringify(
                             {
                                 fullName:
-                                    form.fullName.trim(),
+                                    normalizePersonName(form.fullName),
                                 phoneNumber:
                                     form.phoneNumber.trim(),
                                 email:
@@ -472,7 +530,7 @@ function DriverSignupCorrections() {
                                 cnicNumber:
                                     form.cnicNumber,
                                 licenseNumber:
-                                    form.licenseNumber.trim(),
+                                    normalizeLicenceNumber(form.licenseNumber),
                                 vehicleMake:
                                     form.vehicleMake.trim(),
                                 vehicleModel:
@@ -484,7 +542,7 @@ function DriverSignupCorrections() {
                                 vehicleColor:
                                     form.vehicleColor.trim(),
                                 vehiclePlateNumber:
-                                    form.vehiclePlateNumber.trim(),
+                                    normalizePlateNumber(form.vehiclePlateNumber),
                                 vehicleCapacity:
                                     Number(
                                         form.vehicleCapacity
@@ -520,7 +578,7 @@ function DriverSignupCorrections() {
                 return;
             }
 
-            localStorage.setItem(
+            sessionStorage.setItem(
                 "applicationStatus",
                 data.applicationStatus
             );
@@ -692,6 +750,12 @@ function DriverSignupCorrections() {
                                 onChange={
                                     updateField
                                 }
+                                onBlur={() =>
+                                    updateSelection(
+                                        "fullName",
+                                        normalizePersonName(form.fullName)
+                                    )
+                                }
                             />
 
                             <CorrectionMessage
@@ -812,14 +876,22 @@ function DriverSignupCorrections() {
                                 id="licenseNumber"
                                 name="licenseNumber"
                                 type="text"
-                                maxLength={50}
+                                maxLength={30}
                                 value={
                                     form.licenseNumber
                                 }
-                                onChange={
-                                    updateField
+                                placeholder="Letters and numbers only"
+                                onChange={(event) =>
+                                    updateSelection(
+                                        "licenseNumber",
+                                        normalizeLicenceNumber(event.target.value)
+                                    )
                                 }
                             />
+
+                            <p className="driver-signup-hint">
+                                Enter 3–30 letters and numbers exactly as printed, without spaces or dashes.
+                            </p>
 
                             <CorrectionMessage
                                 fieldName="licenseNumber"
@@ -845,18 +917,24 @@ function DriverSignupCorrections() {
                                 Make
                             </label>
 
-                            <input
+                            <SearchableSelect
                                 id="vehicleMake"
-                                name="vehicleMake"
-                                type="text"
-                                maxLength={50}
                                 value={
                                     form.vehicleMake
                                 }
-                                onChange={
-                                    updateField
+                                options={makeOptions}
+                                placeholder={
+                                    catalogLoading
+                                        ? "Loading approved makes..."
+                                        : "Search approved makes"
                                 }
+                                disabled={catalogLoading || Boolean(catalogError)}
+                                onChange={updateVehicleMake}
                             />
+
+                            <p className="vehicle-select-hint">
+                                Start typing, then select an approved make.
+                            </p>
 
                             <CorrectionMessage
                                 fieldName="vehicleMake"
@@ -874,16 +952,20 @@ function DriverSignupCorrections() {
                                 Model
                             </label>
 
-                            <input
+                            <SearchableSelect
                                 id="vehicleModel"
-                                name="vehicleModel"
-                                type="text"
-                                maxLength={50}
                                 value={
                                     form.vehicleModel
                                 }
-                                onChange={
-                                    updateField
+                                options={modelOptions}
+                                placeholder={
+                                    form.vehicleMake
+                                        ? "Search approved models"
+                                        : "Select a make first"
+                                }
+                                disabled={!isApprovedOption(form.vehicleMake, makeOptions)}
+                                onChange={(value) =>
+                                    updateSelection("vehicleModel", value)
                                 }
                             />
 
@@ -903,19 +985,16 @@ function DriverSignupCorrections() {
                                 Vehicle year
                             </label>
 
-                            <input
+                            <SearchableSelect
                                 id="vehicleYear"
-                                name="vehicleYear"
-                                type="number"
-                                min="2000"
-                                max={
-                                    maximumVehicleYear
-                                }
                                 value={
                                     form.vehicleYear
                                 }
-                                onChange={
-                                    updateField
+                                options={yearOptions}
+                                placeholder="Search vehicle year"
+                                disabled={catalogLoading || Boolean(catalogError)}
+                                onChange={(value) =>
+                                    updateSelection("vehicleYear", value)
                                 }
                             />
 
@@ -935,16 +1014,17 @@ function DriverSignupCorrections() {
                                 Color
                             </label>
 
-                            <input
+                            <SearchableSelect
                                 id="vehicleColor"
-                                name="vehicleColor"
-                                type="text"
-                                maxLength={30}
                                 value={
                                     form.vehicleColor
                                 }
-                                onChange={
-                                    updateField
+                                options={colorOptions}
+                                placeholder="Search approved colors"
+                                showColorSwatch
+                                disabled={catalogLoading || Boolean(catalogError)}
+                                onChange={(value) =>
+                                    updateSelection("vehicleColor", value)
                                 }
                             />
 
@@ -972,8 +1052,11 @@ function DriverSignupCorrections() {
                                 value={
                                     form.vehiclePlateNumber
                                 }
-                                onChange={
-                                    updateField
+                                onChange={(event) =>
+                                    updateSelection(
+                                        "vehiclePlateNumber",
+                                        normalizePlateNumber(event.target.value)
+                                    )
                                 }
                             />
 
@@ -990,21 +1073,25 @@ function DriverSignupCorrections() {
                             }
                         >
                             <label htmlFor="vehicleCapacity">
-                                Seating capacity
+                                Passenger capacity
                             </label>
 
-                            <input
+                            <SearchableSelect
                                 id="vehicleCapacity"
-                                name="vehicleCapacity"
-                                type="number"
-                                min="1"
                                 value={
                                     form.vehicleCapacity
                                 }
-                                onChange={
-                                    updateField
+                                options={capacityOptions}
+                                placeholder="Select capacity"
+                                disabled={catalogLoading || Boolean(catalogError)}
+                                onChange={(value) =>
+                                    updateSelection("vehicleCapacity", value)
                                 }
                             />
+
+                            <p className="vehicle-select-hint">
+                                Number of passengers, excluding the driver.
+                            </p>
 
                             <CorrectionMessage
                                 fieldName="vehicleCapacity"
@@ -1012,6 +1099,12 @@ function DriverSignupCorrections() {
                         </div>
                     </div>
                 </section>
+
+                {catalogError && (
+                    <p className="vehicle-catalog-error">
+                        {catalogError}
+                    </p>
+                )}
 
                 {error && (
                     <p className="driver-signup-error">
@@ -1023,7 +1116,9 @@ function DriverSignupCorrections() {
                     className="driver-signup-submit"
                     type="submit"
                     disabled={
-                        submitting
+                        submitting ||
+                        catalogLoading ||
+                        Boolean(catalogError)
                     }
                 >
                     {

@@ -9,7 +9,7 @@
 
   padding:
     calc(
-      76px +
+      24px +
       env(
         safe-area-inset-top
       )
@@ -932,7 +932,7 @@
   .searching-page {
     padding:
       calc(
-        70px +
+        18px +
         env(
           safe-area-inset-top
         )

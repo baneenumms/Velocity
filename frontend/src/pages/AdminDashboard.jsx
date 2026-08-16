@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-  ArrowLeft,
   ClipboardCheck,
   MessageSquareText,
   UserRoundCog,
@@ -44,24 +43,11 @@ function AdminDashboard() {
   return (
     <div className="admin-dashboard-page">
       <div className="admin-dashboard-container">
-        <div className="admin-dashboard-topbar">
-          <button
-            className="admin-dashboard-back"
-            onClick={() =>
-              navigate(
-                "/driver-dashboard",
-                {
-                  replace: true,
-                }
-              )
-            }
-          >
-            <ArrowLeft size={18} />
-            Driver Mode
-          </button>
-        </div>
-
         <header className="admin-dashboard-heading">
+          <span className="admin-page-eyebrow">
+            Control centre
+          </span>
+
           <h1>
             Admin Dashboard
           </h1>

@@ -13,6 +13,11 @@ import {
 } from "lucide-react";
 import "./DriverApplicationStatus.css";
 import VelocityMark from "../components/VelocityMark";
+import {
+    clearApplicantSession,
+    getApplicantToken,
+    promoteApprovedDriver,
+} from "../utils/driverApplicantSession";
 
 const API = apiBaseUrl;
 
@@ -29,8 +34,7 @@ function DriverApplicationStatus() {
 
     const [error, setError] = useState("");
 
-    const applicantToken =
-        localStorage.getItem("applicantToken");
+    const applicantToken = getApplicantToken();
 
     const readResponse = async (response) => {
 
@@ -51,12 +55,10 @@ function DriverApplicationStatus() {
 
     const clearAuthentication = () => {
 
+        clearApplicantSession();
+
         [
             "activeMode",
-            "applicantToken",
-            "applicationStatus",
-            "canGoOnline",
-            "walletEnabled",
             "passengerId",
             "driverId",
             "userId",
@@ -64,40 +66,25 @@ function DriverApplicationStatus() {
             "adminToken",
             "fullName",
         ].forEach((key) => {
+            sessionStorage.removeItem(key);
             localStorage.removeItem(key);
         });
+
+        sessionStorage.removeItem("velocitySession");
 
     };
 
     const activateApprovedDriver = (data) => {
 
-        localStorage.setItem(
-            "activeMode",
-            "DRIVER"
-        );
-
-        localStorage.setItem(
-            "driverId",
-            String(data.driverId)
-        );
-
-        localStorage.setItem(
-            "userId",
-            String(data.userId)
-        );
-
-        localStorage.setItem(
-            "canGoOnline",
-            "true"
-        );
-
-        localStorage.setItem(
-            "walletEnabled",
-            "true"
-        );
-
-        localStorage.removeItem("applicantToken");
-        localStorage.removeItem("applicationStatus");
+        try {
+            promoteApprovedDriver(data);
+        } catch (sessionError) {
+            console.error(sessionError);
+            setError(
+                "Your application is approved, but the driver session could not be started. Please sign in again."
+            );
+            return;
+        }
 
         navigate(
             "/driver-dashboard",
@@ -108,7 +95,10 @@ function DriverApplicationStatus() {
 
     };
 
-    const loadStatus = async (showRefresh = false) => {
+    const loadStatus = async (
+        showRefresh = false,
+        silent = false
+    ) => {
 
         if (!applicantToken) {
             clearAuthentication();
@@ -125,7 +115,7 @@ function DriverApplicationStatus() {
 
         if (showRefresh) {
             setRefreshing(true);
-        } else {
+        } else if (!silent) {
             setLoading(true);
         }
 
@@ -177,7 +167,7 @@ function DriverApplicationStatus() {
 
             setApplication(data);
 
-            localStorage.setItem(
+            sessionStorage.setItem(
                 "applicationStatus",
                 data.applicationStatus
             );
@@ -192,14 +182,28 @@ function DriverApplicationStatus() {
 
         } finally {
 
-            setLoading(false);
-            setRefreshing(false);
+            if (!silent) {
+                setLoading(false);
+            }
+
+            if (showRefresh) {
+                setRefreshing(false);
+            }
 
         }
     };
 
     useEffect(() => {
         loadStatus();
+
+        const statusRefresh = window.setInterval(
+            () => loadStatus(false, true),
+            8000
+        );
+
+        return () => {
+            window.clearInterval(statusRefresh);
+        };
     }, []);
 
     const handleLogout = async () => {

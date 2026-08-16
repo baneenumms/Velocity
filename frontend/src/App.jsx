@@ -46,15 +46,19 @@ import PassengerFeedback from "./pages/PassengerFeedback";
 import SearchingRide from "./pages/SearchingRide";
 import PassengerActiveRide from "./pages/PassengerActiveRide";
 import RideFeedback from "./pages/RideFeedback";
+import CancellationConfirmation from "./pages/CancellationConfirmation";
 
 /* Shared */
 import TermsAndPolicy from "./pages/TermsAndPolicy";
+import AuthenticatedAppHeader from "./components/AuthenticatedAppHeader";
 
 /* Admin */
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminDriverApplications from "./pages/AdminDriverApplications";
 import AdminFeedback from "./pages/AdminFeedback";
 import AdminWalletTopUps from "./pages/AdminWalletTopUps";
+import AdminAccountAction from "./pages/AdminAccountAction";
+import AdminAppHeader from "./components/AdminAppHeader";
 
 function readStoredValue(key) {
   return (
@@ -93,6 +97,12 @@ function getAuthenticatedHome() {
       readStoredValue("adminToken")
     );
 
+  const hasApplicantSession =
+    activeMode === "DRIVER_APPLICANT" &&
+    Boolean(
+      readStoredValue("applicantToken")
+    );
+
   /*
    * activeMode is set after the user
    * reaches a dashboard.
@@ -107,6 +117,10 @@ function getAuthenticatedHome() {
     hasAdminSession
   ) {
     return "/admin";
+  }
+
+  if (hasApplicantSession) {
+    return "/driver-application-status";
   }
 
   if (
@@ -146,6 +160,7 @@ function PublicOnlyRoute({
 
 function DriverRoute({
   children,
+  homeOnly = false,
 }) {
   if (!hasValidId("driverId")) {
     const authenticatedHome =
@@ -162,11 +177,52 @@ function DriverRoute({
     );
   }
 
+  return (
+    <div className="velocity-authenticated-layout">
+      <AuthenticatedAppHeader
+        mode="DRIVER"
+        homeOnly={homeOnly}
+      />
+
+      <div className="velocity-authenticated-content">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function ApplicantRoute({
+  children,
+}) {
+  const activeMode = (
+    readStoredValue("activeMode") ||
+    ""
+  ).toUpperCase();
+
+  const applicantToken =
+    readStoredValue("applicantToken");
+
+  if (
+    activeMode !== "DRIVER_APPLICANT" ||
+    !applicantToken
+  ) {
+    return (
+      <Navigate
+        to={
+          getAuthenticatedHome() ||
+          "/driver-phone"
+        }
+        replace
+      />
+    );
+  }
+
   return children;
 }
 
 function PassengerRoute({
   children,
+  homeOnly = false,
 }) {
   if (
     !hasValidId("passengerId")
@@ -185,7 +241,18 @@ function PassengerRoute({
     );
   }
 
-  return children;
+  return (
+    <div className="velocity-authenticated-layout">
+      <AuthenticatedAppHeader
+        mode="PASSENGER"
+        homeOnly={homeOnly}
+      />
+
+      <div className="velocity-authenticated-content">
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function AdminRoute({
@@ -213,7 +280,15 @@ function AdminRoute({
     );
   }
 
-  return children;
+  return (
+    <div className="admin-authenticated-layout">
+      <AdminAppHeader />
+
+      <div className="admin-authenticated-content">
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function AuthenticatedRoute({
@@ -236,7 +311,28 @@ function AuthenticatedRoute({
     );
   }
 
-  return children;
+  const activeMode = (
+    readStoredValue("activeMode") ||
+    (hasValidId("driverId")
+      ? "DRIVER"
+      : "PASSENGER")
+  ).toUpperCase();
+
+  return (
+    <div className="velocity-authenticated-layout">
+      <AuthenticatedAppHeader
+        mode={
+          activeMode === "DRIVER"
+            ? "DRIVER"
+            : "PASSENGER"
+        }
+      />
+
+      <div className="velocity-authenticated-content">
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function App() {
@@ -332,18 +428,18 @@ function App() {
         <Route
           path="/driver-application-status"
           element={
-            <PublicOnlyRoute>
+            <ApplicantRoute>
               <DriverApplicationStatus />
-            </PublicOnlyRoute>
+            </ApplicantRoute>
           }
         />
 
         <Route
           path="/driver-signup-corrections"
           element={
-            <PublicOnlyRoute>
+            <ApplicantRoute>
               <DriverSignupCorrections />
-            </PublicOnlyRoute>
+            </ApplicantRoute>
           }
         />
 
@@ -408,6 +504,24 @@ function App() {
           element={
             <DriverRoute>
               <DriverFeedback />
+            </DriverRoute>
+          }
+        />
+
+        <Route
+          path="/driver-cancel-offer"
+          element={
+            <DriverRoute>
+              <CancellationConfirmation kind="DRIVER_OFFER" />
+            </DriverRoute>
+          }
+        />
+
+        <Route
+          path="/driver-cancel-ride"
+          element={
+            <DriverRoute>
+              <CancellationConfirmation kind="DRIVER_RIDE" />
             </DriverRoute>
           }
         />
@@ -509,7 +623,7 @@ function App() {
         <Route
           path="/searching-ride"
           element={
-            <PassengerRoute>
+            <PassengerRoute homeOnly>
               <SearchingRide />
             </PassengerRoute>
           }
@@ -529,6 +643,24 @@ function App() {
           element={
             <PassengerRoute>
               <RideFeedback />
+            </PassengerRoute>
+          }
+        />
+
+        <Route
+          path="/passenger-cancel-search"
+          element={
+            <PassengerRoute>
+              <CancellationConfirmation kind="PASSENGER_SEARCH" />
+            </PassengerRoute>
+          }
+        />
+
+        <Route
+          path="/passenger-cancel-ride"
+          element={
+            <PassengerRoute>
+              <CancellationConfirmation kind="PASSENGER_RIDE" />
             </PassengerRoute>
           }
         />
@@ -578,6 +710,15 @@ function App() {
           element={
             <AdminRoute>
               <AdminFeedback />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/account-action"
+          element={
+            <AdminRoute>
+              <AdminAccountAction />
             </AdminRoute>
           }
         />

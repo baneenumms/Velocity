@@ -1,0 +1,18 @@
+/* Phase 2E: keep profile, trip, wallet, and policy screens on the Ride History contract. */
+.driver-wallet-shell .wallet-container {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.passenger-profile-page .passenger-profile-card {
+  padding: 34px 38px 38px !important;
+}
+
+@media (max-width: 600px) {
+  .passenger-profile-page .passenger-profile-card {
+    padding: 24px 18px !important;
+  }
+}

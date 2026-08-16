@@ -1,4 +1,4 @@
-import { apiBaseUrl } from "../config/api.js";
+﻿import { apiBaseUrl } from "../config/api.js";
 import {
   useEffect,
   useRef,
@@ -18,11 +18,8 @@ import {
 
 import L from "leaflet";
 
-import HamburgerMenu from
-  "../components/HamburgerMenu";
-
-import VelocityHomeButton from
-  "../components/VelocityHomeButton";
+import DashboardNotice from
+  "../components/DashboardNotice";
 
 import DashboardRideState from
   "../components/DashboardRideState";
@@ -225,6 +222,11 @@ function DriverDashboard() {
   ] = useState({});
 
   const [
+    pendingOffers,
+    setPendingOffers,
+  ] = useState({});
+
+  const [
     loadingRequests,
     setLoadingRequests,
   ] = useState(false);
@@ -242,11 +244,6 @@ function DriverDashboard() {
   const [
     updating,
     setUpdating,
-  ] = useState(false);
-
-  const [
-    menuOpen,
-    setMenuOpen,
   ] = useState(false);
 
   const [
@@ -403,19 +400,33 @@ function DriverDashboard() {
         }
 
         try {
-          const response =
-            await fetch(
+          const [
+            requestsResponse,
+            offersResponse,
+          ] = await Promise.all([
+            fetch(
               `${API}/ride-requests/available?driverId=${driverId}`,
               {
                 cache:
                   "no-store",
               }
-            );
+            ),
+            fetch(
+              `${API}/driver-offers/driver/${driverId}/pending`,
+              {
+                cache:
+                  "no-store",
+              }
+            ),
+          ]);
 
-          const data =
-            await getJson(
-              response
-            );
+          const [
+            data,
+            offersData,
+          ] = await Promise.all([
+            getJson(requestsResponse),
+            getJson(offersResponse),
+          ]);
 
           if (stopped) {
             return;
@@ -430,8 +441,28 @@ function DriverDashboard() {
                 )
               : [];
 
+          const offersByRequest =
+            (Array.isArray(offersData)
+              ? offersData
+              : []
+            ).reduce(
+              (current, offer) => {
+                if (offer?.requestId) {
+                  current[offer.requestId] =
+                    offer;
+                }
+
+                return current;
+              },
+              {}
+            );
+
           setRequests(
             available
+          );
+
+          setPendingOffers(
+            offersByRequest
           );
 
           setOfferFares(
@@ -447,15 +478,41 @@ function DriverDashboard() {
                       request.requestId
                     ] === undefined
                   ) {
+                    const existingOffer =
+                      offersByRequest[
+                        request.requestId
+                      ];
+
                     updated[
                       request.requestId
                     ] = formatFare(
-                      request
-                        .passengerFare
+                      existingOffer
+                        ?.offeredFare ??
+                        request
+                          .passengerFare
                     );
                   }
                 }
               );
+
+              return updated;
+            }
+          );
+
+          setOfferMessages(
+            (current) => {
+              const updated = {
+                ...current,
+              };
+
+              Object.values(
+                offersByRequest
+              ).forEach((offer) => {
+                updated[offer.requestId] =
+                  `Offer sent: PKR ${formatFare(
+                    offer.offeredFare
+                  )}`;
+              });
 
               return updated;
             }
@@ -796,6 +853,13 @@ function DriverDashboard() {
               )}`,
           })
         );
+
+        setPendingOffers(
+          (current) => ({
+            ...current,
+            [requestId]: data,
+          })
+        );
       } catch (
         offerError
       ) {
@@ -809,6 +873,7 @@ function DriverDashboard() {
           );
 
         const walletBalanceError =
+          originalMessage === "HTTP 400" ||
           /wallet|balance|top.?up|insufficient/i.test(
             originalMessage
           );
@@ -824,7 +889,7 @@ function DriverDashboard() {
           walletBalanceError
         ) {
           displayMessage =
-            "Your wallet balance is too low. Please top up your wallet before sending an offer.";
+            "Your wallet needs to have at least 12% of the ride fare available before you can send an offer. Top up your wallet to continue.";
         }
 
         setOfferMessages(
@@ -838,6 +903,43 @@ function DriverDashboard() {
       } finally {
         setSubmitting("");
       }
+    };
+
+  const cancelOffer =
+    (request) => {
+      const requestId =
+        request.requestId;
+      const offer =
+        pendingOffers[requestId];
+
+      if (!offer?.offerId) {
+        setOfferMessages(
+          (current) => ({
+            ...current,
+            [requestId]:
+              "No pending offer was found.",
+          })
+        );
+        return;
+      }
+
+      const cancellationContext = {
+        kind: "DRIVER_OFFER",
+        request,
+        offer,
+      };
+
+      sessionStorage.setItem(
+        "velocityCancellationContext",
+        JSON.stringify(cancellationContext)
+      );
+
+      navigate(
+        "/driver-cancel-offer",
+        {
+          state: cancellationContext,
+        }
+      );
     };
 
   if (!validDriver) {
@@ -882,36 +984,12 @@ function DriverDashboard() {
 
   return (
     <div className="driver-dashboard-shell">
-      <HamburgerMenu
-        open={menuOpen}
-        onClose={() =>
-          setMenuOpen(false)
-        }
-      />
-
       <div
         className="dashboard-page"
         ref={
           dashboardScrollRef
         }
       >
-        <header className="dashboard-header">
-          <VelocityHomeButton
-            mode="DRIVER"
-          />
-
-          <button
-            type="button"
-            className="menu-btn"
-            aria-label="Open menu"
-            onClick={() =>
-              setMenuOpen(true)
-            }
-          >
-            ☰
-          </button>
-        </header>
-
         <DashboardRideState
           mode="DRIVER"
           driverId={driverId}
@@ -929,91 +1007,94 @@ function DriverDashboard() {
             </h1>
           </section>
 
+          <DashboardNotice mode="DRIVER" />
+
           <section className="card dashboard-card">
-            <p className="driver-status-copy">
-              {hasActiveRide
-                ? "Complete or cancel your current ride before receiving new requests."
-                : online
-                  ? "You are ready to receive requests."
-                  : "Turn on your location and go online."}
-            </p>
-
-            <div className="status-toggle-row">
-              <span
-                className={
-                  `status-label ${
-                    online
-                      ? "on"
-                      : "off"
-                  }`
-                }
-              >
-                {hasActiveRide
-                  ? "Active Ride"
-                  : online
-                    ? "Online"
-                    : "Offline"}
-              </span>
-
-              <button
-                type="button"
-                className={
-                  `toggle-switch ${
-                    online
-                      ? "on"
-                      : "off"
-                  }`
-                }
-                onClick={
-                  toggleStatus
-                }
-                disabled={
-                  updating ||
-                  hasActiveRide
-                }
-                aria-label={
-                  hasActiveRide
-                    ? "Availability locked during active ride"
-                    : online
-                      ? "Go offline"
-                      : "Go online"
-                }
-              >
-                <span className="toggle-knob" />
-              </button>
-            </div>
-
-            {!location && (
-              <button
-                type="button"
-                className="location-button"
-                onClick={
-                  getCurrentLocation
-                }
-                disabled={locating}
-              >
-                {locating
-                  ? "Finding Location..."
-                  : "Turn On Location"}
-              </button>
-            )}
-
-            {location && (
-              <div className="driver-location-info">
-                <span>
-                  Current location
+            {hasActiveRide ? (
+              <div className="status-toggle-row">
+                <span className="status-label on">
+                  ACTIVE RIDE
                 </span>
-
-                <strong>
-                  {address}
-                </strong>
               </div>
-            )}
+            ) : (
+              <>
+                <p className="driver-status-copy">
+                  {online
+                    ? "You are ready to receive requests."
+                    : "Turn on your location and go online."}
+                </p>
 
-            {error && (
-              <p className="error">
-                {error}
-              </p>
+                <div className="status-toggle-row">
+                  <span
+                    className={
+                      `status-label ${
+                        online
+                          ? "on"
+                          : "off"
+                      }`
+                    }
+                  >
+                    {online
+                      ? "Online"
+                      : "Offline"}
+                  </span>
+
+                  <button
+                    type="button"
+                    className={
+                      `toggle-switch ${
+                        online
+                          ? "on"
+                          : "off"
+                      }`
+                    }
+                    onClick={
+                      toggleStatus
+                    }
+                    disabled={updating}
+                    aria-label={
+                      online
+                        ? "Go offline"
+                        : "Go online"
+                    }
+                  >
+                    <span className="toggle-knob" />
+                  </button>
+                </div>
+
+                {!location && (
+                  <button
+                    type="button"
+                    className="location-button"
+                    onClick={
+                      getCurrentLocation
+                    }
+                    disabled={locating}
+                  >
+                    {locating
+                      ? "Finding Location..."
+                      : "Turn On Location"}
+                  </button>
+                )}
+
+                {location && (
+                  <div className="driver-location-info">
+                    <span>
+                      Current location
+                    </span>
+
+                    <strong>
+                      {address}
+                    </strong>
+                  </div>
+                )}
+
+                {error && (
+                  <p className="error">
+                    {error}
+                  </p>
+                )}
+              </>
             )}
           </section>
 
@@ -1187,9 +1268,35 @@ function DriverDashboard() {
                         >
                           {submitting ===
                           request.requestId
-                            ? "Sending..."
-                            : "Send Offer"}
+                            ? pendingOffers[
+                                request.requestId
+                              ]
+                              ? "Updating..."
+                              : "Sending..."
+                            : pendingOffers[
+                                  request.requestId
+                                ]
+                              ? "Update Offer"
+                              : "Send Offer"}
                         </button>
+
+                        {pendingOffers[
+                          request.requestId
+                        ] && (
+                          <button
+                            type="button"
+                            className="cancel-offer-button"
+                            onClick={() =>
+                              cancelOffer(request)
+                            }
+                            disabled={
+                              submitting ===
+                                request.requestId
+                            }
+                          >
+                            Cancel Offer
+                          </button>
+                        )}
                       </div>
 
                       {offerMessages[
@@ -1202,6 +1309,11 @@ function DriverDashboard() {
                                 request.requestId
                               ]?.startsWith(
                                 "Offer sent:"
+                              ) ||
+                              offerMessages[
+                                request.requestId
+                              ]?.startsWith(
+                                "Offer cancelled."
                               )
                                 ? "success"
                                 : "error"
@@ -1215,6 +1327,23 @@ function DriverDashboard() {
                           }
                         </p>
                       )}
+                    
+                    {offerMessages[
+                      request.requestId
+                    ]?.includes(
+                      "12% of the ride fare"
+                    ) && (
+                      <button
+                        type="button"
+                        className="wallet-topup-inline-button"
+                        onClick={() =>
+                          navigate("/driver-wallet")
+                        }
+                      >
+                        Top Up My Wallet
+                      </button>
+                    )}
+
                     </article>
                   )
                 )}
@@ -1228,3 +1357,4 @@ function DriverDashboard() {
 }
 
 export default DriverDashboard;
+

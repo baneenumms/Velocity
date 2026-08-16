@@ -10,7 +10,6 @@ import {
 } from "react-router-dom";
 
 import {
-  ArrowLeft,
   CheckCircle2,
   Clock3,
   RefreshCw,
@@ -514,19 +513,34 @@ function AdminWalletTopUps() {
       )}
 
       <div className="admin-topups-container">
-        <div className="admin-topups-topbar">
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/admin")
-            }
-          >
-            <ArrowLeft size={18} />
-            Admin Dashboard
-          </button>
+        <header className="admin-page-heading-row">
+          <div className="admin-topups-heading">
+            <div className="admin-topups-heading-icon">
+              <WalletCards
+                size={32}
+              />
+            </div>
+
+            <div>
+              <span className="admin-page-eyebrow">
+                Financial review
+              </span>
+
+              <h1>
+                Wallet Top-Ups
+              </h1>
+
+              <p>
+                Review external payment
+                details before crediting
+                driver wallets.
+              </p>
+            </div>
+          </div>
 
           <button
             type="button"
+            className="admin-page-refresh-button"
             onClick={() =>
               loadRequests(filter)
             }
@@ -542,26 +556,6 @@ function AdminWalletTopUps() {
             />
             Refresh
           </button>
-        </div>
-
-        <header className="admin-topups-heading">
-          <div className="admin-topups-heading-icon">
-            <WalletCards
-              size={32}
-            />
-          </div>
-
-          <div>
-            <h1>
-              Wallet Top-Ups
-            </h1>
-
-            <p>
-              Review external payment
-              details before crediting
-              driver wallets.
-            </p>
-          </div>
         </header>
 
         <div className="admin-topup-tabs">

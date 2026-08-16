@@ -26,6 +26,10 @@ public class DriverApplicationStatusResponse {
     public Integer driverId;
     public String applicantToken;
 
+    public String sessionToken;
+    public String activeMode;
+    public String sessionExpiresAt;
+
     public List<DriverApplicationCorrectionResponse> corrections =
             new ArrayList<>();
 }

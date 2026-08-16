@@ -5,19 +5,8 @@ import {
 } from "react";
 
 import {
-  useNavigate,
-} from "react-router-dom";
-
-import {
-  ArrowLeft,
-  ArrowRight,
-  History,
-  Menu,
+  CarFront,
 } from "lucide-react";
-
-import HamburgerMenu from
-  "../components/HamburgerMenu";
-import VelocityMark from "../components/VelocityMark";
 
 import "./DriverTripHistory.css";
 
@@ -51,8 +40,6 @@ async function readResponse(response) {
 }
 
 function DriverTripHistory() {
-  const navigate = useNavigate();
-
   const driverId = Number(
     sessionStorage.getItem(
       "driverId"
@@ -67,9 +54,6 @@ function DriverTripHistory() {
 
   const [error, setError] =
     useState("");
-
-  const [menuOpen, setMenuOpen] =
-    useState(false);
 
   const validDriver =
     Number.isInteger(driverId) &&
@@ -131,226 +115,210 @@ function DriverTripHistory() {
     validDriver,
   ]);
 
-  const formatMoney = (amount) =>
-    Number(
-      amount ?? 0
-    ).toLocaleString(
+  const formatMoney = (amount) => {
+    const value = Number(amount);
+
+    if (!Number.isFinite(value)) {
+      return "—";
+    }
+
+    return `PKR ${value.toLocaleString(
       "en-US",
       {
-        minimumFractionDigits: 2,
+        minimumFractionDigits: 0,
         maximumFractionDigits: 2,
       }
-    );
+    )}`;
+  };
+
+  const formatDate = (trip) => {
+    const value =
+      trip.completedAt ??
+      trip.cancelledAt ??
+      trip.startedAt ??
+      trip.acceptedAt ??
+      trip.requestedAt;
+
+    if (!value) {
+      return "Date unavailable";
+    }
+
+    const date = new Date(value);
+
+    return Number.isNaN(
+      date.getTime()
+    )
+      ? String(value)
+      : date.toLocaleString();
+  };
+
+  const getPickup = (trip) =>
+    trip.pickupLocation ||
+    trip.pickupAddress ||
+    trip.pickupName ||
+    "Pickup unavailable";
+
+  const getDestination = (trip) =>
+    trip.dropoffLocation ||
+    trip.dropoffAddress ||
+    trip.dropoffName ||
+    "Destination unavailable";
 
   return (
-    <div className="page trips-page">
-      <HamburgerMenu
-        open={menuOpen}
-        onClose={() =>
-          setMenuOpen(false)
-        }
-      />
+    <div className="driver-trip-history-page">
+      <main className="driver-trip-history-content">
+        <section className="driver-trip-history-title">
+          <p>Your journeys</p>
+          <h1>Trip History</h1>
+        </section>
 
-      <div className="dashboard-header">
-        <button
-          type="button"
-          className="menu-btn"
-          onClick={() =>
-            setMenuOpen(true)
-          }
-          aria-label="Open menu"
-        >
-          <Menu size={25} />
-        </button>
+        {loading && (
+          <section className="driver-trip-state-card">
+            <p>Loading your trip history...</p>
+          </section>
+        )}
 
-        <VelocityMark className="driver-header-mark" />
-      </div>
+        {!loading && error && (
+          <section className="driver-trip-state-card">
+            <CarFront size={50} />
+            <h2>Trip history unavailable</h2>
+            <p>{error}</p>
+          </section>
+        )}
 
-      <div className="card trips-card">
-        <div className="trips-heading">
-          <div className="icon-circle">
-            <History
-              size={36}
-              color="white"
-            />
-          </div>
-
-          <h1 className="title">
-            Trip History
-          </h1>
-        </div>
-
-        <div className="trips-content">
-          {loading && (
-            <p className="subtitle">
-              Loading trips...
-            </p>
-          )}
-
-          {!loading && error && (
-            <p className="error">
-              {error}
-            </p>
-          )}
-
-          {!loading &&
-            !error &&
-            trips.length === 0 && (
-              <p className="subtitle">
-                No trips were found for
-                this driver.
+        {!loading &&
+          !error &&
+          trips.length === 0 && (
+            <section className="driver-trip-state-card">
+              <CarFront size={50} />
+              <h2>No trips found</h2>
+              <p>
+                Completed and cancelled
+                rides linked to this driver
+                will appear here.
               </p>
-            )}
+            </section>
+          )}
 
-          {!loading &&
-            !error &&
-            trips.length > 0 && (
-              <div className="trip-list">
-                {trips.map(
-                  (trip, index) => {
-                    const fare =
-                      Number(
-                        trip.finalFare ??
-                          0
-                      );
+        {!loading &&
+          !error &&
+          trips.length > 0 && (
+            <div className="driver-trip-history-list">
+              {trips.map(
+                (trip, index) => {
+                  const fare = Number(
+                    trip.finalFare ??
+                      trip.acceptedFare ??
+                      0
+                  );
 
-                    const platformFee =
-                      fare * 0.12;
+                  const platformFee =
+                    fare * 0.12;
 
-                    const netEarnings =
-                      fare -
-                      platformFee;
+                  const netEarnings =
+                    fare - platformFee;
 
-                    const tripDate =
-                      trip.completedAt ??
-                      trip.cancelledAt ??
-                      trip.requestedAt;
+                  const distance = Number(
+                    trip.distanceKm
+                  );
 
-                    const status =
-                      trip.rideStatus ||
-                      "Completed";
+                  const status =
+                    trip.rideStatus ||
+                    "Completed";
 
-                    return (
-                      <div
-                        className="trip-item"
-                        key={
-                          trip.rideId ??
-                          index
-                        }
-                      >
-                        <div className="trip-top-row">
-                          <span className="trip-date">
-                            {tripDate
-                              ? new Date(
-                                  tripDate
-                                ).toLocaleString()
-                              : "—"}
+                  const statusClass =
+                    String(status)
+                      .toLowerCase()
+                      .replaceAll("_", "-");
+
+                  return (
+                    <article
+                      className="driver-trip-history-card"
+                      key={
+                        trip.rideId ??
+                        index
+                      }
+                    >
+                      <div className="driver-trip-card-header">
+                        <div>
+                          <span>
+                            Ride #{
+                              trip.rideId ??
+                              index + 1
+                            }
                           </span>
 
-                          <span
-                            className={`trip-status ${String(
-                              status
-                            ).toLowerCase()}`}
-                          >
-                            {status}
-                          </span>
+                          <strong>
+                            {formatDate(trip)}
+                          </strong>
                         </div>
 
-                        <div className="trip-route">
-                          <div>
-                            <span className="route-label">
-                              Pickup
-                            </span>
+                        <span
+                          className={`driver-trip-status driver-trip-status-${statusClass}`}
+                        >
+                          {String(status)
+                            .replaceAll("_", " ")}
+                        </span>
+                      </div>
 
-                            <p>
-                              {trip.pickupLocation ||
-                                trip.pickupAddress ||
-                                trip.pickupName ||
-                                "—"}
-                            </p>
-                          </div>
+                      <div className="driver-trip-location">
+                        <span className="driver-trip-pickup-dot" />
 
-                          <ArrowRight
-                            className="trip-arrow"
-                            size={20}
-                          />
-
-                          <div>
-                            <span className="route-label">
-                              Drop-off
-                            </span>
-
-                            <p>
-                              {trip.dropoffLocation ||
-                                trip.dropoffAddress ||
-                                trip.dropoffName ||
-                                "—"}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="earnings-box">
-                          <div>
-                            <span>
-                              Trip Fare
-                            </span>
-
-                            <strong>
-                              Rs{" "}
-                              {formatMoney(
-                                fare
-                              )}
-                            </strong>
-                          </div>
-
-                          <div>
-                            <span>
-                              Platform Fee
-                              (12%)
-                            </span>
-
-                            <strong className="fee">
-                              -Rs{" "}
-                              {formatMoney(
-                                platformFee
-                              )}
-                            </strong>
-                          </div>
-
-                          <div className="net-row">
-                            <span>
-                              Net Earnings
-                            </span>
-
-                            <strong>
-                              Rs{" "}
-                              {formatMoney(
-                                netEarnings
-                              )}
-                            </strong>
-                          </div>
+                        <div>
+                          <small>Pickup</small>
+                          <p>{getPickup(trip)}</p>
                         </div>
                       </div>
-                    );
-                  }
-                )}
-              </div>
-            )}
-        </div>
 
-        <button
-          type="button"
-          className="primary-btn back-btn"
-          onClick={() =>
-            navigate(
-              "/driver-dashboard"
-            )
-          }
-        >
-          <ArrowLeft size={18} />
-          Back to Home
-        </button>
-      </div>
+                      <div className="driver-trip-route-line" />
+
+                      <div className="driver-trip-location">
+                        <span className="driver-trip-destination-dot" />
+
+                        <div>
+                          <small>Destination</small>
+                          <p>{getDestination(trip)}</p>
+                        </div>
+                      </div>
+
+                      <div className="driver-trip-details">
+                        <div>
+                          <span>Distance</span>
+                          <strong>
+                            {Number.isFinite(distance)
+                              ? `${distance.toFixed(2)} km`
+                              : "—"}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>Trip Fare</span>
+                          <strong>
+                            {formatMoney(fare)}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>Platform Fee</span>
+                          <strong className="driver-trip-fee">
+                            -{formatMoney(platformFee)}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>Net Earnings</span>
+                          <strong>
+                            {formatMoney(netEarnings)}
+                          </strong>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                }
+              )}
+            </div>
+          )}
+      </main>
     </div>
   );
 }

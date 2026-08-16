@@ -23,7 +23,6 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.time.Year;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -69,6 +68,12 @@ public class DriverRegistrationService {
 
     @Inject
     DriverApplicantSessionService applicantSessionService;
+
+    @Inject
+    VehicleCatalogService vehicleCatalogService;
+
+    @Inject
+    SessionService sessionService;
 
     public DriverSignupStartResponse startSignup(
             DriverSignupRequest request
@@ -268,7 +273,23 @@ public class DriverRegistrationService {
             );
         }
 
-        return buildStatusResponse(application, null);
+        DriverApplicationStatusResponse response =
+                buildStatusResponse(application, null);
+
+        if (response.driverId != null
+                && application.status
+                == DriverApplicationStatus.APPROVED) {
+            var session = sessionService.replaceSession(
+                    user,
+                    "DRIVER"
+            );
+
+            response.sessionToken = session.sessionToken;
+            response.activeMode = session.activeMode;
+            response.sessionExpiresAt = session.expiresAt;
+        }
+
+        return response;
     }
 
     private User resolveReusablePassenger(
@@ -597,10 +618,10 @@ public class DriverRegistrationService {
             );
         }
 
-        request.fullName = required(
+        request.fullName = normalizePersonName(required(
                 request.fullName,
                 "Full name"
-        ).replaceAll("\\s+", " ");
+        ));
 
         if (request.fullName.length() > 100) {
             throw new WebApplicationException(
@@ -655,65 +676,38 @@ public class DriverRegistrationService {
                 "Licence number"
         ).toUpperCase(Locale.ROOT);
 
-        if (request.licenseNumber.length() > 50) {
+        if (!request.licenseNumber.matches("^[A-Z0-9]{3,30}$")) {
             throw new WebApplicationException(
-                    "Licence number is too long",
+                    "Licence number must contain 3 to 30 letters and numbers without spaces or dashes",
                     400
             );
         }
-
-        request.vehicleMake = required(
-                request.vehicleMake,
-                "Vehicle make"
-        );
-
-        request.vehicleModel = required(
-                request.vehicleModel,
-                "Vehicle model"
-        );
-
-        request.vehicleColor = required(
-                request.vehicleColor,
-                "Vehicle color"
-        );
 
         request.vehiclePlateNumber = required(
                 request.vehiclePlateNumber,
                 "Vehicle plate number"
         ).toUpperCase(Locale.ROOT);
 
-        if (request.vehicleMake.length() > 50
-                || request.vehicleModel.length() > 50
-                || request.vehicleColor.length() > 30
-                || request.vehiclePlateNumber.length() > 20) {
+        if (request.vehiclePlateNumber.length() > 20) {
             throw new WebApplicationException(
-                    "One or more vehicle fields are too long",
+                    "Vehicle plate number is too long",
                     400
             );
         }
 
-        int maximumYear = Year.now().getValue() + 1;
+        var selection = vehicleCatalogService.requireValidSelection(
+                request.vehicleMake,
+                request.vehicleModel,
+                request.vehicleYear,
+                request.vehicleColor,
+                request.vehicleCapacity
+        );
 
-        if (
-                request.vehicleYear == null
-                        || request.vehicleYear < 2000
-                        || request.vehicleYear > maximumYear
-        ) {
-            throw new WebApplicationException(
-                    "Vehicle year is invalid",
-                    400
-            );
-        }
-
-        if (
-                request.vehicleCapacity == null
-                        || request.vehicleCapacity <= 0
-        ) {
-            throw new WebApplicationException(
-                    "Vehicle capacity must be greater than zero",
-                    400
-            );
-        }
+        request.vehicleMake = selection.make();
+        request.vehicleModel = selection.model();
+        request.vehicleYear = selection.year();
+        request.vehicleColor = selection.color();
+        request.vehicleCapacity = selection.capacity();
 
         request.password = required(
                 request.password,
@@ -726,6 +720,26 @@ public class DriverRegistrationService {
                     400
             );
         }
+    }
+
+    private String normalizePersonName(String value) {
+        String[] words = value
+                .replaceAll("\\s+", " ")
+                .toLowerCase(Locale.ROOT)
+                .split(" ");
+
+        StringBuilder result = new StringBuilder();
+
+        for (String word : words) {
+            if (!result.isEmpty()) {
+                result.append(' ');
+            }
+
+            result.append(Character.toUpperCase(word.charAt(0)))
+                    .append(word.substring(1));
+        }
+
+        return result.toString();
     }
 
     private String required(String value, String fieldName) {

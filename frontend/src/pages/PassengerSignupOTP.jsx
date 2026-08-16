@@ -1,7 +1,5 @@
 import { apiBaseUrl } from "../config/api.js";
 import {
-  useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -16,6 +14,7 @@ import {
 
 import "./OTP.css";
 import VelocityMark from "../components/VelocityMark";
+import OtpInputGroup from "../components/OtpInputGroup";
 
 const API =
   apiBaseUrl;
@@ -100,60 +99,12 @@ function PassengerSignupOTP() {
   const [loading, setLoading] =
     useState(false);
 
-  const inputs = useRef([]);
-
-  useEffect(() => { inputs.current[0]?.focus(); }, []);
-
   const validState =
     Boolean(
       fullName &&
       phone &&
       email
     );
-
-  const handleChange = (
-    value,
-    index
-  ) => {
-    if (!/^\d?$/.test(value)) {
-      return;
-    }
-
-    const nextOtp = [...otp];
-    nextOtp[index] = value;
-
-    setOtp(nextOtp);
-    setError("");
-
-    if (
-      value &&
-      index < 5
-    ) {
-      inputs.current[
-        index + 1
-      ]?.focus();
-    }
-  };
-
-  const handleKeyDown = (
-    event,
-    index
-  ) => {
-    if (event.key === "Enter") {
-      handleVerify();
-      return;
-    }
-    if (
-      event.key ===
-        "Backspace" &&
-      otp[index] === "" &&
-      index > 0
-    ) {
-      inputs.current[
-        index - 1
-      ]?.focus();
-    }
-  };
 
   const handleVerify = async () => {
     setError("");
@@ -219,16 +170,38 @@ function PassengerSignupOTP() {
           "",
         ]);
 
-        window.setTimeout(() => {
-          inputs.current[
-            0
-          ]?.focus();
-        }, 0);
+        return;
+      }
 
+      if (!data.sessionToken) {
+        setError(
+          "Your account was created, but the login session could not be started. Please sign in."
+        );
         return;
       }
 
       clearPreviousSession();
+
+      sessionStorage.setItem(
+        "velocitySession",
+        JSON.stringify({
+          token: data.sessionToken,
+          userId: data.userId,
+          activeMode:
+            data.activeMode ||
+            "PASSENGER",
+          passengerId:
+            data.passengerId,
+          expiresAt:
+            data.sessionExpiresAt,
+        })
+      );
+
+      sessionStorage.setItem(
+        "activeMode",
+        data.activeMode ||
+          "PASSENGER"
+      );
 
       sessionStorage.setItem(
         "userId",
@@ -300,7 +273,7 @@ function PassengerSignupOTP() {
 
   if (!validState) {
     return (
-      <div className="page">
+      <div className="page auth-page">
         <div className="card">
           <h1 className="title">
             Passenger Registration
@@ -352,49 +325,15 @@ function PassengerSignupOTP() {
           {maskedEmail || email}
         </p>
 
-        <div className="otp-container">
-          {otp.map(
-            (digit, index) => (
-              <input
-                key={index}
-                ref={(element) => {
-                  inputs.current[
-                    index
-                  ] = element;
-                }}
-                className="otp-box"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                autoComplete={
-                  index === 0
-                    ? "one-time-code"
-                    : "off"
-                }
-                maxLength={1}
-                value={digit}
-                disabled={loading}
-                onChange={(
-                  event
-                ) =>
-                  handleChange(
-                    event.target
-                      .value,
-                    index
-                  )
-                }
-                onKeyDown={(
-                  event
-                ) =>
-                  handleKeyDown(
-                    event,
-                    index
-                  )
-                }
-              />
-            )
-          )}
-        </div>
+        <OtpInputGroup
+          value={otp}
+          onChange={(nextOtp) => {
+            setOtp(nextOtp);
+            setError("");
+          }}
+          onSubmit={handleVerify}
+          disabled={loading}
+        />
 
         {error && (
           <p className="error">

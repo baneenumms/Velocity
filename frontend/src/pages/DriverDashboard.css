@@ -6,11 +6,15 @@
   height: auto;
 
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #f4f6f9;
 }
 
 .dashboard-page {
   width: 100%;
   height: 100%;
+  flex: 1;
   min-height: 0;
 
   padding: 24px 28px 50px;
@@ -498,12 +502,35 @@
   border: none;
   border-radius: 12px;
 
-  background: #112544;
+  background:
+    linear-gradient(
+      105deg,
+      #e55f91,
+      #1f3655
+    );
   color: #ffffff;
+
+  box-shadow:
+    0 9px 18px
+    rgba(83, 143, 194, 0.22);
 
   font-weight: 800;
 
   cursor: pointer;
+}
+
+.driver-offer-controls
+  .cancel-offer-button {
+  border: 1px solid #c23d6c;
+  background: #ffffff;
+  color: #a9325c;
+}
+
+.driver-offer-controls
+  .cancel-offer-button:hover:not(
+    :disabled
+  ) {
+  background: #fcebf1;
 }
 
 .driver-offer-controls
@@ -800,11 +827,23 @@
 /* Final shared Velocity dashboard shell — same structure and palette as Passenger. */
 .driver-dashboard-shell {
   background: #f2efe9 !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100%;
+  height: auto;
+  min-height: calc(100vh - 80px);
+  min-height: calc(100dvh - 80px);
+  overflow: visible;
 }
 
 .driver-dashboard-shell .dashboard-page {
+  width: 100%;
+  height: auto;
+  min-height: calc(100vh - 80px);
+  min-height: calc(100dvh - 80px);
   padding: 0 0 60px !important;
   align-items: stretch;
+  overflow: visible;
 }
 
 .driver-dashboard-shell .dashboard-header {
@@ -837,6 +876,7 @@
   grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
   grid-template-areas:
     "welcome welcome"
+    "notice notice"
     "profile map"
     "requests requests";
   gap: 24px;
@@ -879,7 +919,19 @@
 }
 
 .driver-dashboard-shell .location-button {
-  background: #a13c62 !important;
+  background:
+    linear-gradient(
+      105deg,
+      #e55f91,
+      #1f3655
+    ) !important;
+  box-shadow:
+    0 9px 18px
+    rgba(83, 143, 194, 0.22);
+}
+
+.driver-dashboard-shell .velocity-dashboard-notice {
+  grid-area: notice;
 }
 
 .driver-dashboard-shell .driver-location-info {
@@ -893,7 +945,12 @@
 @media (max-width: 850px) {
   .driver-dashboard-shell .driver-dashboard-content {
     grid-template-columns: 1fr;
-    grid-template-areas: "welcome" "profile" "map" "requests";
+    grid-template-areas:
+      "welcome"
+      "notice"
+      "profile"
+      "map"
+      "requests";
   }
 }
 
@@ -902,4 +959,22 @@
   .driver-dashboard-shell .driver-dashboard-content { width: min(100% - 24px, 1200px); margin-top: 24px; }
   .driver-dashboard-shell .dashboard-card { min-height: 0; height: auto; }
   .driver-dashboard-shell .driver-map-card { min-height: 350px; height: 350px; }
+}
+
+
+.wallet-topup-inline-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #d4477c, #22395e);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.wallet-topup-inline-button:hover {
+  transform: translateY(-1px);
 }

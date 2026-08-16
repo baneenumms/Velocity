@@ -6,9 +6,9 @@ import com.beni.entity.Ride;
 import com.beni.entity.Vehicle;
 import com.beni.entity.Wallet;
 import com.beni.repository.DriverRepository;
+import com.beni.repository.PassengerRepository;
 import com.beni.repository.VehicleRepository;
 import com.beni.repository.WalletRepository;
-import com.beni.repository.PassengerRepository;
 import com.beni.service.ActiveRidePolicyService;
 import com.beni.service.RideService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,12 +22,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class DriverOfferService {
@@ -35,17 +34,14 @@ public class DriverOfferService {
     private static final BigDecimal RATE =
             new BigDecimal("0.12");
 
-    private final Map<
-            String,
-            DriverOffer
-            > offers =
-            new ConcurrentHashMap<>();
-
     private final SecureRandom random =
             new SecureRandom();
 
     @Inject
     RideRequestService rideRequestService;
+
+    @Inject
+    DriverOfferRepository driverOfferRepository;
 
     @Inject
     DriverRepository driverRepository;
@@ -63,20 +59,23 @@ public class DriverOfferService {
     RideService rideService;
 
     @Inject
-    ActiveRidePolicyService
-            activeRidePolicyService;
+    ActiveRidePolicyService activeRidePolicyService;
 
-    public synchronized DriverOffer
-    submitOffer(
+    @Transactional
+    public DriverOffer submitOffer(
             SubmitDriverOfferRequest input
     ) {
         validate(input);
 
         /*
-         * A driver with an ACCEPTED or
-         * IN_PROGRESS ride cannot submit
-         * another offer.
+         * Every submit/accept path uses the same
+         * lock order: wallet, request, offer.
+         * This serializes work by driver and by
+         * passenger request across app instances.
          */
+        Wallet wallet =
+                lockedWallet(input.driverId);
+
         activeRidePolicyService
                 .requireDriverAvailable(
                         input.driverId
@@ -84,7 +83,7 @@ public class DriverOfferService {
 
         RideRequest request =
                 rideRequestService
-                        .getRideRequest(
+                        .getRideRequestForUpdate(
                                 input.requestId
                         );
 
@@ -96,9 +95,7 @@ public class DriverOfferService {
         );
 
         Driver driver =
-                driver(
-                        input.driverId
-                );
+                driver(input.driverId);
 
         requireNotOwnRide(request, driver);
 
@@ -126,82 +123,64 @@ public class DriverOfferService {
                 reserve(fare);
 
         require(
-                available(
-                        wallet(driver)
-                ).compareTo(
-                        required
-                ) >= 0,
+                available(wallet)
+                        .compareTo(required) >= 0,
                 "Insufficient available wallet balance",
                 400
         );
 
         DriverOffer offer =
-                findPending(
-                        input.requestId,
-                        input.driverId
-                );
+                driverOfferRepository
+                        .findPendingForUpdate(
+                                input.requestId,
+                                input.driverId
+                        );
+
+        boolean newOffer =
+                offer == null;
+
+        LocalDateTime now =
+                LocalDateTime.now();
 
         if (offer == null) {
-            offer =
-                    new DriverOffer();
-
+            offer = new DriverOffer();
             offer.offerId =
-                    UUID.randomUUID()
-                            .toString();
-
+                    UUID.randomUUID().toString();
             offer.requestId =
                     input.requestId;
-
             offer.driverId =
                     driver.driverId;
-
             offer.driverName =
                     driver.user.fullName;
-
             offer.status =
                     DriverOfferStatus.PENDING;
-
-            offer.createdAt =
-                    LocalDateTime.now();
-
-            offers.put(
-                    offer.offerId,
-                    offer
-            );
+            offer.createdAt = now;
         }
 
         offer.vehicleId =
                 vehicle.vehicleId;
-
         offer.vehicleDescription =
-                vehicle.make +
-                        " " +
-                        vehicle.model;
-
+                vehicle.make + " " + vehicle.model;
         offer.plateNumber =
                 vehicle.plateNumber;
+        offer.offeredFare = fare;
+        offer.requiredReserve = required;
+        offer.updatedAt = now;
 
-        offer.offeredFare =
-                fare;
-
-        offer.requiredReserve =
-                required;
-
-        offer.updatedAt =
-                LocalDateTime.now();
+        if (newOffer) {
+            driverOfferRepository.persist(offer);
+        }
 
         return offer;
     }
 
-    public List<DriverOffer>
-    getOffersForRequest(
+    @Transactional
+    public List<DriverOffer> getOffersForRequest(
             String requestId
     ) {
         RideRequest request =
                 rideRequestService
-                        .getRideRequest(
-                                requestId
-                        );
+                        .getRideRequest(requestId);
 
         if (
                 request.status !=
@@ -211,54 +190,151 @@ public class DriverOfferService {
         }
 
         /*
-         * Remove stale pending offers from
-         * drivers who have since accepted
-         * another ride.
+         * Pending offers from a driver who has
+         * since taken another ride are stale.
          */
         withdrawBusyDriverOffers();
 
-        return offers.values()
-                .stream()
-                .filter(
-                        offer ->
-                                offer.requestId
-                                        .equals(
-                                                requestId
-                                        ) &&
-                                        offer.status ==
-                                                DriverOfferStatus
-                                                        .PENDING
-                )
-                .sorted(
-                        Comparator.comparing(
-                                offer ->
-                                        offer.offeredFare
-                        )
-                )
-                .toList();
+        return driverOfferRepository
+                .listPendingByRequest(requestId);
     }
 
     @Transactional
-    public synchronized
-    AcceptDriverOfferResponse acceptOffer(
-            String offerId,
-            AcceptDriverOfferRequest input
+    public List<DriverOffer> getPendingOffersForDriver(
+            Integer driverId
     ) {
         require(
-                input != null &&
-                        input.passengerId !=
-                                null,
-                "Passenger ID is required",
+                driverId != null &&
+                        driverId > 0,
+                "Driver ID is required",
+                400
+        );
+
+        driver(driverId);
+
+        /*
+         * Remove offers that became stale because
+         * their driver accepted another ride, then
+         * return only offers whose request is still
+         * searchable and has not expired.
+         */
+        withdrawBusyDriverOffers();
+
+        return driverOfferRepository
+                .listPendingByDriver(
+                        driverId,
+                        LocalDateTime.now()
+                );
+    }
+
+    @Transactional
+    public DriverOffer cancelPendingOffer(
+            String offerId,
+            Integer driverId
+    ) {
+        require(
+                offerId != null &&
+                        !offerId.isBlank(),
+                "Offer ID is required",
+                400
+        );
+
+        require(
+                driverId != null &&
+                        driverId > 0,
+                "Driver ID is required",
                 400
         );
 
         DriverOffer offer =
-                offers.get(offerId);
+                driverOfferRepository
+                        .findByOfferIdForUpdate(
+                                offerId
+                        );
 
         require(
                 offer != null,
                 "Driver offer not found",
                 404
+        );
+
+        require(
+                driverId.equals(
+                        offer.driverId
+                ),
+                "This offer does not belong to the authenticated driver",
+                403
+        );
+
+        require(
+                offer.status ==
+                        DriverOfferStatus.PENDING,
+                "Only pending offers can be cancelled",
+                409
+        );
+
+        offer.status =
+                DriverOfferStatus.WITHDRAWN;
+
+        offer.updatedAt =
+                LocalDateTime.now();
+
+        return offer;
+    }
+
+    @Transactional
+    public AcceptDriverOfferResponse acceptOffer(
+            String offerId,
+            AcceptDriverOfferRequest input
+    ) {
+        require(
+                input != null &&
+                        input.passengerId != null,
+                "Passenger ID is required",
+                400
+        );
+
+        DriverOfferRepository.OfferIdentity identity =
+                driverOfferRepository
+                        .findIdentity(offerId);
+
+        require(
+                identity != null,
+                "Driver offer not found",
+                404
+        );
+
+        /*
+         * Read only scalar IDs above. Do not load
+         * the offer entity before its turn in the
+         * shared wallet -> request -> offer order.
+         */
+        Wallet wallet =
+                lockedWallet(identity.driverId());
+
+        RideRequest request =
+                rideRequestService
+                        .getRideRequestForUpdate(
+                                identity.requestId()
+                        );
+
+        DriverOffer offer =
+                driverOfferRepository
+                        .findByOfferIdForUpdate(offerId);
+
+        require(
+                offer != null,
+                "Driver offer not found",
+                404
+        );
+
+        require(
+                identity.requestId()
+                                .equals(offer.requestId) &&
+                        identity.driverId()
+                                .equals(offer.driverId),
+                "Offer changed while it was being accepted",
+                409
         );
 
         require(
@@ -268,12 +344,6 @@ public class DriverOfferService {
                 409
         );
 
-        RideRequest request =
-                rideRequestService
-                        .getRideRequest(
-                                offer.requestId
-                        );
-
         require(
                 request.status ==
                         RideRequestStatus.SEARCHING,
@@ -282,35 +352,24 @@ public class DriverOfferService {
         );
 
         require(
-                request.passengerId.equals(
-                        input.passengerId
-                ),
+                request.passengerId
+                        .equals(input.passengerId),
                 "Passenger cannot accept this offer",
                 403
         );
 
-        /*
-         * The passenger cannot accept another
-         * driver while already on an active ride.
-         */
         activeRidePolicyService
                 .requirePassengerAvailable(
                         input.passengerId
                 );
 
-        /*
-         * The selected driver cannot be assigned
-         * to two passengers.
-         */
         activeRidePolicyService
                 .requireDriverAvailable(
                         offer.driverId
                 );
 
         Driver driver =
-                driver(
-                        offer.driverId
-                );
+                driver(offer.driverId);
 
         requireNotOwnRide(request, driver);
 
@@ -327,37 +386,25 @@ public class DriverOfferService {
                         driver
                 );
 
-        Wallet wallet =
-                wallet(driver);
-
         BigDecimal required =
-                reserve(
-                        offer.offeredFare
-                );
+                reserve(offer.offeredFare);
 
         require(
                 available(wallet)
-                        .compareTo(
-                                required
-                        ) >= 0,
+                        .compareTo(required) >= 0,
                 "Driver wallet balance is insufficient",
                 400
         );
 
         wallet.reservedBalance =
-                money(
-                        wallet.reservedBalance
-                )
+                money(wallet.reservedBalance)
                         .add(required);
-
         wallet.updatedAt =
                 LocalDateTime.now();
 
         String pin =
                 String.valueOf(
-                        random.nextInt(
-                                9000
-                        ) + 1000
+                        random.nextInt(9000) + 1000
                 );
 
         Ride ride =
@@ -374,67 +421,29 @@ public class DriverOfferService {
         driver.driverStatus =
                 DriverStatus.Assigned;
 
-        rideRequestService
-                .markAccepted(
-                        request.requestId
-                );
+        request.status =
+                RideRequestStatus.ACCEPTED;
 
         offer.status =
                 DriverOfferStatus.ACCEPTED;
 
-        offer.updatedAt =
+        LocalDateTime now =
                 LocalDateTime.now();
 
-        /*
-         * Close every competing offer for the
-         * accepted passenger request.
-         *
-         * Also withdraw this driver's offers
-         * on every other passenger request.
-         */
-        offers.values()
-                .stream()
-                .filter(
-                        otherOffer ->
-                                !otherOffer.offerId
-                                        .equals(
-                                                offer.offerId
-                                        ) &&
-                                        otherOffer.status ==
-                                                DriverOfferStatus
-                                                        .PENDING
-                )
-                .forEach(
-                        otherOffer -> {
-                            if (
-                                    otherOffer.requestId
-                                            .equals(
-                                                    request.requestId
-                                            )
-                            ) {
-                                otherOffer.status =
-                                        DriverOfferStatus
-                                                .REJECTED;
-                            } else if (
-                                    otherOffer.driverId
-                                            .equals(
-                                                    driver.driverId
-                                            )
-                            ) {
-                                otherOffer.status =
-                                        DriverOfferStatus
-                                                .WITHDRAWN;
-                            }
+        offer.updatedAt = now;
 
-                            if (
-                                    otherOffer.status !=
-                                            DriverOfferStatus
-                                                    .PENDING
-                            ) {
-                                otherOffer.updatedAt =
-                                        LocalDateTime.now();
-                            }
-                        }
+        driverOfferRepository
+                .rejectCompetingOffers(
+                        request.requestId,
+                        offer.offerId,
+                        now
+                );
+
+        driverOfferRepository
+                .withdrawOtherDriverOffers(
+                        driver.driverId,
+                        offer.offerId,
+                        now
                 );
 
         return response(
@@ -448,38 +457,53 @@ public class DriverOfferService {
     }
 
     private void withdrawBusyDriverOffers() {
-        offers.values()
-                .stream()
-                .filter(
-                        offer ->
-                                offer.status ==
-                                        DriverOfferStatus
-                                                .PENDING
-                )
-                .forEach(
-                        offer -> {
-                            if (
-                                    activeRidePolicyService
-                                            .driverHasActiveRide(
-                                                    offer.driverId
-                                            )
-                            ) {
-                                offer.status =
-                                        DriverOfferStatus
-                                                .WITHDRAWN;
+        Set<Integer> checkedDrivers =
+                new HashSet<>();
 
-                                offer.updatedAt =
-                                        LocalDateTime.now();
-                            }
-                        }
-                );
+        for (
+                DriverOffer offer :
+                driverOfferRepository.listPending()
+        ) {
+            if (!checkedDrivers.add(offer.driverId)) {
+                continue;
+            }
+
+            if (
+                    activeRidePolicyService
+                            .driverHasActiveRide(
+                                    offer.driverId
+                            )
+            ) {
+                driverOfferRepository
+                        .withdrawPendingByDriver(
+                                offer.driverId,
+                                LocalDateTime.now()
+                        );
+            }
+        }
     }
 
-    private void requireNotOwnRide(RideRequest request, Driver driver) {
-        var passenger = passengerRepository.findById(request.passengerId.longValue());
-        require(passenger != null, "Passenger not found", 404);
-        require(!passenger.user.userId.equals(driver.user.userId),
-                "You cannot send or accept an offer for your own ride.", 403);
+    private void requireNotOwnRide(
+            RideRequest request,
+            Driver driver
+    ) {
+        var passenger =
+                passengerRepository.findById(
+                        request.passengerId.longValue()
+                );
+
+        require(
+                passenger != null,
+                "Passenger not found",
+                404
+        );
+
+        require(
+                !passenger.user.userId
+                        .equals(driver.user.userId),
+                "You cannot send or accept an offer for your own ride.",
+                403
+        );
     }
 
     private AcceptDriverOfferResponse response(
@@ -494,45 +518,30 @@ public class DriverOfferService {
                 new AcceptDriverOfferResponse();
 
         response.success = true;
-
         response.message =
                 "Driver offer accepted successfully";
-
         response.requestId =
                 offer.requestId;
-
         response.offerId =
                 offer.offerId;
-
         response.rideId =
                 ride.rideId;
-
         response.status =
                 ride.rideStatus.name();
-
         response.driverId =
                 driver.driverId;
-
         response.driverName =
                 driver.user.fullName;
-
         response.vehicleId =
                 vehicle.vehicleId;
-
         response.vehicleDescription =
-                vehicle.make +
-                        " " +
-                        vehicle.model;
-
+                vehicle.make + " " + vehicle.model;
         response.plateNumber =
                 vehicle.plateNumber;
-
         response.acceptedFare =
                 offer.offeredFare;
-
         response.reservedAmount =
                 reserve;
-
         response.ridePin = pin;
 
         return response;
@@ -549,8 +558,7 @@ public class DriverOfferService {
 
         require(
                 input.requestId != null &&
-                        !input.requestId
-                                .isBlank(),
+                        !input.requestId.isBlank(),
                 "Request ID is required",
                 400
         );
@@ -613,9 +621,7 @@ public class DriverOfferService {
         require(
                 vehicle.driver != null &&
                         vehicle.driver.driverId
-                                .equals(
-                                        driver.driverId
-                                ),
+                                .equals(driver.driverId),
                 "Vehicle does not belong to driver",
                 400
         );
@@ -623,13 +629,13 @@ public class DriverOfferService {
         return vehicle;
     }
 
-    private Wallet wallet(
-            Driver driver
+    private Wallet lockedWallet(
+            Integer driverId
     ) {
         Wallet wallet =
                 walletRepository
-                        .findByDriver(
-                                driver
+                        .findByDriverIdForUpdate(
+                                driverId
                         );
 
         require(
@@ -641,51 +647,23 @@ public class DriverOfferService {
         return wallet;
     }
 
-    private DriverOffer findPending(
-            String requestId,
-            Integer driverId
-    ) {
-        return offers.values()
-                .stream()
-                .filter(
-                        offer ->
-                                offer.requestId
-                                        .equals(
-                                                requestId
-                                        ) &&
-                                        offer.driverId
-                                                .equals(
-                                                        driverId
-                                                ) &&
-                                        offer.status ==
-                                                DriverOfferStatus
-                                                        .PENDING
-                )
-                .findFirst()
-                .orElse(null);
-    }
-
     private BigDecimal available(
             Wallet wallet
     ) {
-        return money(
-                wallet.balance
-        ).subtract(
-                money(
-                        wallet.reservedBalance
-                )
-        );
+        return money(wallet.balance)
+                .subtract(
+                        money(wallet.reservedBalance)
+                );
     }
 
     private BigDecimal reserve(
             BigDecimal fare
     ) {
-        return fare.multiply(
-                RATE
-        ).setScale(
-                2,
-                RoundingMode.HALF_UP
-        );
+        return fare.multiply(RATE)
+                .setScale(
+                        2,
+                        RoundingMode.HALF_UP
+                );
     }
 
     private BigDecimal money(
@@ -705,9 +683,7 @@ public class DriverOfferService {
         try {
             byte[] bytes =
                     MessageDigest
-                            .getInstance(
-                                    "SHA-256"
-                            )
+                            .getInstance("SHA-256")
                             .digest(
                                     value.getBytes(
                                             StandardCharsets.UTF_8

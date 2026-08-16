@@ -1,5 +1,5 @@
 import { apiBaseUrl } from "../config/api.js";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
     Eye,
@@ -8,6 +8,14 @@ import {
 } from "lucide-react";
 import "./DriverSignUP.css";
 import VelocityMark from "../components/VelocityMark";
+import SearchableSelect from "../components/SearchableSelect";
+import useVehicleOptions from "../hooks/useVehicleOptions";
+import {
+    isApprovedOption,
+    normalizeLicenceNumber,
+    normalizePersonName,
+    normalizePlateNumber,
+} from "../utils/inputNormalization";
 
 const API = apiBaseUrl;
 
@@ -17,11 +25,6 @@ function DriverSignUP() {
     const navigate = useNavigate();
 
     const phone = location.state?.phone || "";
-
-    const maximumVehicleYear = useMemo(
-        () => new Date().getFullYear() + 1,
-        []
-    );
 
     const [form, setForm] = useState({
         fullName: "",
@@ -33,7 +36,7 @@ function DriverSignUP() {
         vehicleYear: "",
         vehicleColor: "",
         vehiclePlateNumber: "",
-        vehicleCapacity: "4",
+        vehicleCapacity: "",
         password: "",
         confirmPassword: "",
     });
@@ -46,6 +49,16 @@ function DriverSignUP() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    const {
+        loading: catalogLoading,
+        error: catalogError,
+        makeOptions,
+        modelOptions,
+        yearOptions,
+        colorOptions,
+        capacityOptions,
+    } = useVehicleOptions(form.vehicleMake);
 
     const updateField = (event) => {
         const { name, value } = event.target;
@@ -65,10 +78,33 @@ function DriverSignUP() {
         }));
     };
 
+    const updateVehicleMake = (value) => {
+        setForm((current) => ({
+            ...current,
+            vehicleMake: value,
+            vehicleModel: "",
+        }));
+    };
+
+    const updateSelection = (name, value) => {
+        setForm((current) => ({
+            ...current,
+            [name]: value,
+        }));
+    };
+
     const validateForm = () => {
 
         if (!phone) {
             return "Please begin registration from the driver phone page.";
+        }
+
+        if (catalogLoading) {
+            return "Approved vehicle options are still loading.";
+        }
+
+        if (catalogError) {
+            return catalogError;
         }
 
         if (
@@ -98,17 +134,28 @@ function DriverSignUP() {
             return "CNIC must contain exactly 13 digits.";
         }
 
-        const vehicleYear = Number(form.vehicleYear);
-
-        if (
-            vehicleYear < 2000
-            || vehicleYear > maximumVehicleYear
-        ) {
-            return `Vehicle year must be between 2000 and ${maximumVehicleYear}.`;
+        if (!/^[A-Z0-9]{3,30}$/.test(form.licenseNumber)) {
+            return "Licence number must contain 3 to 30 letters and numbers without spaces or dashes.";
         }
 
-        if (Number(form.vehicleCapacity) <= 0) {
-            return "Vehicle capacity must be greater than zero.";
+        if (!isApprovedOption(form.vehicleMake, makeOptions)) {
+            return "Please select an approved vehicle make.";
+        }
+
+        if (!isApprovedOption(form.vehicleModel, modelOptions)) {
+            return "Please select an approved model for the selected make.";
+        }
+
+        if (!yearOptions.includes(form.vehicleYear)) {
+            return "Please select an approved vehicle year.";
+        }
+
+        if (!isApprovedOption(form.vehicleColor, colorOptions)) {
+            return "Please select an approved vehicle color.";
+        }
+
+        if (!capacityOptions.includes(form.vehicleCapacity)) {
+            return "Please select the passenger capacity.";
         }
 
         if (form.password.length < 6) {
@@ -163,12 +210,12 @@ function DriverSignUP() {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        fullName: form.fullName.trim(),
+                        fullName: normalizePersonName(form.fullName),
                         phoneNumber: phone,
                         email: form.email.trim(),
                         cnicNumber: form.cnicNumber,
                         licenseNumber:
-                            form.licenseNumber.trim(),
+                            normalizeLicenceNumber(form.licenseNumber),
                         vehicleMake:
                             form.vehicleMake.trim(),
                         vehicleModel:
@@ -178,7 +225,7 @@ function DriverSignUP() {
                         vehicleColor:
                             form.vehicleColor.trim(),
                         vehiclePlateNumber:
-                            form.vehiclePlateNumber.trim(),
+                            normalizePlateNumber(form.vehiclePlateNumber),
                         vehicleCapacity:
                             Number(form.vehicleCapacity),
                         password: form.password,
@@ -286,6 +333,12 @@ function DriverSignUP() {
                                 value={form.fullName}
                                 autoFocus
                                 onChange={updateField}
+                                onBlur={() =>
+                                    updateSelection(
+                                        "fullName",
+                                        normalizePersonName(form.fullName)
+                                    )
+                                }
                                 autoComplete="name"
                             />
 
@@ -348,10 +401,20 @@ function DriverSignUP() {
                                 id="licenseNumber"
                                 name="licenseNumber"
                                 type="text"
-                                maxLength={50}
+                                maxLength={30}
                                 value={form.licenseNumber}
-                                onChange={updateField}
+                                placeholder="Letters and numbers only"
+                                onChange={(event) =>
+                                    updateSelection(
+                                        "licenseNumber",
+                                        normalizeLicenceNumber(event.target.value)
+                                    )
+                                }
                             />
+
+                            <p className="driver-signup-hint">
+                                Enter 3–30 letters and numbers exactly as printed, without spaces or dashes.
+                            </p>
 
                         </div>
 
@@ -371,15 +434,22 @@ function DriverSignUP() {
                                 Make
                             </label>
 
-                            <input
+                            <SearchableSelect
                                 id="vehicleMake"
-                                name="vehicleMake"
-                                type="text"
-                                maxLength={50}
-                                placeholder="Toyota"
                                 value={form.vehicleMake}
-                                onChange={updateField}
+                                options={makeOptions}
+                                placeholder={
+                                    catalogLoading
+                                        ? "Loading approved makes..."
+                                        : "Search approved makes"
+                                }
+                                disabled={catalogLoading || Boolean(catalogError)}
+                                onChange={updateVehicleMake}
                             />
+
+                            <p className="vehicle-select-hint">
+                                Start typing, then select an approved make.
+                            </p>
 
                         </div>
 
@@ -389,14 +459,19 @@ function DriverSignUP() {
                                 Model
                             </label>
 
-                            <input
+                            <SearchableSelect
                                 id="vehicleModel"
-                                name="vehicleModel"
-                                type="text"
-                                maxLength={50}
-                                placeholder="Corolla"
                                 value={form.vehicleModel}
-                                onChange={updateField}
+                                options={modelOptions}
+                                placeholder={
+                                    form.vehicleMake
+                                        ? "Search approved models"
+                                        : "Select a make first"
+                                }
+                                disabled={!isApprovedOption(form.vehicleMake, makeOptions)}
+                                onChange={(value) =>
+                                    updateSelection("vehicleModel", value)
+                                }
                             />
 
                         </div>
@@ -407,14 +482,15 @@ function DriverSignUP() {
                                 Vehicle year
                             </label>
 
-                            <input
+                            <SearchableSelect
                                 id="vehicleYear"
-                                name="vehicleYear"
-                                type="number"
-                                min="2000"
-                                max={maximumVehicleYear}
                                 value={form.vehicleYear}
-                                onChange={updateField}
+                                options={yearOptions}
+                                placeholder="Search vehicle year"
+                                disabled={catalogLoading || Boolean(catalogError)}
+                                onChange={(value) =>
+                                    updateSelection("vehicleYear", value)
+                                }
                             />
 
                         </div>
@@ -425,13 +501,16 @@ function DriverSignUP() {
                                 Color
                             </label>
 
-                            <input
+                            <SearchableSelect
                                 id="vehicleColor"
-                                name="vehicleColor"
-                                type="text"
-                                maxLength={30}
                                 value={form.vehicleColor}
-                                onChange={updateField}
+                                options={colorOptions}
+                                placeholder="Search approved colors"
+                                showColorSwatch
+                                disabled={catalogLoading || Boolean(catalogError)}
+                                onChange={(value) =>
+                                    updateSelection("vehicleColor", value)
+                                }
                             />
 
                         </div>
@@ -448,7 +527,12 @@ function DriverSignUP() {
                                 type="text"
                                 maxLength={20}
                                 value={form.vehiclePlateNumber}
-                                onChange={updateField}
+                                onChange={(event) =>
+                                    updateSelection(
+                                        "vehiclePlateNumber",
+                                        normalizePlateNumber(event.target.value)
+                                    )
+                                }
                             />
 
                         </div>
@@ -456,23 +540,35 @@ function DriverSignUP() {
                         <div className="driver-signup-field">
 
                             <label htmlFor="vehicleCapacity">
-                                Seating capacity
+                                Passenger capacity
                             </label>
 
-                            <input
+                            <SearchableSelect
                                 id="vehicleCapacity"
-                                name="vehicleCapacity"
-                                type="number"
-                                min="1"
                                 value={form.vehicleCapacity}
-                                onChange={updateField}
+                                options={capacityOptions}
+                                placeholder="Select capacity"
+                                disabled={catalogLoading || Boolean(catalogError)}
+                                onChange={(value) =>
+                                    updateSelection("vehicleCapacity", value)
+                                }
                             />
+
+                            <p className="vehicle-select-hint">
+                                Number of passengers, excluding the driver.
+                            </p>
 
                         </div>
 
                     </div>
 
                 </section>
+
+                {catalogError && (
+                    <p className="vehicle-catalog-error">
+                        {catalogError}
+                    </p>
+                )}
 
                 <section className="driver-signup-section">
 
@@ -581,7 +677,7 @@ function DriverSignUP() {
                 <button
                     className="driver-signup-submit"
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || catalogLoading || Boolean(catalogError)}
                 >
                     {
                         loading

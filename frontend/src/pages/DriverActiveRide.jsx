@@ -16,6 +16,7 @@ import {
   Navigation,
   Play,
   RotateCcw,
+  XCircle,
 } from "lucide-react";
 
 import "./DriverActiveRide.css";
@@ -482,6 +483,47 @@ function DriverActiveRide() {
       }
     };
 
+  const cancelAcceptedRide =
+    () => {
+      setError("");
+
+      if (!ride?.rideId) {
+        setError(
+          "Ride ID was not found."
+        );
+
+        return;
+      }
+
+      if (
+        ride.status !==
+        "ACCEPTED"
+      ) {
+        setError(
+          "A ride can only be cancelled before it starts."
+        );
+
+        return;
+      }
+
+      const cancellationContext = {
+        kind: "DRIVER_RIDE",
+        ride,
+      };
+
+      sessionStorage.setItem(
+        "velocityCancellationContext",
+        JSON.stringify(cancellationContext)
+      );
+
+      navigate(
+        "/driver-cancel-ride",
+        {
+          state: cancellationContext,
+        }
+      );
+    };
+
   if (!ride) {
     return (
       <div className="driver-active-page">
@@ -648,18 +690,31 @@ function DriverActiveRide() {
             </button>
 
             {!arrived ? (
-              <button
-                type="button"
-                className="driver-arrived-button"
-                onClick={
-                  showPinSection
-                }
-              >
-                <CheckCircle2
-                  size={19}
-                />
-                I Have Arrived
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="driver-arrived-button"
+                  onClick={showPinSection}
+                  disabled={busy}
+                >
+                  <CheckCircle2 size={19} />
+                  I Have Arrived
+                </button>
+
+                <div className="driver-cancellation-notice">
+                  Cancelling before the ride starts releases the 12% reservation and deducts a 5% cancellation fee from your wallet.
+                </div>
+
+                <button
+                  type="button"
+                  className="driver-cancel-ride-button"
+                  onClick={cancelAcceptedRide}
+                  disabled={busy}
+                >
+                  <XCircle size={19} />
+                  Cancel Accepted Ride
+                </button>
+              </>
             ) : (
               <section className="driver-pin-section">
                 <div className="driver-pin-heading">

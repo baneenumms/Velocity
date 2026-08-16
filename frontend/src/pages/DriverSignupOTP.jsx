@@ -1,5 +1,5 @@
 import { apiBaseUrl } from "../config/api.js";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
     useLocation,
     useNavigate,
@@ -7,6 +7,8 @@ import {
 import { Mail } from "lucide-react";
 import "./OTP.css";
 import VelocityMark from "../components/VelocityMark";
+import OtpInputGroup from "../components/OtpInputGroup";
+import { saveApplicantSession } from "../utils/driverApplicantSession";
 
 const API = apiBaseUrl;
 
@@ -26,71 +28,6 @@ function DriverSignupOTP() {
 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
-    const inputs = useRef([]);
-
-    useEffect(() => { inputs.current[0]?.focus(); }, []);
-
-    const handleChange = (value, index) => {
-
-        if (!/^\d?$/.test(value)) {
-            return;
-        }
-
-        const nextOtp = [...otp];
-        nextOtp[index] = value;
-
-        setOtp(nextOtp);
-
-        if (value && index < nextOtp.length - 1) {
-            inputs.current[index + 1]?.focus();
-        }
-    };
-
-    const handleKeyDown = (event, index) => {
-
-        if (event.key === "Enter") {
-            handleVerify();
-            return;
-        }
-
-        if (
-            event.key === "Backspace"
-            && !otp[index]
-            && index > 0
-        ) {
-            inputs.current[index - 1]?.focus();
-        }
-    };
-
-    const handlePaste = (event) => {
-
-        const pastedCode = event.clipboardData
-            .getData("text")
-            .replace(/\D/g, "")
-            .slice(0, 6);
-
-        if (!pastedCode) {
-            return;
-        }
-
-        event.preventDefault();
-
-        const nextOtp = Array(6).fill("");
-
-        pastedCode.split("").forEach((digit, index) => {
-            nextOtp[index] = digit;
-        });
-
-        setOtp(nextOtp);
-
-        const focusIndex = Math.min(
-            pastedCode.length,
-            5
-        );
-
-        inputs.current[focusIndex]?.focus();
-    };
 
     const readResponse = async (response) => {
 
@@ -174,35 +111,7 @@ function DriverSignupOTP() {
 
             clearOtherModes();
 
-            localStorage.setItem(
-                "activeMode",
-                "DRIVER_APPLICANT"
-            );
-
-            localStorage.setItem(
-                "applicantToken",
-                data.applicantToken
-            );
-
-            localStorage.setItem(
-                "userId",
-                String(data.userId)
-            );
-
-            localStorage.setItem(
-                "applicationStatus",
-                data.applicationStatus
-            );
-
-            localStorage.setItem(
-                "canGoOnline",
-                String(data.canGoOnline)
-            );
-
-            localStorage.setItem(
-                "walletEnabled",
-                String(data.walletEnabled)
-            );
+            saveApplicantSession(data);
 
             navigate(
                 "/driver-application-status",
@@ -244,7 +153,7 @@ function DriverSignupOTP() {
 
         return (
 
-            <div className="page">
+            <div className="page auth-page">
 
                 <div className="card">
 
@@ -294,44 +203,15 @@ function DriverSignupOTP() {
                     {maskedEmail || "your email address"}
                 </p>
 
-                <div
-                    className="otp-container"
-                    onPaste={handlePaste}
-                >
-
-                    {otp.map((digit, index) => (
-
-                        <input
-                            key={index}
-                            ref={(element) => {
-                                inputs.current[index] = element;
-                            }}
-                            className="otp-box"
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            autoComplete={
-                                index === 0
-                                    ? "one-time-code"
-                                    : "off"
-                            }
-                            maxLength={1}
-                            value={digit}
-                            disabled={loading}
-                            onChange={(event) =>
-                                handleChange(
-                                    event.target.value,
-                                    index
-                                )
-                            }
-                            onKeyDown={(event) =>
-                                handleKeyDown(event, index)
-                            }
-                        />
-
-                    ))}
-
-                </div>
+                <OtpInputGroup
+                    value={otp}
+                    onChange={(nextOtp) => {
+                        setOtp(nextOtp);
+                        setError("");
+                    }}
+                    onSubmit={handleVerify}
+                    disabled={loading}
+                />
 
                 {error && (
                     <p className="error">

@@ -5,10 +5,12 @@ import com.beni.dto.DriverApplicationStatusResponse;
 import com.beni.dto.DriverSignupRequest;
 import com.beni.dto.DriverSignupStartResponse;
 import com.beni.dto.DriverSignupVerifyRequest;
+import com.beni.dto.VehicleCatalogResponse;
 import com.beni.entity.User;
 import com.beni.service.DriverApplicantSessionService;
 import com.beni.service.DriverApplicationResubmissionService;
 import com.beni.service.DriverRegistrationService;
+import com.beni.service.VehicleCatalogService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -30,6 +32,15 @@ public class DriverRegistrationResource {
 
     @Inject
     DriverApplicantSessionService applicantSessionService;
+
+    @Inject
+    VehicleCatalogService vehicleCatalogService;
+
+    @GET
+    @Path("/vehicle-options")
+    public VehicleCatalogResponse getVehicleOptions() {
+        return vehicleCatalogService.getOptions();
+    }
 
     @POST
     @Path("/signup/send-otp")
