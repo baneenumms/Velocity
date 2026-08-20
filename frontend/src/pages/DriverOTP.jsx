@@ -1,5 +1,5 @@
 import { apiBaseUrl } from "../config/api.js";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail } from "lucide-react";
 import "./OTP.css";
@@ -16,8 +16,12 @@ function DriverOTP() {
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
     const [error, setError] = useState("");
     const [otpFailed, setOtpFailed] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const requestInFlight = useRef(false);
 
     const handleVerify = async () => {
+
+        if (requestInFlight.current) return;
 
         setError("");
 
@@ -27,6 +31,9 @@ function DriverOTP() {
             setError("Please enter the complete OTP.");
             return;
         }
+
+        requestInFlight.current = true;
+        setLoading(true);
 
         try {
 
@@ -63,6 +70,9 @@ function DriverOTP() {
             console.error(err);
             setError("Unable to connect to server.");
 
+        } finally {
+            requestInFlight.current = false;
+            setLoading(false);
         }
     };
 
@@ -100,7 +110,7 @@ function DriverOTP() {
                         setError("");
                     }}
                     onSubmit={handleVerify}
-                    disabled={otpFailed}
+                    disabled={otpFailed || loading}
                 />
 
                 {error && (
@@ -120,8 +130,9 @@ function DriverOTP() {
                     <button
                         className="primary-btn"
                         onClick={handleVerify}
+                        disabled={loading}
                     >
-                        Verify OTP
+                        {loading ? "Verifying OTP..." : "Verify OTP"}
                     </button>
                 )}
 

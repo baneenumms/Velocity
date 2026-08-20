@@ -1,5 +1,5 @@
 import { apiBaseUrl } from "../config/api.js";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   useLocation,
   useNavigate,
@@ -24,6 +24,7 @@ async function readResponse(response) {
 }
 
 function PassengerSignUP() {
+  const otpRequestInFlight = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -43,6 +44,7 @@ function PassengerSignUP() {
     useState(false);
 
   const handleContinue = async () => {
+    if (otpRequestInFlight.current) return;
     setError("");
 
     const cleanName =
@@ -76,6 +78,7 @@ function PassengerSignUP() {
       return;
     }
 
+    otpRequestInFlight.current = true;
     setLoading(true);
 
     try {
@@ -129,6 +132,7 @@ function PassengerSignUP() {
         "Unable to connect to server."
       );
     } finally {
+      otpRequestInFlight.current = false;
       setLoading(false);
     }
   };

@@ -1,5 +1,5 @@
 import { apiBaseUrl } from "../config/api.js";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
     useLocation,
     useNavigate,
@@ -75,6 +75,7 @@ function DriverPassword() {
     const [showPassword, setShowPassword] =
         useState(false);
     const [loading, setLoading] = useState(false);
+    const requestInFlight = useRef(false);
 
     const readResponse = async (response) => {
         const responseText = await response.text();
@@ -93,6 +94,7 @@ function DriverPassword() {
     };
 
     const handleLogin = async () => {
+        if (requestInFlight.current) return;
         setError("");
 
         if (!phone) {
@@ -107,6 +109,7 @@ function DriverPassword() {
             return;
         }
 
+        requestInFlight.current = true;
         setLoading(true);
 
         try {
@@ -240,6 +243,7 @@ function DriverPassword() {
                 "Unable to connect to server."
             );
         } finally {
+            requestInFlight.current = false;
             setLoading(false);
         }
     };

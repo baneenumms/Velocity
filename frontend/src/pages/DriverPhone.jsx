@@ -1,5 +1,5 @@
 import { apiBaseUrl } from "../config/api.js";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Phone } from "lucide-react";
 import "./Phone.css";
@@ -9,10 +9,14 @@ function DriverPhone() {
 
     const [phone, setPhone] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const requestInFlight = useRef(false);
 
     const navigate = useNavigate();
 
     const handleContinue = async () => {
+
+        if (requestInFlight.current) return;
 
         setError("");
 
@@ -22,6 +26,8 @@ function DriverPhone() {
         }
 
         const formattedPhone = "0" + phone;
+        requestInFlight.current = true;
+        setLoading(true);
 
         try {
 
@@ -85,6 +91,9 @@ function DriverPhone() {
             console.error(err);
             setError("Unable to connect to server.");
 
+        } finally {
+            requestInFlight.current = false;
+            setLoading(false);
         }
     };
 
@@ -119,13 +128,14 @@ function DriverPhone() {
                         value={phone}
                         maxLength={10}
                         autoFocus
+                        disabled={loading}
                         onChange={(e) =>
                             setPhone(
                                 e.target.value.replace(/\D/g, "")
                             )
                         }
                         onKeyDown={(event) => {
-                            if (event.key === "Enter") handleContinue();
+                            if (event.key === "Enter" && !loading) handleContinue();
                         }}
                     />
 
@@ -138,8 +148,9 @@ function DriverPhone() {
                 <button
                     className="primary-btn"
                     onClick={handleContinue}
+                    disabled={loading}
                 >
-                    Continue
+                    {loading ? "Sending OTP..." : "Continue"}
                 </button>
 
             </div>

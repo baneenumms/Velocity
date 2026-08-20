@@ -1,5 +1,6 @@
 import { apiBaseUrl } from "../config/api.js";
 import {
+  useRef,
   useState,
 } from "react";
 
@@ -69,8 +70,10 @@ function PassengerOTP() {
     useState(false);
   const [loading, setLoading] =
     useState(false);
+  const requestInFlight = useRef(false);
 
   const handleVerify = async () => {
+    if (requestInFlight.current) return;
     setError("");
 
     if (!phone) {
@@ -89,6 +92,7 @@ function PassengerOTP() {
       return;
     }
 
+    requestInFlight.current = true;
     setLoading(true);
 
     try {
@@ -178,6 +182,7 @@ function PassengerOTP() {
         "Unable to connect to server."
       );
     } finally {
+      requestInFlight.current = false;
       setLoading(false);
     }
   };

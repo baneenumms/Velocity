@@ -1,5 +1,5 @@
 import { apiBaseUrl } from "../config/api.js";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
     Eye,
@@ -20,6 +20,8 @@ import {
 const API = apiBaseUrl;
 
 function DriverSignUP() {
+
+    const otpRequestInFlight = useRef(false);
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -189,6 +191,7 @@ function DriverSignUP() {
     const handleSubmit = async (event) => {
 
         event.preventDefault();
+        if (otpRequestInFlight.current) return;
         setError("");
 
         const validationError = validateForm();
@@ -198,6 +201,7 @@ function DriverSignUP() {
             return;
         }
 
+        otpRequestInFlight.current = true;
         setLoading(true);
 
         try {
@@ -272,6 +276,7 @@ function DriverSignUP() {
 
         } finally {
 
+            otpRequestInFlight.current = false;
             setLoading(false);
 
         }

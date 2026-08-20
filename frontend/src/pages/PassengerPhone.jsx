@@ -1,5 +1,5 @@
 import { apiBaseUrl } from "../config/api.js";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Phone } from "lucide-react";
 import "./Phone.css";
@@ -10,10 +10,13 @@ function PassengerPhone() {
     const [phone, setPhone] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const requestInFlight = useRef(false);
 
     const navigate = useNavigate();
 
     const handleContinue = async () => {
+
+        if (requestInFlight.current) return;
 
         setError("");
 
@@ -24,6 +27,7 @@ function PassengerPhone() {
 
         const formattedPhone = "0" + phone;
 
+        requestInFlight.current = true;
         setLoading(true);
 
         try {
@@ -83,6 +87,7 @@ function PassengerPhone() {
 
         } finally {
 
+            requestInFlight.current = false;
             setLoading(false);
 
         }
