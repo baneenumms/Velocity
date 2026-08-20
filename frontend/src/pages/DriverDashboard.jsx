@@ -982,6 +982,11 @@ function DriverDashboard() {
         ]
       : DEFAULT_CENTER;
 
+  const mobileViewport =
+    window.matchMedia(
+      "(max-width: 600px)"
+    ).matches;
+
   return (
     <div className="driver-dashboard-shell">
       <div
@@ -1107,6 +1112,10 @@ function DriverDashboard() {
                   : 12
               }
               className="driver-map"
+              dragging={!mobileViewport}
+              touchZoom={!mobileViewport}
+              scrollWheelZoom={!mobileViewport}
+              doubleClickZoom={!mobileViewport}
             >
               <TileLayer
                 attribution="&copy; OpenStreetMap contributors"

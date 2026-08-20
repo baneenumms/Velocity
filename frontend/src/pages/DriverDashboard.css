@@ -970,6 +970,22 @@
     overflow-x: hidden !important;
   }
 
+  .driver-dashboard-shell {
+    position: static !important;
+    height: auto !important;
+    min-height: calc(100dvh - 72px) !important;
+    overflow-y: visible !important;
+  }
+
+  .driver-dashboard-shell .dashboard-page {
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding-bottom: 36px !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .driver-dashboard-shell .driver-dashboard-content {
     width: calc(100% - 32px) !important;
     max-width: calc(100% - 32px) !important;
@@ -1004,6 +1020,60 @@
   .driver-dashboard-shell .location-button {
     width: 100%;
     max-width: 100%;
+  }
+
+  .driver-dashboard-shell .driver-dashboard-content {
+    margin-top: 16px !important;
+    gap: 14px !important;
+  }
+
+  .driver-dashboard-shell .driver-dashboard-welcome p {
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+
+  .driver-dashboard-shell .driver-dashboard-welcome h1 {
+    font-size: clamp(27px, 9vw, 34px);
+    line-height: 1.08;
+  }
+
+  .driver-dashboard-shell .dashboard-card {
+    padding: 18px 14px !important;
+    border-radius: 17px !important;
+  }
+
+  .driver-dashboard-shell .driver-status-copy {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .driver-dashboard-shell .status-toggle-row {
+    margin: 14px 0 12px;
+    gap: 12px;
+  }
+
+  .driver-dashboard-shell .location-button {
+    padding: 13px 14px;
+    border-radius: 14px;
+    font-size: 16px;
+  }
+
+  .driver-dashboard-shell .driver-map-card {
+    min-height: 235px !important;
+    height: 235px !important;
+    border-radius: 17px !important;
+  }
+
+  .driver-dashboard-shell .driver-map,
+  .driver-dashboard-shell .leaflet-container {
+    min-height: 235px !important;
+    height: 235px !important;
+    touch-action: pan-y !important;
+  }
+
+  .driver-dashboard-shell .requests-placeholder {
+    padding: 18px 14px !important;
+    border-radius: 17px !important;
   }
 }
 
