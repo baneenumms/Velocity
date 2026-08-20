@@ -961,6 +961,52 @@
   .driver-dashboard-shell .driver-map-card { min-height: 350px; height: 350px; }
 }
 
+/* Phone safety net: no dashboard child may be wider than the visible viewport. */
+@media (max-width: 600px) {
+  .driver-dashboard-shell,
+  .driver-dashboard-shell .dashboard-page {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  .driver-dashboard-shell .driver-dashboard-content {
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
+    min-width: 0 !important;
+    margin-inline: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .driver-dashboard-shell .dashboard-card,
+  .driver-dashboard-shell .driver-map-card,
+  .driver-dashboard-shell .requests-placeholder {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .driver-dashboard-shell .dashboard-card {
+    padding: 24px 18px !important;
+  }
+
+  .driver-dashboard-shell .dashboard-card p,
+  .driver-dashboard-shell .driver-status-copy,
+  .driver-dashboard-shell .driver-location-info strong {
+    overflow-wrap: anywhere;
+  }
+
+  .driver-dashboard-shell .status-toggle-row {
+    flex-wrap: wrap;
+  }
+
+  .driver-dashboard-shell .location-button {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
 
 .wallet-topup-inline-button {
   width: 100%;

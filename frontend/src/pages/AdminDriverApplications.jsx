@@ -134,6 +134,21 @@ function AdminDriverApplications() {
         );
     };
 
+    const endExpiredAdminSession = () => {
+        ["adminToken", "isAdmin", "velocitySession"]
+            .forEach((key) => {
+                sessionStorage.removeItem(key);
+                localStorage.removeItem(key);
+            });
+
+        navigate("/role", {
+            replace: true,
+            state: {
+                message: "Your admin session expired. Please sign in again.",
+            },
+        });
+    };
+
     const loadApplications = async (
         requestedFilter = filter
     ) => {
@@ -166,6 +181,11 @@ function AdminDriverApplications() {
                 await readResponse(response);
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    endExpiredAdminSession();
+                    return;
+                }
+
                 setError(
                     requestErrorMessage(
                         response,
