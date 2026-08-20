@@ -949,8 +949,8 @@
       "welcome"
       "notice"
       "profile"
-      "map"
-      "requests";
+      "requests"
+      "map";
   }
 }
 
@@ -971,10 +971,14 @@
   }
 
   .driver-dashboard-shell {
-    position: static !important;
-    height: auto !important;
-    min-height: calc(100dvh - 72px) !important;
-    overflow-y: visible !important;
+    position: relative !important;
+    height: calc(100dvh - 72px) !important;
+    min-height: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
   .driver-dashboard-shell .dashboard-page {
@@ -983,10 +987,17 @@
     min-height: 0 !important;
     padding-bottom: 36px !important;
     overflow-y: visible !important;
-    -webkit-overflow-scrolling: touch;
   }
 
   .driver-dashboard-shell .driver-dashboard-content {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "welcome"
+      "notice"
+      "profile"
+      "requests"
+      "map" !important;
     width: calc(100% - 32px) !important;
     max-width: calc(100% - 32px) !important;
     min-width: 0 !important;
@@ -1074,6 +1085,23 @@
   .driver-dashboard-shell .requests-placeholder {
     padding: 18px 14px !important;
     border-radius: 17px !important;
+  }
+
+  .driver-dashboard-shell .requests-heading-row,
+  .driver-dashboard-shell .ride-request-card-header,
+  .driver-dashboard-shell .driver-offer-controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .driver-dashboard-shell .request-fare {
+    align-items: flex-start !important;
+  }
+
+  .driver-dashboard-shell .driver-offer-controls input,
+  .driver-dashboard-shell .driver-offer-controls button {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
 

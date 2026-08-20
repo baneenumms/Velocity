@@ -15,11 +15,11 @@ const BACKEND_URL =
 
 const POLL_MS = 3000;
 const FIVE_MINUTES =
-  5 * 60 * 1000;
+  5 * 60;
 const TEN_MINUTES =
-  10 * 60 * 1000;
+  10 * 60;
 const FIFTEEN_MINUTES =
-  15 * 60 * 1000;
+  15 * 60;
 
 function getRequestId() {
   const storedId =
@@ -127,21 +127,6 @@ function formatPaymentMethod(value) {
     : "Cash";
 }
 
-function dateToMilliseconds(value) {
-  if (!value) {
-    return null;
-  }
-
-  const milliseconds =
-    new Date(value).getTime();
-
-  return Number.isFinite(
-    milliseconds
-  )
-    ? milliseconds
-    : null;
-}
-
 function clearRideStorage() {
   [
     "activeRideRequest",
@@ -184,6 +169,12 @@ function SearchingRide() {
   const [driversOnline, setDriversOnline] =
     useState(null);
 
+  const [remainingSeconds, setRemainingSeconds] =
+    useState(null);
+
+  const [serverVerified, setServerVerified] =
+    useState(false);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -196,35 +187,18 @@ function SearchingRide() {
     useState("");
 
   const [
-    currentTime,
-    setCurrentTime,
-  ] = useState(Date.now());
-
-  const [
     fiveMinutePromptDismissed,
     setFiveMinutePromptDismissed,
   ] = useState(false);
 
-  const createdAtValue =
-    rideRequest?.createdAt ||
-    initialSavedRide?.createdAt ||
-    sessionStorage.getItem(
-      "searchStartedAt"
-    );
-
-  const createdAtMilliseconds =
-    dateToMilliseconds(
-      createdAtValue
-    );
-
-  const elapsedMilliseconds =
-    createdAtMilliseconds
-      ? Math.max(
+  const elapsedSeconds =
+    remainingSeconds === null
+      ? 0
+      : Math.max(
           0,
-          currentTime -
-            createdAtMilliseconds
-        )
-      : 0;
+          FIFTEEN_MINUTES -
+            remainingSeconds
+        );
 
   const rideStatus =
     rideRequest?.status ||
@@ -234,9 +208,7 @@ function SearchingRide() {
     "SEARCHING";
 
   const timedOut =
-    rideStatus === "EXPIRED" ||
-    elapsedMilliseconds >=
-      FIFTEEN_MINUTES;
+    rideStatus === "EXPIRED";
 
   const requestFinished =
     rideStatus !== "SEARCHING";
@@ -246,62 +218,44 @@ function SearchingRide() {
 
   const showFiveMinutePrompt =
     noOffers &&
-    elapsedMilliseconds >=
+    elapsedSeconds >=
       FIVE_MINUTES &&
-    elapsedMilliseconds <
+    elapsedSeconds <
       TEN_MINUTES &&
     !fiveMinutePromptDismissed &&
     !timedOut;
 
   const showPersistentReminder =
     noOffers &&
-    elapsedMilliseconds >=
+    elapsedSeconds >=
       FIVE_MINUTES &&
-    elapsedMilliseconds <
+    elapsedSeconds <
       TEN_MINUTES &&
     fiveMinutePromptDismissed &&
     !timedOut;
 
   const showTenMinutePrompt =
     noOffers &&
-    elapsedMilliseconds >=
+    elapsedSeconds >=
       TEN_MINUTES &&
-    elapsedMilliseconds <
+    elapsedSeconds <
       FIFTEEN_MINUTES &&
     !timedOut;
 
   const remainingMinutes =
-    Math.max(
-      0,
-      Math.ceil(
-        (
-          FIFTEEN_MINUTES -
-          elapsedMilliseconds
-        ) / 60000
-      )
-    );
-
-  useEffect(() => {
-    const timerId =
-      window.setInterval(
-        () => {
-          setCurrentTime(
-            Date.now()
-          );
-        },
-        1000
-      );
-
-    return () => {
-      window.clearInterval(
-        timerId
-      );
-    };
-  }, []);
+    remainingSeconds === null
+      ? 15
+      : Math.max(
+          0,
+          Math.ceil(
+            remainingSeconds / 60
+          )
+        );
 
   useEffect(() => {
     if (!requestId) {
       setLoading(false);
+      setServerVerified(true);
 
       setError(
         "Your ride request could not be found."
@@ -311,8 +265,8 @@ function SearchingRide() {
     }
 
     if (
-      requestFinished ||
-      timedOut
+      serverVerified &&
+      (requestFinished || timedOut)
     ) {
       setLoading(false);
       return undefined;
@@ -388,6 +342,13 @@ function SearchingRide() {
           Number(availabilityData?.onlineDriverCount) || 0
         );
 
+        setRemainingSeconds(
+          Math.max(
+            0,
+            Number(availabilityData?.remainingSeconds) || 0
+          )
+        );
+
         sessionStorage.setItem(
           "rideStatus",
           requestData.status ||
@@ -395,6 +356,7 @@ function SearchingRide() {
         );
 
         setError("");
+        setServerVerified(true);
       } catch (loadError) {
         console.error(
           "Searching ride error:",
@@ -432,6 +394,7 @@ function SearchingRide() {
   }, [
     requestId,
     requestFinished,
+    serverVerified,
     timedOut,
     initialSavedRide,
   ]);
@@ -695,10 +658,7 @@ function SearchingRide() {
     ) ||
     "CASH";
 
-  if (
-    loading &&
-    !rideRequest
-  ) {
+  if (loading || !serverVerified) {
     return (
       <div className="searching-page">
         <main className="searching-card loading-card">

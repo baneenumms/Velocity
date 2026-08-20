@@ -123,7 +123,9 @@ public class RideRequestResource {
         RideRequest request = rideRequestService.getRideRequest(requestId);
         authorizationService.requirePassenger(authorization, request.passengerId);
         return new RideRequestAvailabilityResponse(
-                (int) rideRequestService.onlineDriverCountForRequest(requestId)
+                (int) rideRequestService.onlineDriverCount(),
+                rideRequestService.remainingSearchSeconds(request),
+                request.status.name()
         );
     }
 

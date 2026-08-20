@@ -14,6 +14,7 @@ import jakarta.ws.rs.WebApplicationException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -178,9 +179,26 @@ public class RideRequestService {
     }
 
     @Transactional
-    public long onlineDriverCountForRequest(String requestId) {
-        getRideRequest(requestId);
+    public long onlineDriverCount() {
         return driverRepository.countOnlineDrivers();
+    }
+
+    public long remainingSearchSeconds(RideRequest request) {
+        if (
+                request == null ||
+                        request.status != RideRequestStatus.SEARCHING ||
+                        request.expiresAt == null
+        ) {
+            return 0;
+        }
+
+        return Math.max(
+                0,
+                Duration.between(
+                        LocalDateTime.now(),
+                        request.expiresAt
+                ).getSeconds()
+        );
     }
 
     @Transactional
