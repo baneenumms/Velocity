@@ -71,6 +71,12 @@ function HamburgerMenu() {
     setOpen,
   ] = useState(false);
 
+  const [logoutError, setLogoutError] =
+    useState("");
+
+  const [loggingOut, setLoggingOut] =
+    useState(false);
+
   const navigate = useNavigate();
 
   const isAdmin =
@@ -106,33 +112,66 @@ function HamburgerMenu() {
     navigate(path);
   };
 
-  const handleLogout = () => {
-    fetch(`${apiBaseUrl}/auth-sessions/current`, {
-      method: "DELETE",
-    }).catch(() => {});
+  const handleLogout = async () => {
+    setLogoutError("");
+    setLoggingOut(true);
 
-    sessionStorage.removeItem("velocitySession");
+    try {
+      const response = await fetch(
+        `${apiBaseUrl}/auth-sessions/current`,
+        {
+          method: "DELETE",
+        }
+      );
 
-    AUTHENTICATED_SESSION_KEYS
-      .forEach((key) => {
-        sessionStorage.removeItem(
-          key
+      if (!response.ok) {
+        const text = await response.text();
+        let message = text;
+
+        try {
+          const data = text ? JSON.parse(text) : null;
+          message = data?.message || data?.details || text;
+        } catch {
+          // The server may return plain text for an authorization error.
+        }
+
+        setLogoutError(
+          message ||
+            "You cannot log out while an active ride is in progress."
         );
-
-        localStorage.removeItem(
-          key
-        );
-      });
-
-    setOpen(false);
-
-    navigate(
-      "/role",
-      {
-        replace: true,
+        return;
       }
-    );
+
+      sessionStorage.removeItem("velocitySession");
+
+      AUTHENTICATED_SESSION_KEYS
+        .forEach((key) => {
+          sessionStorage.removeItem(
+            key
+          );
+
+          localStorage.removeItem(
+            key
+          );
+        });
+
+      setOpen(false);
+
+      navigate(
+        "/role",
+        {
+          replace: true,
+        }
+      );
+    } catch {
+      setLogoutError(
+        "Unable to log out right now. Please check your connection and try again."
+      );
+    } finally {
+      setLoggingOut(false);
+    }
   };
+
 
   return (
     <div className="driver-menu">
@@ -253,10 +292,17 @@ function HamburgerMenu() {
               type="button"
               className="driver-menu-logout"
               onClick={handleLogout}
+              disabled={loggingOut}
             >
               <LogOut size={18} />
-              Logout
+              {loggingOut ? "Logging out..." : "Logout"}
             </button>
+
+            {logoutError && (
+              <p className="driver-logout-error">
+                {logoutError}
+              </p>
+            )}
           </nav>
         </>
       )}

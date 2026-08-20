@@ -7,6 +7,7 @@ import com.beni.entity.User;
 import com.beni.repository.AuthSessionRepository;
 import com.beni.repository.DriverRepository;
 import com.beni.repository.PassengerRepository;
+import com.beni.riderequest.DriverOfferRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -42,6 +43,9 @@ public class SessionService {
 
     @Inject
     ActiveRidePolicyService activeRidePolicyService;
+
+    @Inject
+    DriverOfferRepository driverOfferRepository;
 
     @Transactional
     public SessionResponse replaceSession(User user, String activeMode) {
@@ -121,7 +125,34 @@ public class SessionService {
     @Transactional
     public void revokeCurrentSession(String authorizationHeader) {
         AuthSession session = requireValidSession(authorizationHeader);
-        session.revokedAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+
+        /*
+         * Logging out must make a driver unavailable immediately.
+         * Pending offers cannot remain visible or be accepted after
+         * the driver leaves the app.
+         */
+        if (session.activeMode.equalsIgnoreCase("DRIVER")) {
+            var driver = driverRepository.findByUser(session.user);
+
+            if (driver != null) {
+                if (activeRidePolicyService.driverHasActiveRide(driver.driverId)) {
+                    throw new WebApplicationException(
+                            "You have an active ride. Complete it or cancel it before logging out.",
+                            409
+                    );
+                }
+
+                driver.driverStatus = DriverStatus.Offline;
+
+                driverOfferRepository.withdrawPendingByDriver(
+                        driver.driverId,
+                        now
+                );
+            }
+        }
+
+        session.revokedAt = now;
         session.revokedReason = "SIGNED_OUT";
     }
 

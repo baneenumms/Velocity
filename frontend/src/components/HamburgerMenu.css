@@ -147,6 +147,19 @@
   background: #fdecec;
 }
 
+.driver-menu-dropdown .driver-menu-logout:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.driver-logout-error {
+  margin: 6px 5px 3px;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 @media (max-width: 520px) {
   .driver-menu-button {
     width: 44px;
