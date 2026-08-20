@@ -196,7 +196,10 @@ public class DriverOfferService {
         withdrawBusyDriverOffers();
 
         return driverOfferRepository
-                .listPendingByRequest(requestId);
+                .listVisibleByRequest(
+                        requestId,
+                        LocalDateTime.now()
+                );
     }
 
     @Transactional

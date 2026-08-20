@@ -1,5 +1,8 @@
 package com.beni.riderequest;
 
+import com.beni.entity.AuthSession;
+import com.beni.entity.Driver;
+import com.beni.entity.DriverStatus;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.LockModeType;
@@ -109,8 +112,9 @@ public class DriverOfferRepository
                 .firstResult();
     }
 
-    public List<DriverOffer> listPendingByRequest(
-            String requestId
+    public List<DriverOffer> listVisibleByRequest(
+            String requestId,
+            LocalDateTime now
     ) {
         if (
                 requestId == null ||
@@ -119,12 +123,27 @@ public class DriverOfferRepository
             return List.of();
         }
 
-        return list(
-                "requestId = ?1 and status = ?2 " +
-                        "order by offeredFare asc",
-                requestId.trim(),
-                DriverOfferStatus.PENDING
-        );
+        return getEntityManager()
+                .createQuery(
+                        "select offer " +
+                                "from DriverOffer offer, Driver driver, AuthSession session " +
+                                "where offer.driverId = driver.driverId " +
+                                "and session.user = driver.user " +
+                                "and offer.requestId = :requestId " +
+                                "and offer.status = :offerStatus " +
+                                "and driver.driverStatus = :driverStatus " +
+                                "and session.activeMode = :activeMode " +
+                                "and session.revokedAt is null " +
+                                "and session.expiresAt > :now " +
+                                "order by offer.offeredFare asc",
+                        DriverOffer.class
+                )
+                .setParameter("requestId", requestId.trim())
+                .setParameter("offerStatus", DriverOfferStatus.PENDING)
+                .setParameter("driverStatus", DriverStatus.Online)
+                .setParameter("activeMode", "DRIVER")
+                .setParameter("now", now)
+                .getResultList();
     }
 
     public List<DriverOffer> listPendingByDriver(
