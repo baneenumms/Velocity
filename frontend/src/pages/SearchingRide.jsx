@@ -181,6 +181,9 @@ function SearchingRide() {
   const [offers, setOffers] =
     useState([]);
 
+  const [driversOnline, setDriversOnline] =
+    useState(null);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -322,6 +325,7 @@ function SearchingRide() {
         const [
           requestResponse,
           offersResponse,
+          availabilityResponse,
         ] = await Promise.all([
           fetch(
             `${BACKEND_URL}/ride-requests/${requestId}`
@@ -329,6 +333,10 @@ function SearchingRide() {
 
           fetch(
             `${BACKEND_URL}/driver-offers/request/${requestId}`
+          ),
+
+          fetch(
+            `${BACKEND_URL}/ride-requests/${requestId}/availability`
           ),
         ]);
 
@@ -340,6 +348,11 @@ function SearchingRide() {
         const offersData =
           await readResponse(
             offersResponse
+          );
+
+        const availabilityData =
+          await readResponse(
+            availabilityResponse
           );
 
         if (stopped) {
@@ -369,6 +382,10 @@ function SearchingRide() {
           Array.isArray(offersData)
             ? offersData
             : []
+        );
+
+        setDriversOnline(
+          Number(availabilityData?.onlineDriverCount) || 0
         );
 
         sessionStorage.setItem(
@@ -705,10 +722,22 @@ function SearchingRide() {
     );
   }
 
-  if (
-    timedOut ||
-    rideStatus === "CANCELLED"
-  ) {
+  if (rideStatus === "CANCELLED") {
+    return (
+      <div className="searching-page">
+        <main className="searching-card timeout-card">
+          <div className="timeout-icon">✓</div>
+          <h1>Ride Search Cancelled</h1>
+          <p>Your request is closed and drivers can no longer send offers.</p>
+          <button type="button" className="search-again-button" onClick={handleSearchAgain}>
+            Return to Dashboard
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  if (timedOut) {
     return (
       <div className="searching-page">
         <main className="searching-card timeout-card">
@@ -986,14 +1015,15 @@ function SearchingRide() {
               <div className="small-loader" />
 
               <strong>
-                Waiting for offers
+                {driversOnline === 0
+                  ? "No drivers online right now"
+                  : "Waiting for offers"}
               </strong>
 
               <p>
-                Nearby drivers are
-                reviewing your ride
-                request. This page
-                refreshes automatically.
+                {driversOnline === 0
+                  ? "Your search is still active. We will keep looking for up to 15 minutes, or you can cancel it anytime."
+                  : "Nearby drivers are reviewing your ride request. This page refreshes automatically."}
               </p>
             </div>
           ) : (

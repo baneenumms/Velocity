@@ -5,8 +5,8 @@
   overflow: hidden;
   place-items: center;
   align-content: center;
-  gap: 14px;
-  padding: 24px;
+  gap: 10px;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
   background:
     radial-gradient(circle at 16% 14%, rgba(248, 188, 207, .62), transparent 31%),
     linear-gradient(135deg, #edf3fc 0%, #c9d8f0 52%, #f8d2df 100%);
@@ -28,7 +28,7 @@
   letter-spacing: .025em;
   line-height: 1.1;
 }
-.splash-car { position: relative; z-index: 1; width: min(92vw, 590px); margin-top: 26px; overflow: visible; }
+.splash-car { position: relative; z-index: 1; width: min(92vw, 590px); margin-top: 18px; overflow: visible; }
 .splash-road-bed { fill: #36516b; opacity: .96; }
 .splash-road-edge { stroke: #f6bed0; stroke-width: 3; opacity: .9; }
 .splash-road { stroke: #f7e8b0; stroke-width: 3; stroke-dasharray: 35 14; opacity: .94; }
@@ -45,3 +45,21 @@
 @keyframes splash-blink-left { 0%, 46%, 100% { opacity: 1; } 47%, 95% { opacity: .16; } }
 @keyframes splash-blink-right { 0%, 46%, 100% { opacity: .16; } 47%, 95% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .splash-wheel, .splash-headlight-left, .splash-headlight-right { animation: none; } }
+
+@media (max-width: 480px) {
+  .velocity-splash {
+    /* Keep the whole mark, tagline, and illustration together on phone screens. */
+    align-content: center;
+    gap: 8px;
+    padding-inline: 16px;
+  }
+
+  .splash-mark { font-size: clamp(34px, 10vw, 44px); }
+
+  .splash-tagline { font-size: clamp(18px, 5.5vw, 23px); }
+
+  .splash-car {
+    width: min(100%, 390px);
+    margin-top: 12px;
+  }
+}

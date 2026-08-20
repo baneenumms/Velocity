@@ -1,6 +1,7 @@
 package com.beni.riderequest;
 
 import com.beni.dto.CreateRideRequest;
+import com.beni.dto.RideRequestAvailabilityResponse;
 import com.beni.service.ActiveRidePolicyService;
 import com.beni.service.ResourceAuthorizationService;
 import jakarta.inject.Inject;
@@ -111,6 +112,19 @@ public class RideRequestResource {
         );
 
         return request;
+    }
+
+    @GET
+    @Path("/{requestId}/availability")
+    public RideRequestAvailabilityResponse getAvailability(
+            @PathParam("requestId") String requestId,
+            @HeaderParam("Authorization") String authorization
+    ) {
+        RideRequest request = rideRequestService.getRideRequest(requestId);
+        authorizationService.requirePassenger(authorization, request.passengerId);
+        return new RideRequestAvailabilityResponse(
+                (int) rideRequestService.onlineDriverCountForRequest(requestId)
+        );
     }
 
     @PUT

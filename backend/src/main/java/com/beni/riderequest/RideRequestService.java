@@ -178,6 +178,12 @@ public class RideRequestService {
     }
 
     @Transactional
+    public long onlineDriverCountForRequest(String requestId) {
+        getRideRequest(requestId);
+        return driverRepository.countOnlineDrivers();
+    }
+
+    @Transactional
     public List<RideRequest>
     getAvailableRideRequests(Integer driverId) {
         expireRequests();

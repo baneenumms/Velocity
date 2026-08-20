@@ -1,6 +1,7 @@
 package com.beni.repository;
 
 import com.beni.entity.Driver;
+import com.beni.entity.DriverStatus;
 import com.beni.entity.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,5 +33,9 @@ public class DriverRepository
                 "lower(licenseNumber) = lower(?1)",
                 licenseNumber.trim()
         ).firstResult();
+    }
+
+    public long countOnlineDrivers() {
+        return count("driverStatus", DriverStatus.Online);
     }
 }
